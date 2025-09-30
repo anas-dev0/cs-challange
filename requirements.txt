@@ -8,3 +8,6 @@ duckduckgo-search
 langchain-community
 requests
 python-dotenv
+PyMuPDF
+python-docx
+easyocr
