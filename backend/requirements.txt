@@ -14,3 +14,7 @@ python-docx
 easyocr
 streamlit
 plotly
+flask
+flask-cors
+livekit
+livekit-api
