@@ -60,9 +60,10 @@ def get_token():
         })
     
     except Exception as e:
+        # Log the error internally but don't expose details to the client
         print(f"Error generating token: {str(e)}")
         return jsonify({
-            "error": f"Failed to generate token: {str(e)}"
+            "error": "Failed to generate token. Please check server configuration and try again."
         }), 500
 
 @app.route('/config')
@@ -91,4 +92,6 @@ if __name__ == "__main__":
     else:
         print("✅ LiveKit credentials loaded successfully")
     
-    app.run(port=3001, debug=True)
+    # Use debug mode based on environment variable (default: False for security)
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() in ('true', '1', 'yes')
+    app.run(port=3001, debug=debug_mode)
