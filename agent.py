@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import asyncio
 from livekit import agents
 from livekit.agents import AgentSession, Agent, RoomInputOptions
-from livekit.plugins import google
+from livekit.plugins import google,silero
 
 # Import the new functions
 from prompts import create_initial_prompts, FINAL_FEEDBACK_PROMPT
@@ -36,6 +36,7 @@ async def entrypoint(ctx: agents.JobContext):
     )
 
     session = AgentSession(
+        vad=silero.VAD.load(),
         llm=google.beta.realtime.RealtimeModel(
             voice="charon"
         )
