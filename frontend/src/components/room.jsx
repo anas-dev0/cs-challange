@@ -2,7 +2,6 @@ import { useVoiceAssistant, AudioVisualizer } from '@livekit/components-react';
 
 export default function MyVoiceAgentUI() {
   const {
-    assistant, // The agent participant object
     audioTrack, // The agent's audio track
     state,        // The agent's current state
   } = useVoiceAssistant();

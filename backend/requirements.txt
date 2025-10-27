@@ -17,3 +17,4 @@ plotly
 flask
 flask-cors
 livekit
+livekit-api
