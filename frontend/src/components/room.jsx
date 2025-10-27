@@ -1,3 +1,5 @@
+import { useVoiceAssistant, AudioVisualizer } from '@livekit/components-react';
+
 export default function MyVoiceAgentUI() {
   const {
     assistant, // The agent participant object
@@ -6,18 +8,24 @@ export default function MyVoiceAgentUI() {
   } = useVoiceAssistant();
 
   let agentStateMessage = 'Agent is initializing...';
+  let statusColor = '#6366f1'; // Default indigo color
+  
   switch (state) {
     case 'listening':
-      agentStateMessage = 'Agent is listening...';
+      agentStateMessage = '🎤 Agent is listening...';
+      statusColor = '#22c55e'; // Green
       break;
     case 'thinking':
-      agentStateMessage = 'Agent is thinking...';
+      agentStateMessage = '🤔 Agent is thinking...';
+      statusColor = '#f59e0b'; // Amber
       break;
     case 'speaking':
-      agentStateMessage = 'Agent is speaking...';
+      agentStateMessage = '🗣️ Agent is speaking...';
+      statusColor = '#3b82f6'; // Blue
       break;
     case 'idle':
-      agentStateMessage = 'Agent is idle.';
+      agentStateMessage = '😴 Agent is idle.';
+      statusColor = '#6b7280'; // Gray
       break;
   }
 
@@ -27,14 +35,67 @@ export default function MyVoiceAgentUI() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '80%'
+      height: '80%',
+      padding: '2rem',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      borderRadius: '12px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
     }}>
-      <h2>{agentStateMessage}</h2>
+      <h1 style={{
+        color: 'white',
+        fontSize: '2.5rem',
+        marginBottom: '1rem',
+        textAlign: 'center'
+      }}>
+        🎯 AI Interview Coach
+      </h1>
       
-      {/* This component plays the agent's audio and shows a visualizer */}
-      {audioTrack && (
-        <AudioVisualizer track={audioTrack} style={{ height: '200px', width: '100%' }} />
-      )}
+      <div style={{
+        backgroundColor: 'white',
+        padding: '2rem',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+        minWidth: '300px',
+        textAlign: 'center'
+      }}>
+        <h2 style={{
+          color: statusColor,
+          fontSize: '1.5rem',
+          marginBottom: '1rem',
+          transition: 'color 0.3s ease'
+        }}>
+          {agentStateMessage}
+        </h2>
+        
+        {/* This component plays the agent's audio and shows a visualizer */}
+        {audioTrack && (
+          <div style={{ 
+            marginTop: '2rem',
+            padding: '1rem',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '8px'
+          }}>
+            <AudioVisualizer 
+              track={audioTrack} 
+              style={{ 
+                height: '200px', 
+                width: '100%',
+                borderRadius: '4px'
+              }} 
+            />
+          </div>
+        )}
+        
+        <p style={{
+          marginTop: '1.5rem',
+          color: '#6b7280',
+          fontSize: '0.9rem',
+          lineHeight: '1.5'
+        }}>
+          Welcome to your AI-powered interview practice session!<br />
+          Speak naturally and the AI will guide you through the interview.
+        </p>
+      </div>
     </div>
   );
 }
