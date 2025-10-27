@@ -9,3 +9,8 @@ langchain-community
 requests
 python-dotenv
 PyPDF2
+PyMuPDF
+python-docx
+easyocr
+streamlit
+plotly
