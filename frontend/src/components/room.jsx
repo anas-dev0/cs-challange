@@ -1,4 +1,4 @@
-import { useVoiceAssistant, AudioVisualizer } from '@livekit/components-react';
+import { useVoiceAssistant } from '@livekit/components-react';
 
 export default function MyVoiceAgentUI() {
   const {
@@ -66,24 +66,28 @@ export default function MyVoiceAgentUI() {
           {agentStateMessage}
         </h2>
         
-        {/* This component plays the agent's audio and shows a visualizer */}
-        {audioTrack && (
+        {/* Audio visualizer - only show if track is available */}
+        {audioTrack ? (
           <div style={{ 
             marginTop: '2rem',
             padding: '1rem',
             backgroundColor: '#f3f4f6',
             borderRadius: '8px'
           }}>
-            <AudioVisualizer 
-              track={audioTrack} 
-              style={{ 
-                height: '200px', 
-                width: '100%',
-                borderRadius: '4px'
-              }} 
-            />
+            <div style={{ 
+              height: '200px', 
+              width: '100%',
+              borderRadius: '4px',
+              backgroundColor: '#e5e7eb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#9ca3af'
+            }}>
+              🎵 Audio Visualizer
+            </div>
           </div>
-        )}
+        ) : null}
         
         <p style={{
           marginTop: '1.5rem',

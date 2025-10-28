@@ -1,0 +1,22 @@
+{
+  "name": "working-agent",
+  "version": "1.0.0",
+  "description": "> **Personalized Interview Preparation with Advanced AI Technology**",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && ",
+    "start": "concurrently \"npm run backend\" \"npm run frontend\" "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anas-dev0/cs-challange.git"
+  },
+  "author": "Anas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/anas-dev0/cs-challange/issues"
+  },
+  "homepage": "https://github.com/anas-dev0/cs-challange#readme"
+}
