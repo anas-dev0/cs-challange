@@ -2,7 +2,6 @@ import { useVoiceAssistant, BarVisualizer } from '@livekit/components-react';
 import { PhoneDisconnectIcon, ChatTextIcon, MicrophoneIcon, MicrophoneSlashIcon } from '@phosphor-icons/react';
 import { Button } from './ui/Button';
 import { Toggle } from './ui/Toggle';
-import { cn } from '../lib/utils';
 import { useState } from 'react';
 import { Track } from 'livekit-client';
 import { useLocalParticipant } from '@livekit/components-react';
