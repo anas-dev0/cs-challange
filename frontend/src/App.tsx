@@ -1,28 +1,173 @@
-﻿import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+﻿import { useState, useCallback } from "react"
+import {
+  LiveKitRoom,
+  RoomAudioRenderer,
+  useRoomContext,
+} from "@livekit/components-react"
+import { useTranslation } from "react-i18next"
+import WelcomeView from "./components/WelcomeView"
+import SessionView from "./components/SessionView"
+import UploadView from "./components/UploadView"
+import { Header } from "./components/Header"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import "./App.css"
 
-function App() {
+const TOKEN_SERVER_URL = "http://localhost:3001"
+
+function AppContent({ onDisconnect }: { onDisconnect: () => void }) {
+  const room = useRoomContext()
+
+  const handleDisconnect = useCallback(() => {
+    if (room && room.state !== "disconnected") {
+      room.disconnect()
+    }
+    onDisconnect()
+  }, [room, onDisconnect])
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Welcome to frontend</CardTitle>
-          <CardDescription>
-            Vite + React + TypeScript + Tailwind + shadcn/ui
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="Enter your email" />
-          </div>
-          <Button className="w-full">Get Started</Button>
-        </CardContent>
-      </Card>
-    </div>
+    <>
+      <SessionView onDisconnect={handleDisconnect} />
+      <RoomAudioRenderer />
+    </>
   )
 }
 
-export default App
+export default function App() {
+  const { t } = useTranslation()
+  const [currentView, setCurrentView] = useState<"welcome" | "upload" | "session">("welcome")
+  const [connectionData, setConnectionData] = useState<{ token: string; url: string } | null>(null)
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const handleGetStarted = () => {
+    setCurrentView("upload")
+  }
+
+  const handleUploadComplete = async () => {
+    try {
+      setLoading(true)
+      setError("")
+
+      // Start the session and get connection token
+      const resp = await fetch(`${TOKEN_SERVER_URL}/start-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Interview Candidate",
+        }),
+      })
+
+      if (!resp.ok) {
+        const errorData = await resp.json()
+        throw new Error(errorData.error || "Failed to start session")
+      }
+
+      const data = await resp.json()
+
+      if (!data.token || !data.url) {
+        throw new Error("Invalid response from server")
+      }
+
+      setConnectionData(data)
+      setCurrentView("session")
+    } catch (e) {
+      console.error("Error starting session:", e)
+      setError((e as Error).message || "Failed to connect to the server")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDisconnect = () => {
+    setConnectionData(null)
+    setCurrentView("welcome")
+  }
+
+  const handleBack = () => {
+    setCurrentView("welcome")
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-8 pt-24">
+          <Card className="w-full max-w-2xl shadow-2xl">
+            <CardHeader>
+              <CardTitle className="text-3xl text-red-600 dark:text-red-400 flex items-center gap-2">
+                ❌ {t('error.title')}
+              </CardTitle>
+              <CardDescription className="text-base mt-2">{error}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                <h3 className="font-semibold mb-3">{t('error.troubleshooting')}</h3>
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 dark:text-purple-400">•</span>
+                    <span>{t('error.serverRunning')} <code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">{TOKEN_SERVER_URL}</code></span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 dark:text-purple-400">•</span>
+                    <span>{t('error.checkCredentials')}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-600 dark:text-purple-400">•</span>
+                    <span>{t('error.verifyInternet')}</span>
+                  </li>
+                </ul>
+              </div>
+              <Button
+                onClick={() => window.location.reload()}
+                className="w-full h-12 text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-800 hover:from-purple-700 hover:to-indigo-900"
+              >
+                🔄 {t('error.retry')}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    )
+  }
+
+  if (currentView === "session" && connectionData) {
+    return (
+      <>
+        <Header />
+        <LiveKitRoom
+          token={connectionData.token}
+          serverUrl={connectionData.url}
+          connect={true}
+          audio={true}
+          video={false}
+          data-lk-theme="default"
+        >
+          <AppContent onDisconnect={handleDisconnect} />
+        </LiveKitRoom>
+      </>
+    )
+  }
+
+  if (currentView === "upload") {
+    return (
+      <>
+        <Header />
+        <UploadView
+          onUploadComplete={handleUploadComplete}
+          onBack={handleBack}
+          loading={loading}
+        />
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Header />
+      <WelcomeView onGetStarted={handleGetStarted} />
+    </>
+  )
+}
