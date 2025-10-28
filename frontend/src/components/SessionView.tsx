@@ -1,50 +1,43 @@
-import { useVoiceAssistant, BarVisualizer } from "@livekit/components-react"
-import { Phone, Mic, MicOff } from "lucide-react"
-import { useState } from "react"
-import { Track } from "livekit-client"
-import { useLocalParticipant } from "@livekit/components-react"
-import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { useVoiceAssistant, BarVisualizer } from "@livekit/components-react";
+import { Phone, Mic, MicOff } from "lucide-react";
+import { useState } from "react";
+import { useLocalParticipant } from "@livekit/components-react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface SessionViewProps {
-  onDisconnect: () => void
+  onDisconnect: () => void;
 }
 
 export default function SessionView({ onDisconnect }: SessionViewProps) {
-  const { t } = useTranslation()
-  const { state: agentState, audioTrack: agentAudioTrack } = useVoiceAssistant()
-  const { localParticipant } = useLocalParticipant()
-  const [isMuted, setIsMuted] = useState(false)
+  const { t } = useTranslation();
+  const { state: agentState, audioTrack: agentAudioTrack } =
+    useVoiceAssistant();
+  const { localParticipant } = useLocalParticipant();
+  const [isMuted, setIsMuted] = useState(false);
 
   const handleToggleMic = async () => {
-    const micPublication = localParticipant.getTrackPublication(
-      Track.Source.Microphone
-    )
-    if (micPublication) {
-      if (isMuted) {
-        await localParticipant.setMicrophoneEnabled(true)
-      } else {
-        await localParticipant.setMicrophoneEnabled(false)
-      }
-      setIsMuted(!isMuted)
+    if (localParticipant) {
+      await localParticipant.setMicrophoneEnabled(isMuted);
+      setIsMuted(!isMuted);
     }
-  }
+  };
 
   const getAgentStateDisplay = () => {
     switch (agentState) {
       case "listening":
-        return { text: t('session.states.listening'), color: "bg-green-500" }
+        return { text: t("session.states.listening"), color: "bg-green-500" };
       case "thinking":
-        return { text: t('session.states.thinking'), color: "bg-amber-500" }
+        return { text: t("session.states.thinking"), color: "bg-amber-500" };
       case "speaking":
-        return { text: t('session.states.speaking'), color: "bg-blue-500" }
+        return { text: t("session.states.speaking"), color: "bg-blue-500" };
       default:
-        return { text: t('session.states.ready'), color: "bg-gray-500" }
+        return { text: t("session.states.ready"), color: "bg-gray-500" };
     }
-  }
+  };
 
-  const stateDisplay = getAgentStateDisplay()
+  const stateDisplay = getAgentStateDisplay();
 
   return (
     <div className="min-h-screen relative w-full flex-1 flex flex-col items-center justify-center overflow-hidden">
@@ -70,25 +63,30 @@ export default function SessionView({ onDisconnect }: SessionViewProps) {
 
         {/* Agent Visualizer */}
         <Card className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl border-0 mb-8">
-          <CardContent className="p-12">
-            <div className="flex items-center justify-center min-h-[200px]">
-              <BarVisualizer
-                barCount={7}
-                state={agentState}
-                options={{ minHeight: 8 }}
-                trackRef={agentAudioTrack}
-                className="flex h-full items-center justify-center gap-2"
+          <CardContent className="p-12 flex flex-col items-center justify-center gap-6">
+            {agentAudioTrack && (
+              <div
+                style={{
+                  width: "100%",
+                  height: "120px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "16px 0",
+                  borderRadius: "8px",
+                  background: "transparent",
+                }}
               >
-                <span
-                  className="min-h-4 w-3 rounded-full transition-all duration-250 bg-gray-300 dark:bg-gray-600"
-                  data-lk-highlighted="true"
-                  data-lk-muted="false"
+                <BarVisualizer
+                  trackRef={agentAudioTrack}
+                  state={agentState}
+                  className="w-full h-full"
                 />
-              </BarVisualizer>
-            </div>
-
-            <p className="text-center text-gray-600 dark:text-gray-400 text-sm mt-6">
-              {t('session.help')}
+              </div>
+            )}
+            <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
+              {t("session.help")}
             </p>
           </CardContent>
         </Card>
@@ -99,14 +97,18 @@ export default function SessionView({ onDisconnect }: SessionViewProps) {
           <Button
             onClick={handleToggleMic}
             size="icon"
-            variant={isMuted ? "destructive" : "default"}
+            variant={isMuted ? "destructive" : "secondary"}
             className={`w-16 h-16 rounded-full shadow-xl transition-all hover:scale-110 ${
               isMuted
                 ? "bg-red-500 hover:bg-red-600"
                 : "bg-background hover:bg-background/90"
             }`}
           >
-            {isMuted ? <MicOff className="w-7 h-7" /> : <Mic className="w-7 h-7" />}
+            {isMuted ? (
+              <MicOff className="w-7 h-7" />
+            ) : (
+              <Mic className="w-7 h-7" />
+            )}
           </Button>
 
           {/* End call button */}
@@ -116,10 +118,10 @@ export default function SessionView({ onDisconnect }: SessionViewProps) {
             className="h-16 px-8 rounded-full shadow-xl text-base font-bold bg-red-500 hover:bg-red-600 transition-all hover:scale-105 gap-3"
           >
             <Phone className="w-6 h-6" />
-            {t('session.endCall')}
+            {t("session.endCall")}
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
