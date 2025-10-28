@@ -94,7 +94,7 @@ export default function App() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-8 pt-24">
+        <div className="flex items-center justify-center p-8 pt-24">
           <Card className="w-full max-w-2xl shadow-2xl">
             <CardHeader>
               <CardTitle className="text-3xl text-red-600 dark:text-red-400 flex items-center gap-2">
@@ -107,22 +107,22 @@ export default function App() {
                 <h3 className="font-semibold mb-3">{t('error.troubleshooting')}</h3>
                 <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <li className="flex items-start gap-2">
-                    <span className="text-purple-600 dark:text-purple-400">•</span>
+                    <span>•</span>
                     <span>{t('error.serverRunning')} <code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">{TOKEN_SERVER_URL}</code></span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-purple-600 dark:text-purple-400">•</span>
+                    <span>•</span>
                     <span>{t('error.checkCredentials')}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-purple-600 dark:text-purple-400">•</span>
+                    <span>•</span>
                     <span>{t('error.verifyInternet')}</span>
                   </li>
                 </ul>
               </div>
               <Button
                 onClick={() => window.location.reload()}
-                className="w-full h-12 text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-800 hover:from-purple-700 hover:to-indigo-900"
+                className="w-full h-12 text-lg font-bold"
               >
                 🔄 {t('error.retry')}
               </Button>

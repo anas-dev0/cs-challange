@@ -37,21 +37,21 @@ export default function UploadView({ onUploadComplete, onBack, loading }: Upload
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center p-8 relative">
+    <div className="min-h-screen flex items-center justify-center p-8 relative">
       {/* Back button */}
       <Button
         variant="ghost"
         size="icon"
         onClick={onBack}
-        className="absolute top-8 left-8 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md rounded-full w-12 h-12"
+        className="absolute top-8 left-8 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full w-12 h-12"
       >
         <ArrowLeft className="w-6 h-6" />
       </Button>
 
       <Card className="w-full max-w-2xl shadow-2xl">
         <CardHeader className="text-center pb-4">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-800 rounded-full flex items-center justify-center mx-auto mb-6">
-            <FileText className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FileText className="w-10 h-10" />
           </div>
           <CardTitle className="text-3xl font-bold">{t('upload.title')}</CardTitle>
           <CardDescription className="text-base mt-2">
@@ -65,7 +65,7 @@ export default function UploadView({ onUploadComplete, onBack, loading }: Upload
             className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
               uploaded
                 ? "border-green-500 bg-green-50 dark:bg-green-950/20"
-                : "border-gray-300 bg-gray-50 dark:bg-gray-900/20 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/20"
+                : "border-gray-300 bg-gray-50 dark:bg-gray-900/20"
             }`}
           >
             <Input
@@ -91,7 +91,6 @@ export default function UploadView({ onUploadComplete, onBack, loading }: Upload
                   <Button
                     type="button"
                     onClick={() => document.getElementById("cv-upload")?.click()}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-800 hover:from-purple-700 hover:to-indigo-900"
                   >
                     {t('upload.browseFiles')}
                   </Button>
@@ -113,7 +112,7 @@ export default function UploadView({ onUploadComplete, onBack, loading }: Upload
                       setUploaded(false)
                       setFileName("")
                     }}
-                    className="border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/20"
+                    className="border-purple-600"
                   >
                     {t('upload.uploadDifferent')}
                   </Button>
@@ -136,7 +135,7 @@ export default function UploadView({ onUploadComplete, onBack, loading }: Upload
           <Button
             onClick={handleContinue}
             disabled={!uploaded || loading}
-            className="w-full h-12 text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-800 hover:from-purple-700 hover:to-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? t('upload.starting') : t('upload.continue')}
           </Button>

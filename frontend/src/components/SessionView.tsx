@@ -47,7 +47,7 @@ export default function SessionView({ onDisconnect }: SessionViewProps) {
   const stateDisplay = getAgentStateDisplay()
 
   return (
-    <div className="relative w-full h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex flex-col items-center justify-center overflow-hidden">
+    <div className="min-h-screen relative w-full flex-1 flex flex-col items-center justify-center overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-white/10 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-white/10 rounded-full blur-[120px]" />
@@ -103,7 +103,7 @@ export default function SessionView({ onDisconnect }: SessionViewProps) {
             className={`w-16 h-16 rounded-full shadow-xl transition-all hover:scale-110 ${
               isMuted
                 ? "bg-red-500 hover:bg-red-600"
-                : "bg-white hover:bg-white/90 text-purple-600"
+                : "bg-background hover:bg-background/90"
             }`}
           >
             {isMuted ? <MicOff className="w-7 h-7" /> : <Mic className="w-7 h-7" />}

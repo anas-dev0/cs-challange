@@ -133,7 +133,7 @@ const resources = {
         system: 'النظام',
       },
     },
-  },
+  },  
 };
 
 i18n
