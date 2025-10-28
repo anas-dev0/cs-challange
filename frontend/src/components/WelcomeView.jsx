@@ -1,94 +1,243 @@
-import { Button } from './ui/Button';
+import { Mic, CheckCircle, Target, TrendingUp } from "lucide-react";
 
-function WelcomeImage() {
+function FeatureCard({ icon: Icon, title, description }) {
   return (
-    <svg
-      width="64"
-      height="64"
-      viewBox="0 0 64 64"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="mb-4"
-      style={{ width: '64px', height: '64px' }}
+    <div
+      style={{
+        background: "rgba(255, 255, 255, 0.1)",
+        backdropFilter: "blur(10px)",
+        borderRadius: "12px",
+        padding: "1.5rem",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        transition: "all 0.3s",
+      }}
+      onMouseOver={(e) => {
+        e.currentTarget.style.transform = "translateY(-4px)";
+        e.currentTarget.style.boxShadow = "0 10px 30px rgba(0, 0, 0, 0.2)";
+      }}
+      onMouseOut={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "none";
+      }}
     >
-      <path
-        d="M15 24V40C15 40.7957 14.6839 41.5587 14.1213 42.1213C13.5587 42.6839 12.7956 43 12 43C11.2044 43 10.4413 42.6839 9.87868 42.1213C9.31607 41.5587 9 40.7957 9 40V24C9 23.2044 9.31607 22.4413 9.87868 21.8787C10.4413 21.3161 11.2044 21 12 21C12.7956 21 13.5587 21.3161 14.1213 21.8787C14.6839 22.4413 15 23.2044 15 24ZM22 5C21.2044 5 20.4413 5.31607 19.8787 5.87868C19.3161 6.44129 19 7.20435 19 8V56C19 56.7957 19.3161 57.5587 19.8787 58.1213C20.4413 58.6839 21.2044 59 22 59C22.7956 59 23.5587 58.6839 24.1213 58.1213C24.6839 57.5587 25 56.7957 25 56V8C25 7.20435 24.6839 6.44129 24.1213 5.87868C23.5587 5.31607 22.7956 5 22 5ZM32 13C31.2044 13 30.4413 13.3161 29.8787 13.8787C29.3161 14.4413 29 15.2044 29 16V48C29 48.7957 29.3161 49.5587 29.8787 50.1213C30.4413 50.6839 31.2044 51 32 51C32.7956 51 33.5587 50.6839 34.1213 50.1213C34.6839 49.5587 35 48.7957 35 48V16C35 15.2044 34.6839 14.4413 34.1213 13.8787C33.5587 13.3161 32.7956 13 32 13ZM42 21C41.2043 21 40.4413 21.3161 39.8787 21.8787C39.3161 22.4413 39 23.2044 39 24V40C39 40.7957 39.3161 41.5587 39.8787 42.1213C40.4413 42.6839 41.2043 43 42 43C42.7957 43 43.5587 42.6839 44.1213 42.1213C44.6839 41.5587 45 40.7957 45 40V24C45 23.2044 44.6839 22.4413 44.1213 21.8787C43.5587 21.3161 42.7957 21 42 21ZM52 17C51.2043 17 50.4413 17.3161 49.8787 17.8787C49.3161 18.4413 49 19.2044 49 20V44C49 44.7957 49.3161 45.5587 49.8787 46.1213C50.4413 46.6839 51.2043 47 52 47C52.7957 47 53.5587 46.6839 54.1213 46.1213C54.6839 45.5587 55 44.7957 55 44V20C55 19.2044 54.6839 18.4413 54.1213 17.8787C53.5587 17.3161 52.7957 17 52 17Z"
-        fill="currentColor"
-      />
-    </svg>
+      <div
+        style={{
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.2)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: "1rem",
+        }}
+      >
+        <Icon size={24} color="white" />
+      </div>
+      <h3
+        style={{
+          color: "white",
+          fontSize: "1.125rem",
+          fontWeight: "600",
+          marginBottom: "0.5rem",
+        }}
+      >
+        {title}
+      </h3>
+      <p
+        style={{
+          color: "rgba(255, 255, 255, 0.8)",
+          fontSize: "0.875rem",
+          lineHeight: "1.5",
+        }}
+      >
+        {description}
+      </p>
+    </div>
   );
 }
 
-export default function WelcomeView({ onStartCall }) {
+export default function WelcomeView({ onGetStarted }) {
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      textAlign: 'center',
-      padding: '2rem'
-    }}>
-      <section style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <WelcomeImage />
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Decorative elements */}
+      <div
+        style={{
+          position: "absolute",
+          top: "-10%",
+          right: "-5%",
+          width: "400px",
+          height: "400px",
+          background: "rgba(255, 255, 255, 0.1)",
+          borderRadius: "50%",
+          filter: "blur(80px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-10%",
+          left: "-5%",
+          width: "400px",
+          height: "400px",
+          background: "rgba(255, 255, 255, 0.1)",
+          borderRadius: "50%",
+          filter: "blur(80px)",
+        }}
+      />
 
-        <p style={{
-          maxWidth: '40rem',
-          paddingTop: '0.25rem',
-          lineHeight: '1.5',
-          fontWeight: 500,
-          fontSize: '1rem',
-          marginBottom: '1.5rem'
-        }} className="text-foreground">
-          Chat live with your AI interview coach
-        </p>
-
-        <Button 
-          variant="primary" 
-          size="lg" 
-          onClick={onStartCall}
+      <div
+        style={{
+          maxWidth: "1200px",
+          width: "100%",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {/* Hero Section */}
+        <div
           style={{
-            width: '16rem',
-            fontFamily: 'ui-monospace, monospace'
+            textAlign: "center",
+            marginBottom: "4rem",
           }}
         >
-          START CALL
-        </Button>
-      </section>
-
-      <div style={{
-        position: 'fixed',
-        bottom: '1.25rem',
-        left: 0,
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <p style={{
-          maxWidth: '40rem',
-          paddingTop: '0.25rem',
-          fontSize: '0.875rem',
-          lineHeight: '1.25rem',
-          fontWeight: 400
-        }} className="text-muted-foreground">
-          Need help getting set up? Check out the{' '}
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://docs.livekit.io/agents/start/voice-ai/"
-            style={{ textDecoration: 'underline' }}
+          <div
+            style={{
+              width: "120px",
+              height: "120px",
+              background: "rgba(255, 255, 255, 0.2)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 2rem",
+              backdropFilter: "blur(10px)",
+              border: "2px solid rgba(255, 255, 255, 0.3)",
+            }}
           >
-            Voice AI quickstart
-          </a>
-          .
-        </p>
+            <Mic size={60} color="white" />
+          </div>
+
+          <h1
+            style={{
+              color: "white",
+              fontSize: "clamp(2.5rem, 5vw, 4rem)",
+              fontWeight: "800",
+              marginBottom: "1rem",
+              textShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            AI Interview Coach
+          </h1>
+
+          <p
+            style={{
+              color: "rgba(255, 255, 255, 0.9)",
+              fontSize: "clamp(1.125rem, 2vw, 1.5rem)",
+              marginBottom: "3rem",
+              maxWidth: "600px",
+              margin: "0 auto 3rem",
+              lineHeight: "1.6",
+            }}
+          >
+            Practice interviews with AI-powered coaching. Get personalized
+            feedback and improve your skills.
+          </p>
+
+          <button
+            onClick={onGetStarted}
+            style={{
+              padding: "1.25rem 3rem",
+              fontSize: "1.25rem",
+              fontWeight: "700",
+              color: "#667eea",
+              background: "white",
+              border: "none",
+              borderRadius: "50px",
+              cursor: "pointer",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.3)",
+              transition: "all 0.3s",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.75rem",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = "scale(1.05) translateY(-2px)";
+              e.currentTarget.style.boxShadow =
+                "0 15px 40px rgba(0, 0, 0, 0.4)";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = "scale(1) translateY(0)";
+              e.currentTarget.style.boxShadow =
+                "0 10px 30px rgba(0, 0, 0, 0.3)";
+            }}
+          >
+            Get Started
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M7.5 15L12.5 10L7.5 5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Features Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "2rem",
+            marginBottom: "3rem",
+          }}
+        >
+          <FeatureCard
+            icon={Target}
+            title="Personalized Questions"
+            description="Questions tailored to your CV and target role for realistic practice"
+          />
+          <FeatureCard
+            icon={CheckCircle}
+            title="Real-time Feedback"
+            description="Get instant constructive feedback after each answer"
+          />
+          <FeatureCard
+            icon={TrendingUp}
+            title="Detailed Reports"
+            description="Receive comprehensive performance analysis at the end"
+          />
+        </div>
+
+        {/* Bottom info */}
+        <div
+          style={{
+            textAlign: "center",
+          }}
+        >
+          <p
+            style={{
+              color: "rgba(255, 255, 255, 0.7)",
+              fontSize: "0.875rem",
+            }}
+          >
+            Powered by LiveKit & Advanced AI Technology
+          </p>
+        </div>
       </div>
     </div>
   );

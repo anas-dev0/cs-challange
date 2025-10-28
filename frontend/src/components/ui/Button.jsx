@@ -1,63 +1,91 @@
-import { cva } from 'class-variance-authority';
-import { Slot } from '@radix-ui/react-slot';
-import { cn } from '../../lib/utils';
-
-const buttonVariants = cva(
-  [
-    'text-xs font-bold tracking-wider uppercase whitespace-nowrap',
-    'inline-flex items-center justify-center gap-2 shrink-0 rounded-full cursor-pointer outline-none transition-colors duration-300',
-    'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-    'disabled:pointer-events-none disabled:opacity-50',
-    'aria-invalid:ring-destructive/20 aria-invalid:border-destructive dark:aria-invalid:ring-destructive/40',
-    "[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
-  ],
-  {
-    variants: {
-      variant: {
-        default: 'bg-muted text-foreground hover:bg-muted focus:bg-muted hover:bg-foreground/10',
-        destructive: [
-          'bg-destructive/10 text-destructive',
-          'hover:bg-destructive/20 focus:bg-destructive/20 focus-visible:ring-destructive/20',
-          'dark:focus-visible:ring-destructive/40',
-        ],
-        outline: [
-          'border border-input bg-background',
-          'hover:bg-accent hover:text-accent-foreground',
-          'dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
-        ],
-        primary: 'bg-primary text-primary-foreground hover:bg-primary/70 focus:bg-primary/70',
-        secondary: 'bg-foreground/15 text-secondary-foreground hover:bg-foreground/20',
-        ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
-        link: 'text-primary underline-offset-4 hover:underline',
-      },
-      size: {
-        default: 'h-9 px-4 py-2 has-[>svg]:px-3',
-        sm: 'h-8 gap-1.5 px-3 has-[>svg]:px-2.5',
-        lg: 'h-10 px-6 has-[>svg]:px-4',
-        icon: 'size-9',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
-  }
-);
-
 export function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
+  children,
+  variant = "primary",
+  size = "md",
+  onClick,
+  disabled = false,
+  style = {},
   ...props
 }) {
-  const Comp = asChild ? Slot : 'button';
+  const baseStyle = {
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "600",
+    cursor: disabled ? "not-allowed" : "pointer",
+    transition: "all 0.2s",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.5rem",
+    opacity: disabled ? 0.5 : 1,
+    ...style,
+  };
+
+  const variants = {
+    primary: {
+      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      color: "white",
+      boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+    },
+    secondary: {
+      background: "#f3f4f6",
+      color: "#374151",
+      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+    },
+    destructive: {
+      background: "#ef4444",
+      color: "white",
+      boxShadow: "0 4px 12px rgba(239, 68, 68, 0.4)",
+    },
+  };
+
+  const sizes = {
+    sm: {
+      padding: "0.5rem 1rem",
+      fontSize: "0.875rem",
+    },
+    md: {
+      padding: "0.75rem 1.5rem",
+      fontSize: "1rem",
+    },
+    lg: {
+      padding: "1rem 2rem",
+      fontSize: "1.125rem",
+    },
+    icon: {
+      padding: "0.75rem",
+      fontSize: "1rem",
+      width: "40px",
+      height: "40px",
+    },
+  };
+
+  const combinedStyle = {
+    ...baseStyle,
+    ...variants[variant],
+    ...sizes[size],
+  };
+
+  const handleMouseOver = (e) => {
+    if (!disabled) {
+      e.currentTarget.style.transform = "scale(1.05)";
+    }
+  };
+
+  const handleMouseOut = (e) => {
+    e.currentTarget.style.transform = "scale(1)";
+  };
 
   return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={combinedStyle}
+      onMouseOver={handleMouseOver}
+      onMouseOut={handleMouseOut}
       {...props}
-    />
+    >
+      {children}
+    </button>
   );
 }

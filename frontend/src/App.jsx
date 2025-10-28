@@ -1,130 +1,160 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from "react";
 import {
   LiveKitRoom,
   RoomAudioRenderer,
   useRoomContext,
-} from '@livekit/components-react';
-import WelcomeView from './components/WelcomeView';
-import SessionView from './components/SessionView';
-import './App.css';
+} from "@livekit/components-react";
+import WelcomeView from "./components/WelcomeView";
+import SessionView from "./components/SessionView";
+import UploadView from "./components/UploadView";
+import "./App.css";
 
-const TOKEN_SERVER_URL = import.meta.env.VITE_TOKEN_SERVER_URL || 'http://localhost:3001';
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+const TOKEN_SERVER_URL = "http://localhost:3001";
 
-function AppContent() {
+function AppContent({ connectionData, onDisconnect, onBack }) {
   const room = useRoomContext();
-  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
-  const startSession = useCallback(async () => {
-    if (!DEMO_MODE && room.state !== 'connected') {
-      await room.connect();
-    }
-    setIsSessionActive(true);
-  }, [room]);
-
-  const endSession = useCallback(() => {
-    setIsSessionActive(false);
-    if (!DEMO_MODE && room.state !== 'disconnected') {
+  const handleDisconnect = useCallback(() => {
+    setIsConnected(false);
+    if (room && room.state !== "disconnected") {
       room.disconnect();
     }
-  }, [room]);
+    onDisconnect();
+  }, [room, onDisconnect]);
 
   return (
     <>
-      {!isSessionActive && <WelcomeView onStartCall={startSession} />}
-      {isSessionActive && <SessionView onDisconnect={endSession} />}
-      {!DEMO_MODE && <RoomAudioRenderer />}
+      <SessionView onDisconnect={handleDisconnect} />
+      <RoomAudioRenderer />
     </>
   );
 }
 
 export default function App() {
-  const [token, setToken] = useState('');
-  const [livekitUrl, setLivekitUrl] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(!DEMO_MODE);
+  const [currentView, setCurrentView] = useState("welcome"); // welcome, upload, session
+  const [connectionData, setConnectionData] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (DEMO_MODE) {
-      // Skip token fetch in demo mode
-      return;
-    }
+  const handleGetStarted = () => {
+    setCurrentView("upload");
+  };
 
-    async function fetchToken() {
-      try {
-        setLoading(true);
-        setError('');
-        
-        const resp = await fetch(`${TOKEN_SERVER_URL}/get-token`);
-        
-        if (!resp.ok) {
-          const errorData = await resp.json();
-          throw new Error(errorData.error || 'Failed to fetch token');
-        }
-        
-        const data = await resp.json();
-        
-        if (!data.token || !data.url) {
-          throw new Error('Invalid response from server');
-        }
-        
-        setToken(data.token);
-        setLivekitUrl(data.url);
-        
-      } catch (e) {
-        console.error('Error fetching token:', e);
-        setError(e.message || 'Failed to connect to the server');
-      } finally {
-        setLoading(false);
+  const handleUploadComplete = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      // Start the session and get connection token
+      const resp = await fetch(`${TOKEN_SERVER_URL}/start-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Interview Candidate",
+        }),
+      });
+
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || "Failed to start session");
       }
+
+      const data = await resp.json();
+
+      if (!data.token || !data.url) {
+        throw new Error("Invalid response from server");
+      }
+
+      setConnectionData(data);
+      setCurrentView("session");
+    } catch (e) {
+      console.error("Error starting session:", e);
+      setError(e.message || "Failed to connect to the server");
+    } finally {
+      setLoading(false);
     }
-    
-    fetchToken();
-  }, []);
+  };
 
-  if (DEMO_MODE) {
-    // Demo mode - show UI without backend connection
-    return (
-      <LiveKitRoom
-        token="demo"
-        serverUrl="wss://demo.livekit.cloud"
-        connect={false}
-        audio={false}
-        video={false}
-        data-lk-theme="default"
-      >
-        <AppContent />
-      </LiveKitRoom>
-    );
-  }
+  const handleDisconnect = () => {
+    setConnectionData(null);
+    setCurrentView("welcome");
+  };
 
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <h2>🔄 Connecting to AI Interview Coach...</h2>
-        <p>Please wait while we set up your interview session</p>
-      </div>
-    );
-  }
+  const handleBack = () => {
+    setCurrentView("welcome");
+  };
 
   if (error) {
     return (
-      <div className="error-container">
-        <div className="error-content">
-          <h2>❌ Connection Error</h2>
-          <p className="error-message">{error}</p>
-          <div className="error-details">
-            <h3>Troubleshooting:</h3>
-            <ul>
-              <li>Make sure the backend server is running at <code>{TOKEN_SERVER_URL}</code></li>
-              <li>Check that your LiveKit credentials are configured in the <code>.env</code> file</li>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          padding: "2rem",
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "2rem",
+            maxWidth: "500px",
+            width: "100%",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+          }}
+        >
+          <h2 style={{ color: "#dc2626", marginBottom: "1rem" }}>
+            ❌ Connection Error
+          </h2>
+          <p style={{ color: "#374151", marginBottom: "1.5rem" }}>{error}</p>
+          <div
+            style={{
+              backgroundColor: "#f3f4f6",
+              padding: "1rem",
+              borderRadius: "8px",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h3 style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+              Troubleshooting:
+            </h3>
+            <ul
+              style={{
+                fontSize: "0.85rem",
+                color: "#6b7280",
+                paddingLeft: "1.5rem",
+              }}
+            >
+              <li>
+                Make sure the backend server is running at{" "}
+                <code>{TOKEN_SERVER_URL}</code>
+              </li>
+              <li>
+                Check that your LiveKit credentials are configured in the{" "}
+                <code>.env</code> file
+              </li>
               <li>Verify your internet connection</li>
             </ul>
           </div>
-          <button 
-            className="retry-button"
+          <button
             onClick={() => window.location.reload()}
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              backgroundColor: "#667eea",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "1rem",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
           >
             🔄 Retry Connection
           </button>
@@ -133,34 +163,34 @@ export default function App() {
     );
   }
 
-  if (!token || !livekitUrl) {
+  if (currentView === "session" && connectionData) {
     return (
-      <div className="error-container">
-        <div className="error-content">
-          <h2>⚠️ Configuration Error</h2>
-          <p>Failed to initialize the interview session</p>
-          <button 
-            className="retry-button"
-            onClick={() => window.location.reload()}
-          >
-            🔄 Retry
-          </button>
-        </div>
-      </div>
+      <LiveKitRoom
+        token={connectionData.token}
+        serverUrl={connectionData.url}
+        connect={true}
+        audio={true}
+        video={false}
+        data-lk-theme="default"
+      >
+        <AppContent
+          connectionData={connectionData}
+          onDisconnect={handleDisconnect}
+          onBack={handleBack}
+        />
+      </LiveKitRoom>
     );
   }
 
-  return (
-    <LiveKitRoom
-      token={token}
-      serverUrl={livekitUrl}
-      connect={false}
-      audio={true}
-      video={false}
-      data-lk-theme="default"
-    >
-      <AppContent />
-    </LiveKitRoom>
-  );
-}
+  if (currentView === "upload") {
+    return (
+      <UploadView
+        onUploadComplete={handleUploadComplete}
+        onBack={handleBack}
+        loading={loading}
+      />
+    );
+  }
 
+  return <WelcomeView onGetStarted={handleGetStarted} />;
+}
