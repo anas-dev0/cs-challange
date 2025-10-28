@@ -1,23 +1,55 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   LiveKitRoom,
   RoomAudioRenderer,
-  ControlBar,
+  useRoomContext,
 } from '@livekit/components-react';
-import MyVoiceAgentUI from './components/room.jsx';
+import WelcomeView from './components/WelcomeView';
+import SessionView from './components/SessionView';
 import './App.css';
 
 const TOKEN_SERVER_URL = import.meta.env.VITE_TOKEN_SERVER_URL || 'http://localhost:3001';
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+
+function AppContent() {
+  const room = useRoomContext();
+  const [isSessionActive, setIsSessionActive] = useState(false);
+
+  const startSession = useCallback(async () => {
+    if (!DEMO_MODE && room.state !== 'connected') {
+      await room.connect();
+    }
+    setIsSessionActive(true);
+  }, [room]);
+
+  const endSession = useCallback(() => {
+    setIsSessionActive(false);
+    if (!DEMO_MODE && room.state !== 'disconnected') {
+      room.disconnect();
+    }
+  }, [room]);
+
+  return (
+    <>
+      {!isSessionActive && <WelcomeView onStartCall={startSession} />}
+      {isSessionActive && <SessionView onDisconnect={endSession} />}
+      {!DEMO_MODE && <RoomAudioRenderer />}
+    </>
+  );
+}
 
 export default function App() {
   const [token, setToken] = useState('');
   const [livekitUrl, setLivekitUrl] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [roomInfo, setRoomInfo] = useState(null);
+  const [loading, setLoading] = useState(!DEMO_MODE);
 
   useEffect(() => {
-    // Fetch the token from your Python server
+    if (DEMO_MODE) {
+      // Skip token fetch in demo mode
+      return;
+    }
+
     async function fetchToken() {
       try {
         setLoading(true);
@@ -38,10 +70,6 @@ export default function App() {
         
         setToken(data.token);
         setLivekitUrl(data.url);
-        setRoomInfo({
-          identity: data.identity,
-          room: data.room
-        });
         
       } catch (e) {
         console.error('Error fetching token:', e);
@@ -53,6 +81,22 @@ export default function App() {
     
     fetchToken();
   }, []);
+
+  if (DEMO_MODE) {
+    // Demo mode - show UI without backend connection
+    return (
+      <LiveKitRoom
+        token="demo"
+        serverUrl="wss://demo.livekit.cloud"
+        connect={false}
+        audio={false}
+        video={false}
+        data-lk-theme="default"
+      >
+        <AppContent />
+      </LiveKitRoom>
+    );
+  }
 
   if (loading) {
     return (
@@ -107,35 +151,16 @@ export default function App() {
   }
 
   return (
-    <div className="app-container">
-      <LiveKitRoom
-        token={token}
-        serverUrl={livekitUrl}
-        connect={true}
-        audio={true}
-        video={false}
-        data-lk-theme="default"
-        className="livekit-room"
-      >
-        {/* Session info banner */}
-        {roomInfo && (
-          <div className="session-info">
-            <span>👤 {roomInfo.identity}</span>
-            <span>•</span>
-            <span>🏠 {roomInfo.room}</span>
-          </div>
-        )}
-
-        {/* Your agent UI component */}
-        <MyVoiceAgentUI />
-
-        {/* Renders audio for all participants (including the agent) */}
-        <RoomAudioRenderer />
-
-        {/* Standard controls (like mute/unmute) for the user */}
-        <ControlBar />
-      </LiveKitRoom>
-    </div>
+    <LiveKitRoom
+      token={token}
+      serverUrl={livekitUrl}
+      connect={false}
+      audio={true}
+      video={false}
+      data-lk-theme="default"
+    >
+      <AppContent />
+    </LiveKitRoom>
   );
 }
 
