@@ -27,6 +27,10 @@
     "browseFiles": "Browse Files",
     "uploadSuccess": "File uploaded successfully!",
     "uploadDifferent": "Upload Different File",
+    "uploading": "Uploading your CV...",
+    "uploadError": "Failed to upload file. Please try again.",
+    "invalidFileType": "Invalid file type. Please upload a PDF or Word document.",
+    "fileTooLarge": "File is too large. Maximum size is 10MB.",
     "note": "Your CV is used only for this session and is not stored permanently.",
     "continue": "Continue to Interview",
     "starting": "Starting Interview..."

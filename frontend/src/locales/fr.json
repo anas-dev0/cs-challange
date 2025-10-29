@@ -27,6 +27,10 @@
     "browseFiles": "Parcourir les fichiers",
     "uploadSuccess": "Fichier téléchargé avec succès!",
     "uploadDifferent": "Télécharger un Fichier Différent",
+    "uploading": "Téléchargement de votre CV en cours...",
+    "uploadError": "Échec du téléchargement du fichier. Veuillez réessayer.",
+    "invalidFileType": "Type de fichier invalide. Veuillez télécharger un PDF ou un document Word.",
+    "fileTooLarge": "Le fichier est trop volumineux. La taille maximale est de 10 Mo.",
     "note": "Votre CV est utilisé uniquement pour cette session et n'est pas stocké de manière permanente.",
     "continue": "Continuer vers l'Entretien",
     "starting": "Lancement de l'entretien..."
