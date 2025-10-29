@@ -36,7 +36,7 @@ export default function WelcomeView({ onGetStarted }: WelcomeViewProps) {
       <div className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-white/10 rounded-full blur-[100px]" />
       <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-white/10 rounded-full blur-[100px]" />
 
-      <div className="max-w-6xl w-full relative z-10">
+      <div className="max-w-6xl w-full relative z-10 translate-y-20">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <div className="w-30 h-30 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-8 backdrop-blur-md border-2 border-white/30 p-8">
@@ -47,7 +47,7 @@ export default function WelcomeView({ onGetStarted }: WelcomeViewProps) {
             {t('welcome.title')}
           </h1>
 
-          <p className="text-background/80 text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">
             {t('welcome.subtitle')}
           </p>
 
