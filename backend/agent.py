@@ -3,10 +3,9 @@ import asyncio
 from livekit import agents
 from livekit.agents import AgentSession, Agent
 from livekit.plugins import google, silero
-
+from cv_parser import extract_text_from_cv
 # Import the prompts and CV parser
 from prompts import create_initial_prompts
-from cv_parser import extract_text_from_cv
 import os
 import json
 import requests

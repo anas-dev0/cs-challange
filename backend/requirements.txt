@@ -8,10 +8,10 @@ duckduckgo-search
 langchain-community
 requests
 python-dotenv
-PyPDF2
 PyMuPDF
 python-docx
-easyocr
+pytesseract
+Pillow
 streamlit
 plotly
 flask
