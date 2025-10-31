@@ -9,14 +9,12 @@ from prompts import create_initial_prompts
 import os
 import json
 import requests
-
+from livekit.agents import llm
 load_dotenv()
 
 class Assistant(Agent):
     def __init__(self, agent_instruction) -> None:
         super().__init__(instructions=agent_instruction)
-        self.questions_asked = 0
-        self.max_questions = 7
         self.interview_complete = False
 
 # Global storage for session-specific data
@@ -94,35 +92,32 @@ async def entrypoint(ctx: agents.JobContext):
             vad=silero.VAD.load(),
             llm=google.beta.realtime.RealtimeModel(voice="charon")
         )
-
+        assistant=Assistant(agent_instruction)
         # Start session
-        await session.start(room=ctx.room, agent=Assistant(agent_instruction))
+        await session.start(room=ctx.room, agent=assistant)
 
         print("✅ Starting interview...")
-        
-        enhanced_instruction = f"""
-{session_instruction}
-
-**Important:** After the final question, immediately provide the complete feedback report.
-"""
-        
-        await session.generate_reply(instructions=enhanced_instruction)
+        await session.generate_reply(instructions=session_instruction)
 
         print("🎙️ Interview in progress...")
-        
-        try:
-            while True:
-                await asyncio.sleep(1)
-        except asyncio.CancelledError:
-            print("🛑 Session ended")
-        finally:
-            print("👋 Shutting down...")
-            if room_name and room_name in session_data:
-                del session_data[room_name]
-    
+
+        @session.on("agent_speech_committed")
+        async def on_committed(msg: llm.LLMMessage):
+            text=msg.content.lower()
+            if "interview performance report" in text :
+                assistant.interview_complete = True
+        @session.on("agent_stopped_speaking")
+        async def on_stopped_speaking():
+            if assistant.interview_complete:
+                print("✅ Interview complete. Ending session...")
+                await ctx.room.disconnect()
+                if room_name and room_name in session_data:
+                    del session_data[room_name]
+
+
     except Exception as e:
         print(f"❌ Error: {str(e)}")
-        raise
+
 
 if __name__ == "__main__":
     # Make sure the upload folder exists
