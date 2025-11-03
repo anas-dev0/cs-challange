@@ -20,7 +20,13 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface UploadViewProps {
-  onUploadComplete: (cvFilename: string, jobDescription: string) => void;
+  onUploadComplete: (
+    cvFilename: string,
+    jobDescription: string,
+    candidateEmail: string,
+    candidateName: string,
+    jobTitle: string
+  ) => void;
   onBack: () => void;
   loading: boolean;
 }
@@ -38,6 +44,9 @@ export default function UploadView({
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
+  const [candidateEmail, setCandidateEmail] = useState("");
+  const [candidateName, setCandidateName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -105,8 +114,36 @@ export default function UploadView({
       return;
     }
 
+    if (!candidateEmail.trim()) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    if (!candidateName.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+
+    if (!jobTitle.trim()) {
+      toast.error("Please enter the job title");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(candidateEmail)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
     if (uploaded && file && fileName) {
-      onUploadComplete(fileName, jobDescription);
+      onUploadComplete(
+        fileName,
+        jobDescription,
+        candidateEmail,
+        candidateName,
+        jobTitle
+      );
     }
   };
 
@@ -238,11 +275,65 @@ export default function UploadView({
             </p>
           </div>
 
+          {/* Job Title Input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Job Title
+            </label>
+            <Input
+              type="text"
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.target.value)}
+              placeholder="e.g., Senior Frontend Developer"
+              disabled={loading || uploading}
+              className="w-full"
+            />
+          </div>
+
+          {/* Candidate Name Input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Your Full Name
+            </label>
+            <Input
+              type="text"
+              value={candidateName}
+              onChange={(e) => setCandidateName(e.target.value)}
+              placeholder="e.g., John Doe"
+              disabled={loading || uploading}
+              className="w-full"
+            />
+          </div>
+
+          {/* Candidate Email Input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Your Email Address
+            </label>
+            <Input
+              type="email"
+              value={candidateEmail}
+              onChange={(e) => setCandidateEmail(e.target.value)}
+              placeholder="e.g., john.doe@example.com"
+              disabled={loading || uploading}
+              className="w-full"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Your interview report will be sent to this email address
+            </p>
+          </div>
+
           {/* Continue Button */}
           <Button
             onClick={handleContinue}
             disabled={
-              !uploaded || loading || uploading || !jobDescription.trim()
+              !uploaded ||
+              loading ||
+              uploading ||
+              !jobDescription.trim() ||
+              !candidateEmail.trim() ||
+              !candidateName.trim() ||
+              !jobTitle.trim()
             }
             className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >

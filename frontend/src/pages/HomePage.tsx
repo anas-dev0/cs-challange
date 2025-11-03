@@ -51,6 +51,9 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [cvFilename, setCvFilename] = useState<string | null>(null);
   const [jobDescription, setJobDescription] = useState<string | null>(null);
+  const [candidateEmail, setCandidateEmail] = useState<string | null>(null);
+  const [candidateName, setCandidateName] = useState<string | null>(null);
+  const [jobTitle, setJobTitle] = useState<string | null>(null);
 
   const handleGetStarted = () => {
     toast.info(t("home.uploadPrompt"));
@@ -59,14 +62,23 @@ export default function HomePage() {
     setCurrentView("upload");
   };
 
-  const handleUploadComplete = async (filename: string, jobDesc: string) => {
+  const handleUploadComplete = async (
+    filename: string,
+    jobDesc: string,
+    email: string,
+    name: string,
+    title: string
+  ) => {
     try {
       setLoading(true);
       setError("");
 
-      // Store the CV filename and job description
+      // Store all the data
       setCvFilename(filename);
       setJobDescription(jobDesc);
+      setCandidateEmail(email);
+      setCandidateName(name);
+      setJobTitle(title);
 
       // Start the session and get connection token
       const resp = await fetch(`${TOKEN_SERVER_URL}/start-session`, {
@@ -75,9 +87,12 @@ export default function HomePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: "Interview Candidate",
+          name: name,
           cv_filename: filename,
           job_description: jobDesc,
+          candidate_email: email,
+          candidate_name: name,
+          job_title: title,
         }),
       });
 

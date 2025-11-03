@@ -10,6 +10,9 @@ import os
 import json
 import requests
 from livekit.agents import llm
+# Import the mailing module
+from mailer import send_interview_report_email, extract_report_from_message
+from livekit.agents import ConversationItemAddedEvent,AgentStateChangedEvent
 load_dotenv()
 
 class Assistant(Agent):
@@ -18,7 +21,7 @@ class Assistant(Agent):
         self.interview_complete = False
 
 # Global storage for session-specific data
-# Maps room_name -> {cv_filename, job_description}
+# Maps room_name -> {cv_filename, job_description, candidate_email, candidate_name}
 session_data = {}
 
 BACKEND_SERVER = "http://localhost:3001"
@@ -26,7 +29,7 @@ BACKEND_SERVER = "http://localhost:3001"
 async def entrypoint(ctx: agents.JobContext):
     """
     Main entry point for the AI interview agent
-    Gets CV filename and job description from backend server or local session_data
+    Gets CV filename, job description, and candidate info from backend server
     """
     
     try:
@@ -35,6 +38,9 @@ async def entrypoint(ctx: agents.JobContext):
         
         cv_filename = None
         job_description = None
+        candidate_email = None
+        candidate_name = None
+        job_title = "Position"  # Default
         
         # Try to fetch from backend server first
         if room_name:
@@ -44,6 +50,9 @@ async def entrypoint(ctx: agents.JobContext):
                     data = resp.json()
                     cv_filename = data.get('cv_filename')
                     job_description = data.get('job_description')
+                    candidate_email = data.get('candidate_email')
+                    candidate_name = data.get('candidate_name')
+                    job_title = data.get('job_title', 'Position')
                     print(f"✅ Got data from backend server")
             except Exception as e:
                 print(f"⚠️ Could not fetch from server: {e}")
@@ -54,6 +63,9 @@ async def entrypoint(ctx: agents.JobContext):
                 data = session_data[room_name]
                 cv_filename = cv_filename or data.get('cv_filename')
                 job_description = job_description or data.get('job_description')
+                candidate_email = candidate_email or data.get('candidate_email')
+                candidate_name = candidate_name or data.get('candidate_name')
+                job_title = job_title or data.get('job_title', 'Position')
                 print(f"✅ Got data from local session_data")
         
         if not cv_filename:
@@ -66,6 +78,8 @@ async def entrypoint(ctx: agents.JobContext):
         
         print(f"✅ CV: {cv_filename}")
         print(f"✅ Job: {job_description[:100]}...")
+        print(f"✅ Candidate: {candidate_name or 'Not provided'}")
+        print(f"✅ Email: {candidate_email or 'Not provided'}")
         
         # Extract CV text
         print(f"📄 Reading CV: {cv_filename}")
@@ -83,6 +97,7 @@ async def entrypoint(ctx: agents.JobContext):
         print("🤖 Generating prompts...")
         agent_instruction, session_instruction = create_initial_prompts(
             cv_text=cv_text,
+            job_title=job_title,
             job_description_text=job_description,
         )
 
@@ -90,9 +105,10 @@ async def entrypoint(ctx: agents.JobContext):
         print("🎤 Initializing voice session...")
         session = AgentSession(
             vad=silero.VAD.load(),
-            llm=google.beta.realtime.RealtimeModel(voice="charon")
+            llm=google.beta.realtime.RealtimeModel(voice="charon"),
         )
-        assistant=Assistant(agent_instruction)
+        assistant = Assistant(agent_instruction)
+        
         # Start session
         await session.start(room=ctx.room, agent=assistant)
 
@@ -100,23 +116,26 @@ async def entrypoint(ctx: agents.JobContext):
         await session.generate_reply(instructions=session_instruction)
 
         print("🎙️ Interview in progress...")
-
-        @session.on("agent_speech_committed")
-        async def on_committed(msg: llm.LLMMessage):
-            text=msg.content.lower()
-            if "interview performance report" in text :
-                assistant.interview_complete = True
-        @session.on("agent_stopped_speaking")
-        async def on_stopped_speaking():
-            if assistant.interview_complete:
-                print("✅ Interview complete. Ending session...")
-                await ctx.room.disconnect()
-                if room_name and room_name in session_data:
-                    del session_data[room_name]
-
-
+        @session.on("conversation_item_added")
+        def on_conversation_item_added(event: ConversationItemAddedEvent):
+            chat=event.item
+            content=chat.content[0]
+            if chat.role == "assistant":
+                if "that concludes the interview" in content.lower():
+                    print("🛑 Interview concluded by assistant.")
+                    assistant.interview_complete = True
+                    send_interview_report_email(candidate_name=candidate_name, recipient_email=candidate_email, job_title=job_title, report_text=content)
+        @session.on("agent_state_changed")
+        def on_agent_state_changed(event: AgentStateChangedEvent):
+            if assistant.interview_complete and event.new_state == "listening":
+                print("🛑 Agent is listening after interview completion. Ending session.")
+                ctx.room.disconnect()
+                print("✅ Session ended after interview completion.")
+                
     except Exception as e:
         print(f"❌ Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == "__main__":

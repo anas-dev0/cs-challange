@@ -93,6 +93,9 @@ def start_session():
         room_name = data.get('room', f"interview-{secrets.token_hex(4)}")
         cv_filename = data.get('cv_filename')
         job_description = data.get('job_description')
+        candidate_email = data.get('candidate_email')
+        candidate_name = data.get('candidate_name')
+        job_title = data.get('job_title')
         
         # Validate
         if not cv_filename:
@@ -120,9 +123,14 @@ def start_session():
         # Store session data for agent to retrieve (use the actual saved filename)
         session_data[room_name] = {
             "cv_filename": cv_filename,
-            "job_description": job_description
+            "job_description": job_description,
+            "candidate_email": candidate_email,
+            "candidate_name": candidate_name,
+            "job_title": job_title
         }
         print(f"📝 Session data stored for room: {room_name}")
+        print(f"👤 Candidate: {candidate_name} ({candidate_email})")
+        print(f"💼 Position: {job_title}")
         
         # Create access token
         token = api.AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET)

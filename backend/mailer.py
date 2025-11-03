@@ -52,7 +52,8 @@ def parse_report(report_text: str) -> dict:
         "weaknesses": [],
         "communication": {},
         "recommendations": [],
-        "role_fit": ""
+        "role_fit": "",
+        "final_note": ""
     }
     
     # Extract overall score
@@ -80,7 +81,7 @@ def parse_report(report_text: str) -> dict:
             })
     
     # Extract communication assessment
-    comm_fields = ["Confidence", "Clarity", "Pace & Fluency", "Enthusiasm"]
+    comm_fields = ["Confidence", "Clarity", "Pace & Fluency", "Enthusiasm", "Professionalism"]
     for field in comm_fields:
         match = re.search(f'-\s*{field}:\s*(.+?)(?=\n-|\n\*\*|\Z)', clean_text, re.DOTALL)
         if match:
@@ -93,10 +94,15 @@ def parse_report(report_text: str) -> dict:
         recs = re.findall(r'-\s*(.+?)(?=\n-|\n\*\*|\Z)', recs_text, re.DOTALL)
         data["recommendations"] = [r.strip() for r in recs if r.strip()]
     
-    # Extract role fit - handle case where it might be at the end
-    role_fit_match = re.search(r'\*\*Role Fit Assessment:\*\*\s*(.+?)(?=\n\n---|\Z)', clean_text, re.DOTALL)
+    # Extract role fit
+    role_fit_match = re.search(r'\*\*Role Fit Assessment:\*\*\s*(.+?)(?=\*\*Final Note:\*\*|\n\n---|\Z)', clean_text, re.DOTALL)
     if role_fit_match:
         data["role_fit"] = role_fit_match.group(1).strip()
+    
+    # Extract final note (optional)
+    final_note_match = re.search(r'\*\*Final Note:\*\*\s*(.+?)(?=\n\n---|\Z)', clean_text, re.DOTALL)
+    if final_note_match:
+        data["final_note"] = final_note_match.group(1).strip()
     
     return data
 
@@ -129,7 +135,8 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
         "confidence": "Confidence",
         "clarity": "Clarity",
         "pace_fluency": "Pace & Fluency",
-        "enthusiasm": "Enthusiasm"
+        "enthusiasm": "Enthusiasm",
+        "professionalism": "Professionalism"
     }
     for key, label in comm_labels.items():
         if key in report_data["communication"]:
@@ -253,6 +260,9 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                                 </div>
                             </td>
                         </tr>
+                        
+                        <!-- Final Note (if present) -->
+                        {'<tr><td style="padding: 0 30px 30px 30px;"><div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;"><p style="margin: 0; color: #92400e; line-height: 1.6; font-weight: 500;">' + report_data["final_note"] + '</p></div></td></tr>' if report_data.get("final_note") else ''}
                         
                         <!-- Footer -->
                         <tr>
