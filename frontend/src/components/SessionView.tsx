@@ -1,8 +1,4 @@
-import {
-  useVoiceAssistant,
-  BarVisualizer,
-  VideoTrack,
-} from "@livekit/components-react";
+import { useVoiceAssistant, BarVisualizer } from "@livekit/components-react";
 import { Phone, Mic, MicOff, Video, VideoOff } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useLocalParticipant } from "@livekit/components-react";
@@ -423,29 +419,55 @@ export default function SessionView({ onDisconnect }: SessionViewProps) {
         {/* Agent Visualizer */}
         <Card className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl border-0 mb-8">
           <CardContent className="p-12 flex flex-col items-center justify-center gap-6">
-            {agentAudioTrack && (
-              <div
-                style={{
-                  width: "100%",
-                  height: "120px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  padding: "16px 0",
-                  borderRadius: "8px",
-                  background: "transparent",
-                }}
-              >
+            <div
+              style={{
+                width: "100%",
+                height: "120px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                padding: "16px 0",
+                borderRadius: "8px",
+                background: "transparent",
+              }}
+            >
+              {agentAudioTrack ? (
                 <BarVisualizer
                   trackRef={agentAudioTrack}
                   state={agentState}
                   className="w-full h-full"
                 />
-              </div>
-            )}
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-gray-500 text-sm mb-2">
+                      Waiting for agent audio...
+                    </p>
+                    <div className="flex gap-1 justify-center">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className="w-2 h-8 bg-gray-400 rounded-full animate-pulse"
+                          style={{
+                            animationDelay: `${i * 0.1}s`,
+                            animationDuration: "1s",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
-              {t("session.help")}
+              {agentState === "speaking"
+                ? "🎤 Agent is speaking..."
+                : agentState === "listening"
+                ? "👂 Listening to you..."
+                : agentState === "thinking"
+                ? "🤔 Thinking..."
+                : "Ready to chat"}
             </p>
           </CardContent>
         </Card>

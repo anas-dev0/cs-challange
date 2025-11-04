@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15
+    container_name: utopiahire-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: utopiahire
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  auth:
+    build:
+      context: ./auth_fastapi
+    container_name: utopiahire-auth-fastapi
+    depends_on:
+      db:
+        condition: service_healthy
+    # Load all backend environment variables (including OAuth) from auth_fastapi/.env
+    env_file:
+      - ./auth_fastapi/.env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
