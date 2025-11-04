@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   LiveKitRoom,
@@ -46,7 +46,7 @@ export default function Interview() {
   const jobTitle = interviewConfig.jobTitle || ''
 
   // Auto-start session when component mounts
-  useState(() => {
+  useEffect(() => {
     const startSession = async () => {
       try {
         setLoading(true)
@@ -88,7 +88,7 @@ export default function Interview() {
     }
 
     startSession()
-  })
+  }, [])
 
   const handleDisconnect = () => {
     setConnectionData(null)

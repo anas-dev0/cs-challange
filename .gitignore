@@ -34,3 +34,5 @@ out/
 coverage/
 *.tsbuildinfo
 
+# Backup directories
+frontend-backup-current/
