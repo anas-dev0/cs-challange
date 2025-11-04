@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Upload,
   ArrowLeft,
@@ -18,6 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { AuthContext } from "@/AuthContext";
 
 interface UploadViewProps {
   onUploadComplete: (
@@ -107,6 +108,16 @@ export default function UploadView({
       }
     }
   };
+
+  // Prefill candidate email from logged-in user (if available) but allow edits
+  const auth = useContext(AuthContext);
+  useEffect(() => {
+    const email = auth?.user?.email;
+    if (email && !candidateEmail) {
+      setCandidateEmail(email);
+    }
+    // only when auth user email changes
+  }, [auth?.user?.email]);
 
   const handleContinue = () => {
     if (!jobDescription.trim()) {
