@@ -1,21 +1,29 @@
-# 🎯 AI Interview Coach
+# 🎯 AI Interview Coach - UtopiaHire Platform
 
 > **Personalized Interview Preparation with Advanced AI Technology**
 
-An intelligent interview coaching platform that combines CV parsing, real-time AI voice interaction, and personalized feedback to help job seekers excel in their interviews.
+An intelligent interview coaching platform that combines CV parsing, real-time AI voice interaction, OAuth authentication, and personalized feedback to help job seekers excel in their interviews. Built with a professional platform frontend and LiveKit-powered interview sessions.
 
 ## 🌟 Features
 
-### 📄 CV Analysis
-- Multi-format support (PDF, DOCX, PNG, JPG, JPEG)
-- Advanced OCR technology for scanned documents
-- Intelligent content extraction and analysis
+### 🔐 Authentication & User Management
+- OAuth 2.0 authentication (Google & GitHub)
+- Traditional email/password sign-in
+- JWT-based secure sessions
+- Protected routes and user dashboard
+
+### 📄 CV Analysis & Upload
+- Multi-format support (PDF, DOCX)
+- Intelligent CV upload and processing
+- Job description matching
+- Candidate information management
 
 ### 🎤 Real-Time Voice Interviews
 - LiveKit-powered voice communication
 - Natural conversation with AI interviewer
 - Real-time feedback and coaching
-- Audio visualization
+- Audio visualization with agent state indicators
+- Draggable/resizable video preview
 
 ### 🤖 AI-Powered Coaching
 - Personalized questions based on your CV
@@ -28,24 +36,51 @@ An intelligent interview coaching platform that combines CV parsing, real-time A
 - Score trends and improvement metrics
 - Session history and insights
 
+### 🎨 Modern UI/UX
+- Dark-themed responsive design
+- Interactive 3D shader backgrounds
+- Smooth animations with Framer Motion
+- Professional navigation and layout
+- Multi-language support (EN, FR, AR)
+
 ## 🏗️ Project Structure
 
 ```
 cs-challange/
-├── backend/               # Python backend services
-│   ├── server.py         # Flask API server (token generation)
-│   ├── agent.py          # LiveKit voice agent
-│   ├── app.py            # Streamlit web app
-│   ├── cv_parser.py      # CV text extraction
-│   ├── prompts.py        # AI prompt generation
-│   └── requirements.txt  # Python dependencies
+├── backend/                      # Python backend services
+│   ├── server.py                # Flask API server (token generation & CV upload)
+│   ├── agent.py                 # LiveKit voice agent
+│   ├── app.py                   # Streamlit web app (alternative UI)
+│   ├── cv_parser.py             # CV text extraction
+│   ├── prompts.py               # AI prompt generation
+│   └── requirements.txt         # Python dependencies
 │
-└── frontend/             # React frontend application
+└── frontend/                    # React/TypeScript frontend (UtopiaHire platform)
     ├── src/
-    │   ├── App.jsx       # Main application component
-    │   ├── components/   # React components
-    │   └── assets/       # Static assets
-    └── package.json      # Node.js dependencies
+    │   ├── App.tsx              # Main application with routing
+    │   ├── AuthContext.tsx      # Authentication context
+    │   ├── ServiceContext.tsx   # Interview service context
+    │   ├── components/
+    │   │   ├── SessionView.tsx  # LiveKit interview session (from cs-challange)
+    │   │   ├── UploadView.tsx   # CV upload interface (from cs-challange)
+    │   │   ├── Nav.tsx          # Navigation bar
+    │   │   ├── AuthModal.tsx    # OAuth/Login modal
+    │   │   ├── BackgroundShader.tsx  # 3D animated background
+    │   │   └── ui/              # shadcn UI components
+    │   ├── pages/
+    │   │   ├── Home.tsx         # Landing page
+    │   │   ├── About.tsx        # About page
+    │   │   ├── Pricing.tsx      # Pricing page
+    │   │   ├── InterviewerSetup.tsx  # Interview setup (uses UploadView)
+    │   │   ├── Interview.tsx    # Interview session (uses SessionView)
+    │   │   ├── Dashboard.tsx    # User dashboard
+    │   │   ├── CVTool.tsx       # CV optimization tool
+    │   │   └── JobMatcher.tsx   # Job matching tool
+    │   ├── lib/
+    │   │   ├── i18n.ts          # Internationalization setup
+    │   │   └── utils.ts         # Utility functions
+    │   └── locales/             # Translation files (EN, FR, AR)
+    └── package.json             # Node.js dependencies
 ```
 
 ## 🚀 Quick Start
@@ -56,6 +91,7 @@ cs-challange/
 - **Node.js 18+**
 - **LiveKit Account** ([Sign up here](https://cloud.livekit.io/))
 - **Google AI API Key** ([Get it here](https://ai.google.dev/))
+- **Optional**: Google OAuth & GitHub OAuth credentials for authentication
 
 ### 1. Backend Setup
 
@@ -102,20 +138,43 @@ The frontend will start on `http://localhost:5173`
 ### 3. Access the Application
 
 Open your browser and navigate to:
-- **React App**: http://localhost:5173 (Voice Interview UI)
-- **Streamlit App**: Run `streamlit run backend/app.py` for alternative UI
+- **Main Platform**: http://localhost:5173
+  - Landing page with authentication
+  - Professional platform navigation
+  - OAuth sign-in options
+  - Protected interview features
+- **Alternative UI**: Run `streamlit run backend/app.py` for Streamlit-based UI
 
 ## 🎯 Usage
 
-### Voice Interview Mode (React Frontend)
+### Platform Navigation
 
-1. **Start Backend**: Make sure `python server.py` is running
-2. **Start Frontend**: Make sure `npm run dev` is running  
-3. **Open Browser**: Navigate to http://localhost:5173
-4. **Grant Permissions**: Allow microphone access when prompted
-5. **Start Interview**: The AI interviewer will guide you through the session
+1. **Home Page**: Browse features, pricing, and information
+2. **Sign Up/Login**: Use OAuth (Google/GitHub) or email/password
+3. **Dashboard**: Access your interview history and progress
 
-### Streamlit Web App Mode
+### Interview Workflow
+
+1. **Start Backend**: Ensure `python server.py` is running on port 3001
+2. **Login**: Sign in to the platform using your preferred method
+3. **Setup Interview**:
+   - Navigate to "Interview Setup" from the dashboard or navigation
+   - Upload your CV (PDF or DOCX)
+   - Enter job description and details
+   - Provide your email for the interview report
+4. **Begin Session**:
+   - Grant microphone access when prompted
+   - Video camera is optional (can be toggled)
+   - The LiveKit session will connect automatically
+   - AI interviewer will conduct the interview
+5. **During Interview**:
+   - Speak naturally to answer questions
+   - Toggle camera and mic as needed
+   - Drag and resize video preview window
+   - End call when complete
+6. **Post-Interview**: Receive feedback and analysis via email
+
+### Alternative Streamlit Mode
 
 1. **Upload CV**: Go to the CV Parser section and upload your resume
 2. **Job Description**: Enter your target job description
@@ -140,15 +199,31 @@ Open your browser and navigate to:
 1. Get an API key from [Google AI](https://ai.google.dev/)
 2. Add it to `backend/.env` as `GOOGLE_API_KEY`
 
+### OAuth Setup (Optional)
+
+For authentication features:
+
+**Google OAuth**:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create OAuth 2.0 credentials
+3. Add authorized redirect URI: `http://localhost:8000/api/auth/oauth/google/callback`
+4. Add credentials to your auth backend `.env`
+
+**GitHub OAuth**:
+1. Go to GitHub Settings > Developer Settings > OAuth Apps
+2. Create new OAuth App
+3. Set callback URL: `http://localhost:8000/api/auth/oauth/github/callback`
+4. Add credentials to your auth backend `.env`
+
 ## 📦 Available Scripts
 
 ### Backend
 
 ```bash
-# Start Flask API server
+# Start Flask API server (LiveKit token generation & CV upload)
 python server.py
 
-# Start Streamlit web app
+# Start Streamlit web app (alternative UI)
 streamlit run app.py
 
 # Run voice interview agent
@@ -175,18 +250,31 @@ npm run lint
 
 ### Backend
 - **Python 3.13+**
-- **Flask** - REST API server
-- **LiveKit** - Real-time voice communication
-- **Google AI** - Natural language processing
+- **Flask** - REST API server for LiveKit tokens and CV upload
+- **LiveKit** - Real-time voice communication infrastructure
+- **Google AI (Gemini)** - Natural language processing and interview AI
 - **Streamlit** - Alternative web interface
 - **PyMuPDF** - PDF text extraction
 - **EasyOCR** - Optical character recognition
 
 ### Frontend
-- **React 19** - UI framework
-- **Vite** - Build tool and dev server
-- **LiveKit Components** - Pre-built voice UI components
-- **Modern CSS** - Responsive design
+- **React 18** with **TypeScript** - Type-safe UI framework
+- **Vite** - Lightning-fast build tool and dev server
+- **React Router v6** - Client-side routing
+- **LiveKit Components React** - Pre-built real-time voice/video components
+- **Tailwind CSS** - Utility-first styling framework
+- **Framer Motion** - Smooth animations
+- **@shadergradient/react** - Interactive 3D shader backgrounds
+- **Axios** - HTTP client with token refresh
+- **i18next** - Internationalization (EN, FR, AR)
+- **Sonner** - Toast notifications
+- **shadcn/ui** - Re-usable UI components
+
+### Authentication (UtopiaHire Platform)
+- **FastAPI** - High-performance async Python backend (optional)
+- **PostgreSQL** - User database (optional)
+- **JWT** - Token-based authentication
+- **OAuth 2.0** - Google and GitHub social login
 
 ## 🔐 Security & Privacy
 
@@ -195,6 +283,8 @@ npm run lint
 - Temporary file cleanup
 - Session-based data handling
 - Environment variable protection
+- JWT-based secure authentication
+- OAuth 2.0 integration for trusted providers
 
 ## 🐛 Troubleshooting
 
