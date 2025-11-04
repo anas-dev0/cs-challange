@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
+import { Link } from 'react-router-dom'
 import { AuthContext } from '../AuthContext'
-import { FaRocket, FaBrain, FaChartLine, FaStar, FaCheckCircle } from 'react-icons/fa'
+import { FaRocket, FaBrain, FaChartLine, FaStar } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 import { cn } from '../lib/utils'
 
@@ -11,7 +12,7 @@ export default function Home() {
     throw new Error('Home must be used within AuthProvider')
   }
 
-  const { openAuthModal } = context
+  const { user, openAuthModal } = context
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -61,18 +62,29 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <button
-              onClick={() => openAuthModal('register')}
-              className="group relative px-8 py-4 background-gradient text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
-            >
-              <span className="relative z-10">Start Free Trial</span>
-            </button>
-            <button
-              onClick={() => openAuthModal('login')}
-              className="px-8 py-4 bg-card text-card-foreground font-semibold rounded-xl border-2 border-border hover:border-primary hover:text-primary shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              Sign In
-            </button>
+            {user ? (
+              <Link
+                to="/dashboard"
+                className="px-8 py-4 background-gradient text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
+              >
+                Interview
+              </Link>
+            ) : (
+              <>
+                <button
+                  onClick={() => openAuthModal('register')}
+                  className="group relative px-8 py-4 background-gradient text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
+                >
+                  <span className="relative z-10">Start Free Trial</span>
+                </button>
+                <button
+                  onClick={() => openAuthModal('login')}
+                  className="px-8 py-4 bg-card text-card-foreground font-semibold rounded-xl border-2 border-border hover:border-primary hover:text-primary shadow-sm hover:shadow-md transition-all duration-200"
+                >
+                  Sign In
+                </button>
+              </>
+            )}
           </motion.div>
 
           {/* Stats */}
@@ -227,16 +239,32 @@ export default function Home() {
         >
           Join thousands of successful candidates today
         </motion.p>
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          onClick={() => openAuthModal('register')}
-          className="px-10 py-5 background-gradient text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
-        >
-          Get Started for Free
-        </motion.button>
+        {user ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Link
+              to="/dashboard"
+              className="inline-block px-10 py-5 background-gradient text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
+            >
+              Interview
+            </Link>
+          </motion.div>
+        ) : (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            onClick={() => openAuthModal('register')}
+            className="px-10 py-5 background-gradient text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
+          >
+            Get Started for Free
+          </motion.button>
+        )}
       </section>
     </div>
   )

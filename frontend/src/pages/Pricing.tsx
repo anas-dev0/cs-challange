@@ -15,7 +15,7 @@ interface Tier {
 const tiers: Tier[] = [
   {
     name: 'Free',
-    price: '$0',
+    price: '0 DT',
     period: '/mo',
     highlight: false,
     features: [
@@ -27,7 +27,7 @@ const tiers: Tier[] = [
   },
   {
     name: 'Pro',
-    price: '$12',
+    price: '11.9 DT',
     period: '/mo',
     highlight: true,
     features: [
@@ -41,7 +41,7 @@ const tiers: Tier[] = [
   },
   {
     name: 'Team',
-    price: '$49',
+    price: '49.9 DT',
     period: '/mo',
     highlight: false,
     features: [
