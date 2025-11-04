@@ -19,6 +19,7 @@ import API from './api'
 import { User } from './types'
 import { Toaster } from 'sonner'
 import './lib/i18n'
+import './App.css'
 
 function OAuthHandler() {
   const context = useContext(AuthContext)
