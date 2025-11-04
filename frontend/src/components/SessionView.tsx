@@ -427,7 +427,7 @@ export default function SessionView({ onDisconnect }: SessionViewProps) {
               <div
                 style={{
                   width: "100%",
-                  height: "120px",
+                  height: "150px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -440,7 +440,6 @@ export default function SessionView({ onDisconnect }: SessionViewProps) {
                 <BarVisualizer
                   trackRef={agentAudioTrack}
                   state={agentState}
-                  className="w-full h-full"
                 />
               </div>
             )}
