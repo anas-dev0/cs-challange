@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, ConfigDict
+import os
 
 class Settings(BaseSettings):
     jwt_secret: str = Field(..., alias="JWT_SECRET")
@@ -22,8 +23,10 @@ class Settings(BaseSettings):
     
     frontend_url: str = Field("http://localhost:5173", alias="FRONTEND_URL")
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = ConfigDict(
+        env_file=os.path.join(os.path.dirname(__file__), "..", ".env"),
+        case_sensitive=True,
+        extra="ignore"
+    )
 
 settings = Settings()
