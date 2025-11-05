@@ -219,6 +219,7 @@ export default function UploadView({
                     {t("upload.fileTypes")}
                   </p>
                 </div>
+                <div className="flex items-center justify-center">
                 <Label htmlFor="cv-upload">
                   <Button
                     type="button"
@@ -226,10 +227,12 @@ export default function UploadView({
                     onClick={() =>
                       document.getElementById("cv-upload")?.click()
                     }
+                    className="hover:bg-white center"
                   >
                     {t("upload.browseFiles")}
                   </Button>
                 </Label>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -249,7 +252,7 @@ export default function UploadView({
                       setFile(null);
                     }}
                     disabled={loading}
-                    className="border-purple-600"
+                    className="border-purple-600 hover:bg-purple-600 hover:text-white"
                   >
                     {t("upload.uploadDifferent")}
                   </Button>
@@ -346,7 +349,7 @@ export default function UploadView({
               !candidateName.trim() ||
               !jobTitle.trim()
             }
-            className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white hover:text-gray-900 transition-all"
           >
             {loading ? t("upload.starting") : t("upload.continue")}
           </Button>
