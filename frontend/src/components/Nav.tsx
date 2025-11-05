@@ -19,7 +19,7 @@ export default function Nav() {
           {/* left: brand + interview cta */}
           <div className="justify-self-start flex items-center gap-4">
             <Link 
-              className="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[#36cde1] via-[#a56bff] to-white hover:opacity-90 transition-opacity" 
+              className="text-2xl font-extrabold tracking-tight bg-clip-text  bg-gradient-to-r from-[#36cde1] via-[#a56bff] to-white hover:opacity-90 transition-opacity" 
               to="/"
             >
               UtopiaHire

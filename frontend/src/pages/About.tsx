@@ -22,7 +22,7 @@ export default function About() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto"
+          className="mt-4 text-lg max-w-2xl mx-auto text-[#D1D5DB]"
         >
           We help candidates practice smarter interviews with AI guidance, actionable feedback, and career-ready tools.
         </motion.p>
@@ -38,7 +38,7 @@ export default function About() {
           className="order-2 md:order-1"
         >
           <h2 className="text-2xl font-bold text-foreground mb-4">Our Mission</h2>
-          <p className="text-muted-foreground leading-relaxed">
+          <p className="leading-relaxed text-[#D1D5DB]">
             Interviews can be stressful and unpredictable. We believe preparation should be accessible, personalized, and measurable.
             UtopiaHire simulates real-world interviews, provides immediate feedback, and guides your improvement over time.
           </p>

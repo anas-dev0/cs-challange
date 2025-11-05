@@ -124,7 +124,16 @@ async def entrypoint(ctx: agents.JobContext):
                 if "that concludes the interview" in content.lower():
                     print("🛑 Interview concluded by assistant.")
                     assistant.interview_complete = True
-                    send_interview_report_email(candidate_name=candidate_name, recipient_email=candidate_email, job_title=job_title, report_text=content)
+                    # Call async function in a synchronous callback
+                    try:
+                        asyncio.create_task(send_interview_report_email(
+                            recipient_email=candidate_email,
+                            candidate_name=candidate_name, 
+                            job_title=job_title, 
+                            report_text=content
+                        ))
+                    except Exception as e:
+                        print(f"❌ Error sending email: {str(e)}")
         @session.on("agent_state_changed")
         def on_agent_state_changed(event: AgentStateChangedEvent):
             if assistant.interview_complete and event.new_state == "listening":
