@@ -21,7 +21,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { AuthContext } from "@/AuthContext";
-
 const TOKEN_SERVER_URL = "http://localhost:3001";
 
 export default function InterviewerSetup() {
@@ -66,6 +65,7 @@ export default function InterviewerSetup() {
 
       // Navigate to interview session
       navigate("/interviewer/session");
+      toast.info("Navigated to interview session");
     } catch (error) {
       console.error("Error processing upload:", error);
     } finally {
@@ -75,6 +75,7 @@ export default function InterviewerSetup() {
 
   const handleBack = () => {
     navigate("/");
+    toast.info("Returned to home page");
   };
   const { t } = useTranslation();
   const [fileName, setFileName] = useState("");

@@ -18,6 +18,7 @@ import BackgroundShader from './components/BackgroundShader'
 import API from './api'
 import { User } from './types'
 import { Toaster } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import './lib/i18n'
 import './App.css'
 
@@ -59,6 +60,15 @@ function OAuthHandler() {
 }
 
 export default function App() {
+  const { i18n } = useTranslation()
+
+  // Update document direction based on language
+  useEffect(() => {
+    const direction = i18n.language === 'ar' ? 'rtl' : 'ltr'
+    document.documentElement.dir = direction
+    document.documentElement.lang = i18n.language
+  }, [i18n.language])
+
   return (
     <AuthProvider>
       <ServiceProvider>

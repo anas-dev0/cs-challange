@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react'
 import clsx from 'clsx'
 import API from './api'
 import { User, AuthModalState, AuthResponse } from './types'
-
+import  {toast} from 'sonner';
 interface AuthContextType {
   user: User | null
   loading: boolean
@@ -21,16 +21,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [authModal, setAuthModal] = useState<AuthModalState>({ open: false, view: 'login' })
-  const [toast, setToast] = useState<{ text: string; visible: boolean }>({ text: '', visible: false })
+  // const [toast, setToast] = useState<{ text: string; visible: boolean }>({ text: '', visible: false })
   
   // Expose setUser for OAuth callback handler
   ;(AuthProvider as any).setUser = setUser
 
-  const showToast = (text: string, timeout = 2800) => {
-    setToast({ text, visible: true })
-    window.clearTimeout((showToast as any)._t)
-    ;(showToast as any)._t = window.setTimeout(() => setToast({ text: '', visible: false }), timeout)
-  }
+  // const showToast = (text: string, timeout = 2800) => {
+  //   setToast({ text, visible: true })
+  //   window.clearTimeout((showToast as any)._t)
+  //   ;(showToast as any)._t = window.setTimeout(() => setToast({ text: '', visible: false }), timeout)
+  // }
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -55,7 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('token', res.data.token)
     if (res.data.refreshToken) localStorage.setItem('refreshToken', res.data.refreshToken)
     setUser(res.data.user)
-    showToast(`Welcome back${res.data.user?.name ? `, ${res.data.user.name.split(' ')[0]}` : ''}!`)
+    // showToast(`Welcome back${res.data.user?.name ? `, ${res.data.user.name.split(' ')[0]}` : ''}!`)
+    toast.success(`Welcome back${res.data.user?.name ? `, ${res.data.user.name.split(' ')[0]}` : ''}!`);
     return res.data
   }
 
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('token', res.data.token)
     if (res.data.refreshToken) localStorage.setItem('refreshToken', res.data.refreshToken)
     setUser(res.data.user)
-    showToast(`Welcome${res.data.user?.name ? `, ${res.data.user.name.split(' ')[0]}` : ''}!`)
+    toast.success(`Welcome aboard, ${res.data.user.name.split(' ')[0]}!`);
     return res.data
   }
 
@@ -72,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('token')
     localStorage.removeItem('refreshToken')
     setUser(null)
+    toast.success("Logged out successfully");
   }
 
   const openAuthModal = (view: 'login' | 'register' = 'login') => setAuthModal({ open: true, view })
@@ -88,9 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Close modal and redirect for real OAuth handled by backend
       closeAuthModal()
       window.location.href = url
+      toast.info(`Redirecting to ${provider}...`)
       return
     }
-    showToast(`${provider} sign-in is not configured yet`)
+    toast.error(`${provider} sign-in is not configured yet`)
     throw new Error('OAuth not configured')
   }
 
@@ -108,14 +111,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser
     } as any}>
       {children}
-      {/* Toast */}
-      <div className={clsx('fixed top-4 right-4 z-[60] transition-all duration-300', toast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2')}>
-        {toast.visible && (
-          <div className="px-4 py-3 rounded-xl bg-black/70 text-white/90 shadow-xl backdrop-blur-md border border-white/10">
-            {toast.text}
-          </div>
-        )}
-      </div>
     </AuthContext.Provider>
   )
 }
