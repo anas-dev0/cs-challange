@@ -17,48 +17,52 @@ import AuthModal from './components/AuthModal'
 import BackgroundShader from './components/BackgroundShader'
 import API from './api'
 import { User } from './types'
-import { Toaster } from 'sonner'
+import { Toaster,toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import './lib/i18n'
 import './App.css'
+import Notfound from './pages/Notfound'
 
 function OAuthHandler() {
   const context = useContext(AuthContext)
   const location = useLocation()
+  const hasProcessed = React.useRef(false)  // ✅ Better than useState
 
   useEffect(() => {
-    if (!context) return
+    if (!context || hasProcessed.current) return
     
-    // Check for OAuth callback tokens in URL
     const params = new URLSearchParams(location.search)
     const token = params.get('token')
     const refreshToken = params.get('refreshToken')
 
     if (token && refreshToken) {
+      hasProcessed.current = true  // ✅ Mark as processed
+      
       // Store tokens
       localStorage.setItem('token', token)
       localStorage.setItem('refreshToken', refreshToken)
+      
+      // Clean URL immediately
+      window.history.replaceState({}, '', '/')
       
       // Fetch user info
       API.get('/auth/me')
         .then(res => {
           const user: User = res.data.user
-          // Manually update user in context by simulating login
-          ;(context as any).setUser?.(user) || window.location.reload()
+          ;(context as any).setUser?.(user)
+          toast.success(`Welcome back${user?.name ? `, ${user.name.split(' ')[0]}` : ''}!`)
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error('OAuth error:', error)
           localStorage.removeItem('token')
           localStorage.removeItem('refreshToken')
+          toast.error('Failed to sign in. Please try again.')
         })
-      
-      // Clean URL
-      window.history.replaceState({}, '', '/')
     }
-  }, [location, context])
+  }, [location.search, context])
 
   return null
 }
-
 export default function App() {
   const { i18n } = useTranslation()
 
@@ -94,6 +98,7 @@ export default function App() {
               <Route path="/cv" element={<ProtectedRoute><CVTool /></ProtectedRoute>} />
               <Route path="/jobs" element={<ProtectedRoute><JobMatcher /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="*" element={<Notfound />} />
             </Routes>
           </main>
           <Footer />

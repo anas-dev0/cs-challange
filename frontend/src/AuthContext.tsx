@@ -21,16 +21,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [authModal, setAuthModal] = useState<AuthModalState>({ open: false, view: 'login' })
-  // const [toast, setToast] = useState<{ text: string; visible: boolean }>({ text: '', visible: false })
   
   // Expose setUser for OAuth callback handler
   ;(AuthProvider as any).setUser = setUser
 
-  // const showToast = (text: string, timeout = 2800) => {
-  //   setToast({ text, visible: true })
-  //   window.clearTimeout((showToast as any)._t)
-  //   ;(showToast as any)._t = window.setTimeout(() => setToast({ text: '', visible: false }), timeout)
-  // }
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -55,7 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('token', res.data.token)
     if (res.data.refreshToken) localStorage.setItem('refreshToken', res.data.refreshToken)
     setUser(res.data.user)
-    // showToast(`Welcome back${res.data.user?.name ? `, ${res.data.user.name.split(' ')[0]}` : ''}!`)
     toast.success(`Welcome back${res.data.user?.name ? `, ${res.data.user.name.split(' ')[0]}` : ''}!`);
     return res.data
   }
