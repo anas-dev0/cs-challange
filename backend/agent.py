@@ -7,12 +7,10 @@ from cv_parser import extract_text_from_cv
 # Import the prompts and CV parser
 from prompts import create_initial_prompts
 import os
-import json
 import requests
-from livekit.agents import llm
 # Import the mailing module
 from mailer import send_interview_report_email, extract_report_from_message
-from livekit.agents import ConversationItemAddedEvent,AgentStateChangedEvent
+from livekit.agents import ConversationItemAddedEvent
 load_dotenv()
 from test_prompts import create_test_prompts
 
@@ -109,7 +107,7 @@ async def entrypoint(ctx: agents.JobContext):
         # Initialize session
         print("🎤 Initializing voice session...")
         session = AgentSession(
-            vad=silero.VAD.load(),
+            vad=silero.VAD.load(min_silence_duration=2.5, min_speech_duration=0.5),
             llm=google.beta.realtime.RealtimeModel(voice="charon"),
         )
         assistant = Assistant(agent_instruction)
@@ -131,7 +129,7 @@ async def entrypoint(ctx: agents.JobContext):
                     print("🛑 Interview concluded by assistant.")
                     assistant.interview_complete = True
                     # Call async function in a synchronous callback
-                    ctx.room.disconnect()
+                    session.shutdown()
                     try:
                         asyncio.create_task(send_interview_report_email(
                             recipient_email=candidate_email,

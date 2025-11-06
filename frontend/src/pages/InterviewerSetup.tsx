@@ -23,6 +23,17 @@ import { toast } from "sonner";
 import { AuthContext } from "@/AuthContext";
 const TOKEN_SERVER_URL = "http://localhost:3001";
 
+// localStorage keys
+const STORAGE_KEYS = {
+  JOB_DESCRIPTION: "interviewer_job_description",
+  JOB_TITLE: "interviewer_job_title",
+  CANDIDATE_NAME: "interviewer_candidate_name",
+  CANDIDATE_EMAIL: "interviewer_candidate_email",
+  FILE_NAME: "interviewer_file_name",
+  FILE_DATA: "interviewer_file_data",
+  FILE_UPLOADED: "interviewer_file_uploaded",
+};
+
 export default function InterviewerSetup() {
   const navigate = useNavigate();
   const { setCvFile, setInterviewConfig, addHistory } = useServices();
@@ -86,6 +97,84 @@ export default function InterviewerSetup() {
   const [candidateEmail, setCandidateEmail] = useState("");
   const [candidateName, setCandidateName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedJobDescription = localStorage.getItem(
+      STORAGE_KEYS.JOB_DESCRIPTION
+    );
+    const savedJobTitle = localStorage.getItem(STORAGE_KEYS.JOB_TITLE);
+    const savedCandidateName = localStorage.getItem(
+      STORAGE_KEYS.CANDIDATE_NAME
+    );
+    const savedCandidateEmail = localStorage.getItem(
+      STORAGE_KEYS.CANDIDATE_EMAIL
+    );
+    const savedFileName = localStorage.getItem(STORAGE_KEYS.FILE_NAME);
+    const savedFileData = localStorage.getItem(STORAGE_KEYS.FILE_DATA);
+    const savedFileUploaded = localStorage.getItem(STORAGE_KEYS.FILE_UPLOADED);
+
+    if (savedJobDescription) setJobDescription(savedJobDescription);
+    if (savedJobTitle) setJobTitle(savedJobTitle);
+    if (savedCandidateName) setCandidateName(savedCandidateName);
+    if (savedCandidateEmail) setCandidateEmail(savedCandidateEmail);
+
+    // Restore file if it was saved
+    if (savedFileName && savedFileData && savedFileUploaded === "true") {
+      try {
+        // Convert base64 back to file
+        const byteString = atob(savedFileData.split(",")[1]);
+        const mimeString = savedFileData
+          .split(",")[0]
+          .split(":")[1]
+          .split(";")[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mimeString });
+        const restoredFile = new File([blob], savedFileName, {
+          type: mimeString,
+        });
+
+        setFile(restoredFile);
+        setFileName(savedFileName);
+        setUploaded(true);
+      } catch (error) {
+        console.error("Error restoring file from localStorage:", error);
+        localStorage.removeItem(STORAGE_KEYS.FILE_NAME);
+        localStorage.removeItem(STORAGE_KEYS.FILE_DATA);
+        localStorage.removeItem(STORAGE_KEYS.FILE_UPLOADED);
+      }
+    }
+  }, []);
+
+  // Save text inputs to localStorage whenever they change
+  useEffect(() => {
+    if (jobDescription) {
+      localStorage.setItem(STORAGE_KEYS.JOB_DESCRIPTION, jobDescription);
+    }
+  }, [jobDescription]);
+
+  useEffect(() => {
+    if (jobTitle) {
+      localStorage.setItem(STORAGE_KEYS.JOB_TITLE, jobTitle);
+    }
+  }, [jobTitle]);
+
+  useEffect(() => {
+    if (candidateName) {
+      localStorage.setItem(STORAGE_KEYS.CANDIDATE_NAME, candidateName);
+    }
+  }, [candidateName]);
+
+  useEffect(() => {
+    if (candidateEmail) {
+      localStorage.setItem(STORAGE_KEYS.CANDIDATE_EMAIL, candidateEmail);
+    }
+  }, [candidateEmail]);
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -132,6 +221,23 @@ export default function InterviewerSetup() {
         console.log("File uploaded:", data);
         setUploaded(true);
         toast.success(t("upload.uploadSuccess"));
+
+        // Save file to localStorage if it's under 5MB
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+        if (selectedFile.size < MAX_FILE_SIZE) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64Data = reader.result as string;
+            localStorage.setItem(STORAGE_KEYS.FILE_NAME, selectedFile.name);
+            localStorage.setItem(STORAGE_KEYS.FILE_DATA, base64Data);
+            localStorage.setItem(STORAGE_KEYS.FILE_UPLOADED, "true");
+          };
+          reader.readAsDataURL(selectedFile);
+        } else {
+          // File is too large for localStorage, just save the filename
+          localStorage.setItem(STORAGE_KEYS.FILE_NAME, selectedFile.name);
+          localStorage.setItem(STORAGE_KEYS.FILE_UPLOADED, "true");
+        }
       } catch (error) {
         console.error("Error uploading file:", error);
         toast.error(
@@ -256,18 +362,18 @@ export default function InterviewerSetup() {
                   </p>
                 </div>
                 <div className="flex items-center justify-center">
-                <Label htmlFor="cv-upload">
-                  <Button
-                    type="button"
-                    disabled={uploading || loading}
-                    onClick={() =>
-                      document.getElementById("cv-upload")?.click()
-                    }
-                    className="hover:bg-white center"
-                  >
-                    {t("upload.browseFiles")}
-                  </Button>
-                </Label>
+                  <Label htmlFor="cv-upload">
+                    <Button
+                      type="button"
+                      disabled={uploading || loading}
+                      onClick={() =>
+                        document.getElementById("cv-upload")?.click()
+                      }
+                      className="hover:bg-white center"
+                    >
+                      {t("upload.browseFiles")}
+                    </Button>
+                  </Label>
                 </div>
               </div>
             ) : (
@@ -286,6 +392,10 @@ export default function InterviewerSetup() {
                       setUploaded(false);
                       setFileName("");
                       setFile(null);
+                      // Clear file from localStorage when uploading a different file
+                      localStorage.removeItem(STORAGE_KEYS.FILE_NAME);
+                      localStorage.removeItem(STORAGE_KEYS.FILE_DATA);
+                      localStorage.removeItem(STORAGE_KEYS.FILE_UPLOADED);
                     }}
                     disabled={loading}
                     className="border-purple-600 hover:bg-purple-600 hover:text-white"
@@ -393,6 +503,4 @@ export default function InterviewerSetup() {
       </Card>
     </div>
   );
-
-  
 }
