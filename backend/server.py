@@ -1,12 +1,14 @@
 # server.py
 import os
 import json
-from flask import Flask, jsonify, request
-from flask_cors import CORS
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 from livekit import api
 from dotenv import load_dotenv
 import secrets
-from werkzeug.utils import secure_filename
 from datetime import datetime
 import sys
 import requests
@@ -14,17 +16,34 @@ import requests
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'auth_fastapi'))
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from app.models import Interview, User
 
 load_dotenv()
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost:3000"]}})
-#Database setup
+app = FastAPI(title="AI Interview Coach Backend")
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# Database setup
 DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/utopiahire"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 # LiveKit configuration
 LIVEKIT_API_KEY = os.getenv('LIVEKIT_API_KEY')
 LIVEKIT_API_SECRET = os.getenv('LIVEKIT_API_SECRET')
@@ -42,86 +61,103 @@ session_data = {}
 # Create upload folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-def allowed_file(filename):
+# Pydantic models
+class StartSessionRequest(BaseModel):
+    identity: Optional[str] = None
+    name: Optional[str] = "Interview Candidate"
+    room: Optional[str] = None
+    cv_filename: str
+    job_description: str
+    candidate_email: EmailStr
+    candidate_name: str
+    job_title: str
+
+class SaveInterviewRequest(BaseModel):
+    candidate_email: EmailStr
+    job_title: str
+    interview_score: Optional[float] = None
+    conclusion: Optional[str] = None
+
+def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/health')
-def health():
-    return jsonify({
+@app.get('/health')
+async def health():
+    return {
         "status": "ok", 
         "service": "AI Interview Coach Backend"
-    })
+    }
 
-@app.route('/upload-cv', methods=['POST'])
-def upload_cv():
+@app.post('/upload-cv')
+async def upload_cv(cv: UploadFile = File(...)):
     try:
-        # Check if file is in request
-        if 'cv' not in request.files:
-            return jsonify({"error": "No file provided"}), 400
+        # Check if file is provided
+        if not cv:
+            raise HTTPException(status_code=400, detail="No file provided")
         
-        file = request.files['cv']
-        
-        if file.filename == '':
-            return jsonify({"error": "No file selected"}), 400
+        if cv.filename == '':
+            raise HTTPException(status_code=400, detail="No file selected")
         
         # Validate file
-        if not allowed_file(file.filename):
-            return jsonify({"error": "Invalid file type. Only PDF, DOC, and DOCX are allowed"}), 400
+        if not allowed_file(cv.filename):
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid file type. Only PDF, DOC, and DOCX are allowed"
+            )
         
-        # Check file size
-        file.seek(0, os.SEEK_END)
-        file_length = file.tell()
-        if file_length > MAX_FILE_SIZE:
-            return jsonify({"error": "File is too large. Maximum size is 10MB"}), 400
-        file.seek(0)
+        # Read file content to check size
+        file_content = await cv.read()
+        if len(file_content) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=400, 
+                detail="File is too large. Maximum size is 10MB"
+            )
         
         # Save file
-        filename = secure_filename(file.filename)
+        filename = cv.filename
+        # Secure the filename
+        filename = "".join(c for c in filename if c.isalnum() or c in '._- ')
         filename = f"{secrets.token_hex(4)}_{filename}"
         filepath = os.path.join(UPLOAD_FOLDER, filename)
-        file.save(filepath)
+        
+        with open(filepath, 'wb') as f:
+            f.write(file_content)
         
         print(f"✅ CV uploaded: {filename}")
         
-        return jsonify({
+        return {
             "success": True,
             "message": "CV uploaded successfully",
             "filename": filename,
             "path": filepath
-        }), 200
+        }
     
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"❌ Error uploading CV: {str(e)}")
-        return jsonify({"error": f"Upload failed: {str(e)}"}), 500
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
-@app.route('/start-session', methods=['POST'])
-def start_session():
+@app.post('/start-session')
+async def start_session(data: StartSessionRequest):
     try:
         if not LIVEKIT_API_KEY or not LIVEKIT_API_SECRET:
-            return jsonify({"error": "LiveKit credentials not configured"}), 500
+            raise HTTPException(status_code=500, detail="LiveKit credentials not configured")
         
-        data = request.get_json() or {}
-        identity = data.get('identity', f"user-{secrets.token_hex(4)}")
-        name = data.get('name', 'Interview Candidate')
-        room_name = data.get('room', f"interview-{secrets.token_hex(4)}")
-        cv_filename = data.get('cv_filename')
-        job_description = data.get('job_description')
-        candidate_email = data.get('candidate_email')
-        candidate_name = data.get('candidate_name')
-        job_title = data.get('job_title')
-        
-        # Validate
-        if not cv_filename:
-            return jsonify({"error": "No CV filename provided"}), 400
-        
-        if not job_description:
-            return jsonify({"error": "No job description provided"}), 400
+        identity = data.identity or f"user-{secrets.token_hex(4)}"
+        name = data.name or 'Interview Candidate'
+        room_name = data.room or f"interview-{secrets.token_hex(4)}"
+        cv_filename = data.cv_filename
+        job_description = data.job_description
+        candidate_email = data.candidate_email
+        candidate_name = data.candidate_name
+        job_title = data.job_title
         
         # Normalize provided cv filename: ensure it maps to an actual saved file in UPLOAD_FOLDER
         candidate_path = os.path.join(UPLOAD_FOLDER, cv_filename)
         if not os.path.exists(candidate_path):
             # Try to find a saved file that ends with the sanitized filename
-            sanitized = secure_filename(cv_filename)
+            sanitized = "".join(c for c in cv_filename if c.isalnum() or c in '._- ')
             matched = None
             for f in os.listdir(UPLOAD_FOLDER):
                 if f.endswith(sanitized):
@@ -131,7 +167,10 @@ def start_session():
                 cv_filename = matched
                 print(f"🔎 Mapped provided filename to saved file: {cv_filename}")
             else:
-                return jsonify({"error": f"CV file not found on server: {cv_filename}"}), 400
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"CV file not found on server: {cv_filename}"
+                )
 
         # Store session data for agent to retrieve (use the actual saved filename)
         session_data[room_name] = {
@@ -166,53 +205,42 @@ def start_session():
         print(f"✅ Session started for {identity} in room {room_name}")
         print(f"📄 CV: {cv_filename}")
         print(f"💼 Job: {job_description[:50]}...")
-        return jsonify(response_data)
+        return response_data
     
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"❌ Error: {str(e)}")
-        return jsonify({"error": "Failed to start session"}), 500
+        raise HTTPException(status_code=500, detail="Failed to start session")
 
-@app.route('/session-data/<room_name>', methods=['GET'])
-def get_session_data(room_name):
+@app.get('/session-data/{room_name}')
+async def get_session_data(room_name: str):
     """Get session data for a room (used by agent)"""
     if room_name in session_data:
-        return jsonify(session_data[room_name])
-    return jsonify({"error": "Session data not found"}), 404
+        return session_data[room_name]
+    raise HTTPException(status_code=404, detail="Session data not found")
 
-@app.route("/interviews/save-report", methods=['POST'])
-def save_interview_report():
+@app.post("/interviews/save-report")
+async def save_interview_report(data: SaveInterviewRequest, db: Session = Depends(get_db)):
     """
     Save interview report to database after email is sent
     Works with the existing Interview schema
     """
     try:
-        data = request.get_json() or {}
-        candidate_email = data.get('candidate_email')
-        job_title = data.get('job_title')
-        interview_score = data.get('interview_score')
-        conclusion = data.get('conclusion')
-        
-        if not candidate_email:
-            return jsonify({"error": "candidate_email is required"}), 400
-        if not job_title:
-            return jsonify({"error": "job_title is required"}), 400
-        
-        db = SessionLocal()
-        
         # Find user by candidate_email
-        user = db.query(User).filter(User.email == candidate_email).first()
+        user = db.query(User).filter(User.email == data.candidate_email).first()
         if not user:
-            return jsonify({
-                "success": False,
-                "error": f"User not found with email: {candidate_email}"
-            }), 404
+            raise HTTPException(
+                status_code=404,
+                detail=f"User not found with email: {data.candidate_email}"
+            )
         
         # Create new interview record with existing schema
         interview = Interview(
             user_id=user.id,
-            job_title=job_title,
-            interview_score=interview_score,
-            conclusion=conclusion
+            job_title=data.job_title,
+            interview_score=data.interview_score,
+            conclusion=data.conclusion
         )
         
         db.add(interview)
@@ -220,33 +248,28 @@ def save_interview_report():
         db.refresh(interview)
         
         print(f"✅ Interview saved to database - ID: {interview.id}, User ID: {user.id}")
-        return jsonify({
+        return {
             "success": True,
             "interview_id": interview.id,
             "user_id": user.id,
             "message": "Interview record created successfully"
-        }), 201
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"❌ Error saving interview: {str(e)}")
         db.rollback()
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
-    finally:
-        db.close()
-@app.route('/interviews/email/<email>', methods=['GET'])
-def get_user_interviews_by_email(email):
+        raise HTTPException(status_code=500, detail=str(e))
+@app.get('/interviews/email/{email}')
+async def get_user_interviews_by_email(email: str, db: Session = Depends(get_db)):
     """
     Get all interviews for a user by their email
     """
     try:
-        db = SessionLocal()
-        
         # Find user by email
         user = db.query(User).filter(User.email == email).first()
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            raise HTTPException(status_code=404, detail="User not found")
         
         # Get all interviews for this user
         interviews = db.query(Interview).filter(Interview.user_id == user.id).all()
@@ -264,24 +287,28 @@ def get_user_interviews_by_email(email):
         ]
         
         print(f"✅ Retrieved {len(interviews_data)} interviews for user {user.name}")      
-        return jsonify({
+        return {
             "success": True,
             "user_id": user.id,
             "user_name": user.name,
             "user_email": user.email,
             "total_interviews": len(interviews_data),
             "interviews": interviews_data
-        }), 200
+        }
     
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"❌ Error retrieving interviews: {str(e)}")
-        return jsonify({"error": f"Failed to retrieve interviews: {str(e)}"}), 500
-    finally:
-        db.close()
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve interviews: {str(e)}")
 
 if __name__ == "__main__":
+    import uvicorn
+    
     print("🚀 AI Interview Coach Backend Server")
     print(f"Server: http://localhost:3001")
     print(f"Upload folder: {os.path.abspath(UPLOAD_FOLDER)}")
+    print(f"API Docs: http://localhost:3001/docs")
+    print(f"ReDoc: http://localhost:3001/redoc")
     
-    app.run(port=3001, debug=True, threaded=True)
+    uvicorn.run("server:app", host="0.0.0.0", port=3001, reload=True)

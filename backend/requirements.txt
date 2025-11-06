@@ -14,10 +14,12 @@ pytesseract
 Pillow
 streamlit
 plotly
-flask
-flask-cors
+fastapi
+uvicorn[standard]
+python-multipart
 livekit
 livekit-api
 psycopg2
 asyncpg
 SQLAlchemy
+pydantic[email]

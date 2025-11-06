@@ -14,6 +14,7 @@ from livekit.agents import llm
 from mailer import send_interview_report_email, extract_report_from_message
 from livekit.agents import ConversationItemAddedEvent,AgentStateChangedEvent
 load_dotenv()
+from test_prompts import create_test_prompts
 
 class Assistant(Agent):
     def __init__(self, agent_instruction) -> None:
@@ -95,12 +96,16 @@ async def entrypoint(ctx: agents.JobContext):
 
         # Generate personalized prompts
         print("🤖 Generating prompts...")
-        agent_instruction, session_instruction = create_initial_prompts(
+        # agent_instruction, session_instruction = create_initial_prompts(
+        #     cv_text=cv_text,
+        #     job_title=job_title,
+        #     job_description_text=job_description,
+        # )
+        agent_instruction, session_instruction = create_test_prompts(
             cv_text=cv_text,
             job_title=job_title,
             job_description_text=job_description,
         )
-
         # Initialize session
         print("🎤 Initializing voice session...")
         session = AgentSession(
@@ -120,11 +125,13 @@ async def entrypoint(ctx: agents.JobContext):
         def on_conversation_item_added(event: ConversationItemAddedEvent):
             chat=event.item
             content=chat.content[0]
+            print(content)
             if chat.role == "assistant":
                 if "that concludes the interview" in content.lower():
                     print("🛑 Interview concluded by assistant.")
                     assistant.interview_complete = True
                     # Call async function in a synchronous callback
+                    ctx.room.disconnect()
                     try:
                         asyncio.create_task(send_interview_report_email(
                             recipient_email=candidate_email,
@@ -133,14 +140,7 @@ async def entrypoint(ctx: agents.JobContext):
                             report_text=content
                         ))
                     except Exception as e:
-                        print(f"❌ Error sending email: {str(e)}")
-        @session.on("agent_state_changed")
-        def on_agent_state_changed(event: AgentStateChangedEvent):
-            if assistant.interview_complete and event.new_state == "listening":
-                print("🛑 Agent is listening after interview completion. Ending session.")
-                ctx.room.disconnect()
-                print("✅ Session ended after interview completion.")
-                
+                        print(f"❌ Error sending email: {str(e)}")  
     except Exception as e:
         print(f"❌ Error: {str(e)}")
         import traceback
