@@ -29,3 +29,21 @@ export interface HistoryEntry {
   ts: string
   [key: string]: any
 }
+
+// Interview history types
+export interface InterviewItem {
+  id: number
+  job_title: string
+  interview_score: number | null
+  conclusion: string
+  created_at: string | null
+}
+
+export interface UserInterviewsResponse {
+  success: boolean
+  user_id: number
+  user_name: string
+  user_email: string
+  total_interviews: number
+  interviews: InterviewItem[]
+}

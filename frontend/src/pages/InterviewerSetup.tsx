@@ -483,7 +483,8 @@ export default function InterviewerSetup() {
               onChange={(e) => setCandidateEmail(e.target.value)}
               placeholder="e.g., john.doe@example.com"
               disabled={loading || uploading}
-              className="w-full"
+              readOnly
+              className="w-full bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Your interview report will be sent to this email address
