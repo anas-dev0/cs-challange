@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { AuthContext } from "@/AuthContext";
-const TOKEN_SERVER_URL = "http://localhost:3001";
+const TOKEN_SERVER_URL = "http://localhost:8000";
 
 // localStorage keys
 const STORAGE_KEYS = {
@@ -208,8 +208,15 @@ export default function InterviewerSetup() {
         const formData = new FormData();
         formData.append("cv", selectedFile);
 
-        const response = await fetch(`${TOKEN_SERVER_URL}/upload-cv`, {
+        const token = localStorage.getItem("token");
+        const headers: HeadersInit = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${TOKEN_SERVER_URL}/api/upload-cv`, {
           method: "POST",
+          headers: headers,
           body: formData,
         });
 

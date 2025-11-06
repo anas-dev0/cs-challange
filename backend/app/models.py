@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy import String, Integer, Text, DateTime, ForeignKey, Float
 from .db import Base
 from typing import List 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -24,4 +25,3 @@ class Interview(Base):
     conclusion: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
     user: Mapped["User"] = relationship("User", back_populates="interviews")
-                                        

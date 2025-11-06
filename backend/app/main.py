@@ -3,15 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy import text
 from .config import settings
 from .db import Base, engine
-from .routers import router as auth_router
-from .oauth import router as oauth_router
+from .auth_routes import router as auth_router
+from .oauth_routes import router as oauth_router
+from .service_routes import router as service_router
 from .middleware import logging_middleware
 
-app = FastAPI(title="Auth Service ")
+app = FastAPI(title="Unified Backend Service - Auth & Services")
 
 # Custom validation error handler
 @app.exception_handler(RequestValidationError)
@@ -63,10 +63,11 @@ async def health():
     try:
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
-        return {"status": "ok", "db": "up"}
+        return {"status": "ok", "db": "up", "service": "unified"}
     except Exception:
         return {"status": "degraded", "db": "down"}
 
-# Routes
+# Include routers
 app.include_router(auth_router)
 app.include_router(oauth_router)
+app.include_router(service_router)

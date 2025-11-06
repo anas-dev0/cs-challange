@@ -11,7 +11,9 @@ import requests
 # Import the mailing module
 from mailer import send_interview_report_email, extract_report_from_message
 from livekit.agents import ConversationItemAddedEvent
-load_dotenv()
+
+# Load .env from parent directory (backend/)
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 from test_prompts import create_test_prompts
 
 class Assistant(Agent):
@@ -23,7 +25,7 @@ class Assistant(Agent):
 # Maps room_name -> {cv_filename, job_description, candidate_email, candidate_name}
 session_data = {}
 
-BACKEND_SERVER = "http://localhost:3001"
+BACKEND_SERVER = "http://localhost:8000"
 
 async def entrypoint(ctx: agents.JobContext):
     """
@@ -44,7 +46,7 @@ async def entrypoint(ctx: agents.JobContext):
         # Try to fetch from backend server first
         if room_name:
             try:
-                resp = requests.get(f"{BACKEND_SERVER}/session-data/{room_name}", timeout=5)
+                resp = requests.get(f"{BACKEND_SERVER}/api/session-data/{room_name}", timeout=5)
                 if resp.status_code == 200:
                     data = resp.json()
                     cv_filename = data.get('cv_filename')
@@ -55,18 +57,7 @@ async def entrypoint(ctx: agents.JobContext):
                     print(f"✅ Got data from backend server")
             except Exception as e:
                 print(f"⚠️ Could not fetch from server: {e}")
-        
-        # Try local session_data as fallback
-        if not cv_filename or not job_description:
-            if room_name and room_name in session_data:
-                data = session_data[room_name]
-                cv_filename = cv_filename or data.get('cv_filename')
-                job_description = job_description or data.get('job_description')
-                candidate_email = candidate_email or data.get('candidate_email')
-                candidate_name = candidate_name or data.get('candidate_name')
-                job_title = job_title or data.get('job_title', 'Position')
-                print(f"✅ Got data from local session_data")
-        
+    
         if not cv_filename:
             print("❌ Error: No CV filename provided")
             return
@@ -82,7 +73,7 @@ async def entrypoint(ctx: agents.JobContext):
         
         # Extract CV text
         print(f"📄 Reading CV: {cv_filename}")
-        cv_file_path = os.path.join("cv_uploads", cv_filename)
+        cv_file_path = os.path.join("..\\cv_uploads", cv_filename)
         
         if not os.path.exists(cv_file_path):
             print(f"❌ CV file not found: {cv_file_path}")
@@ -146,9 +137,10 @@ async def entrypoint(ctx: agents.JobContext):
 
 
 if __name__ == "__main__":
-    # Make sure the upload folder exists
-    if not os.path.exists("cv_uploads"):
-        os.makedirs("cv_uploads")
+    # Make sure the upload folder exists (one level up from agent folder)
+    cv_uploads_path = os.path.join("..", "cv_uploads")
+    if not os.path.exists(cv_uploads_path):
+        os.makedirs(cv_uploads_path)
         print("📁 Created 'cv_uploads' directory")
 
     print("=" * 50)

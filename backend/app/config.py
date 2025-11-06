@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     github_redirect_uri: str = Field("http://localhost:8000/api/auth/oauth/github/callback", alias="GITHUB_REDIRECT_URI")
     
     frontend_url: str = Field("http://localhost:5173", alias="FRONTEND_URL")
+    
+    # LiveKit configuration
+    livekit_api_key: str = Field("", alias="LIVEKIT_API_KEY")
+    livekit_api_secret: str = Field("", alias="LIVEKIT_API_SECRET")
+    livekit_url: str = Field("wss://interview-coach-44v9xge4.livekit.cloud", alias="LIVEKIT_URL")
 
     model_config = ConfigDict(
         env_file=os.path.join(os.path.dirname(__file__), "..", ".env"),

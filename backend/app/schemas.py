@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 
 class RegisterRequest(BaseModel):
     name: str
@@ -27,3 +28,20 @@ class MeResponse(BaseModel):
 
 class Message(BaseModel):
     message: str
+
+# Service schemas
+class StartSessionRequest(BaseModel):
+    identity: Optional[str] = None
+    name: Optional[str] = "Interview Candidate"
+    room: Optional[str] = None
+    cv_filename: str
+    job_description: str
+    candidate_email: EmailStr
+    candidate_name: str
+    job_title: str
+
+class SaveInterviewRequest(BaseModel):
+    candidate_email: EmailStr
+    job_title: str
+    interview_score: Optional[float] = None
+    conclusion: Optional[str] = None

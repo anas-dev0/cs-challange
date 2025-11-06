@@ -32,7 +32,7 @@ interface UploadViewProps {
   loading: boolean;
 }
 
-const TOKEN_SERVER_URL = "http://localhost:3001";
+const TOKEN_SERVER_URL = "http://localhost:8000";
 
 export default function UploadView({
   onUploadComplete,
@@ -82,8 +82,15 @@ export default function UploadView({
         const formData = new FormData();
         formData.append("cv", selectedFile);
 
-        const response = await fetch(`${TOKEN_SERVER_URL}/upload-cv`, {
+        const token = localStorage.getItem("token");
+        const headers: HeadersInit = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${TOKEN_SERVER_URL}/api/upload-cv`, {
           method: "POST",
+          headers: headers,
           body: formData,
         });
 
@@ -220,18 +227,18 @@ export default function UploadView({
                   </p>
                 </div>
                 <div className="flex items-center justify-center">
-                <Label htmlFor="cv-upload">
-                  <Button
-                    type="button"
-                    disabled={uploading || loading}
-                    onClick={() =>
-                      document.getElementById("cv-upload")?.click()
-                    }
-                    className="hover:bg-white center"
-                  >
-                    {t("upload.browseFiles")}
-                  </Button>
-                </Label>
+                  <Label htmlFor="cv-upload">
+                    <Button
+                      type="button"
+                      disabled={uploading || loading}
+                      onClick={() =>
+                        document.getElementById("cv-upload")?.click()
+                      }
+                      className="hover:bg-white center"
+                    >
+                      {t("upload.browseFiles")}
+                    </Button>
+                  </Label>
                 </div>
               </div>
             ) : (
