@@ -421,3 +421,152 @@ def extract_report_from_message(message_content: str) -> str:
             content = content.replace(phrase, "").strip()
     
     return content
+
+
+async def send_verification_email(
+    recipient_email: str,
+    recipient_name: str,
+    verification_token: str,
+    frontend_url: str = "http://localhost:5173"
+) -> bool:
+    """
+    Sends an email verification link to the user
+    
+    Args:
+        recipient_email: Email address of the user
+        recipient_name: Name of the user
+        verification_token: Unique verification token
+        frontend_url: Base URL of the frontend application
+    
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    
+    if not SENDER_EMAIL or not SENDER_PASSWORD:
+        print("❌ Email configuration missing. Please set SENDER_EMAIL and SENDER_PASSWORD in .env")
+        return False
+    
+    try:
+        verification_link = f"{frontend_url}/verify-email?token={verification_token}"
+        
+        # Use "UtopiaHire" as sender name for verification emails
+        verification_sender_name = "UtopiaHire"
+        
+        # Create HTML email
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Verify Your Email</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 40px 20px;">
+                        <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                            <!-- Header -->
+                            <tr>
+                                <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; border-radius: 12px 12px 0 0; text-align: center;">
+                                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">Verify Your Email</h1>
+                                    <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">Welcome to UtopiaHire!</p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Body -->
+                            <tr>
+                                <td style="padding: 40px 30px;">
+                                    <p style="margin: 0 0 20px 0; color: #111827; font-size: 18px; font-weight: 600;">Hi {recipient_name},</p>
+                                    <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                        Thank you for registering with UtopiaHire! We're excited to have you on board.
+                                    </p>
+                                    <p style="margin: 0 0 30px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                        To complete your registration and start preparing for interviews, please verify your email address by clicking the button below:
+                                    </p>
+                                    
+                                    <!-- Verification Button -->
+                                    <div style="text-align: center; margin: 30px 0;">
+                                        <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                                            Verify Email Address
+                                        </a>
+                                    </div>
+                                    
+                                    <p style="margin: 30px 0 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                                        Or copy and paste this link into your browser:
+                                    </p>
+                                    <p style="margin: 10px 0 0 0; color: #3b82f6; font-size: 14px; word-break: break-all;">
+                                        {verification_link}
+                                    </p>
+                                    
+                                    <div style="margin-top: 30px; padding: 20px; background-color: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                        <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+                                            <strong>Note:</strong> This verification link will expire in 24 hours. If you didn't create an account, you can safely ignore this email.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Footer -->
+                            <tr>
+                                <td style="padding: 30px; background-color: #f9fafb; border-radius: 0 0 12px 12px; text-align: center;">
+                                    <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">UtopiaHire</p>
+                                    <p style="margin: 0; color: #9ca3af; font-size: 12px;">Powered by advanced AI to help you ace your interviews</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+        
+        # Create plain text version (fallback)
+        text_content = f"""
+Verify Your Email
+
+Hi {recipient_name},
+
+Thank you for registering with UtopiaHire! We're excited to have you on board.
+
+To complete your registration and start preparing for interviews, please verify your email address by clicking the link below:
+
+{verification_link}
+
+Note: This verification link will expire in 24 hours. If you didn't create an account, you can safely ignore this email.
+
+---
+UtopiaHire
+Powered by advanced AI to help you ace your interviews
+        """
+        
+        # Create message
+        message = MIMEMultipart("alternative")
+        message["Subject"] = "Verify Your Email - UtopiaHire"
+        message["From"] = f"{verification_sender_name} <{SENDER_EMAIL}>"
+        message["To"] = recipient_email
+        message["Reply-To"] = SENDER_EMAIL
+        message["X-Mailer"] = "UtopiaHire"
+        message["X-Priority"] = "3"
+        message["List-Unsubscribe"] = f"<mailto:{SENDER_EMAIL}?subject=unsubscribe>"
+        
+        # Attach both versions
+        part1 = MIMEText(text_content, "plain")
+        part2 = MIMEText(html_content, "html")
+        message.attach(part1)
+        message.attach(part2)
+        
+        # Send email
+        print(f"📧 Sending verification email to {recipient_email}...")
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.sendmail(SENDER_EMAIL, recipient_email, message.as_string())
+        
+        print(f"✅ Verification email sent successfully to {recipient_email}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Failed to send verification email: {str(e)}")
+        return False

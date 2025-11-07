@@ -13,6 +13,9 @@ class LoginRequest(BaseModel):
 class RefreshRequest(BaseModel):
     refreshToken: str = Field(..., alias="refreshToken")
 
+class VerifyEmailRequest(BaseModel):
+    token: str
+
 class UserOut(BaseModel):
     id: int
     name: str

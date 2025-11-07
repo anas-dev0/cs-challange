@@ -23,3 +23,6 @@ psycopg2
 asyncpg
 SQLAlchemy
 pydantic[email]
+passlib[bcrypt]
+python-jose[cryptography]
+bcrypt==4.0.1

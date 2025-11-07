@@ -57,6 +57,21 @@ async def on_startup():
             await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version integer NOT NULL DEFAULT 0"))
         except Exception:
             pass
+        # Add email verification columns
+        try:
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified integer NOT NULL DEFAULT 0"))
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token varchar(255)"))
+        except Exception:
+            pass
+        # Update foreign key constraint to CASCADE on delete
+        try:
+            # Drop old constraint
+            await conn.execute(text("ALTER TABLE interviews DROP CONSTRAINT IF EXISTS interviews_user_id_fkey"))
+            # Add new constraint with CASCADE
+            await conn.execute(text("ALTER TABLE interviews ADD CONSTRAINT interviews_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"))
+        except Exception as e:
+            print(f"Note: Foreign key constraint update skipped (may already exist): {e}")
+            pass
 
 @app.get("/health")
 async def health():

@@ -3,14 +3,13 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from .config import settings
 from .db import get_db
 from .models import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = HTTPBearer(auto_error=False)
 
 PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$")
@@ -19,10 +18,14 @@ def is_strong_password(pw: str) -> bool:
     return bool(PASSWORD_REGEX.match(pw))
 
 def hash_password(pw: str) -> str:
-    return pwd_context.hash(pw)
+    # Use bcrypt directly to avoid passlib compatibility issues
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(pw.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 def verify_password(pw: str, hashed: str) -> bool:
-    return pwd_context.verify(pw, hashed)
+    # Use bcrypt directly to avoid passlib compatibility issues
+    return bcrypt.checkpw(pw.encode('utf-8'), hashed.encode('utf-8'))
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()

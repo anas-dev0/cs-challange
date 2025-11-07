@@ -78,10 +78,13 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
         
         if user is None:
             # Create new user with OAuth (no password)
+            # OAuth users are automatically verified since the OAuth provider verified the email
             user = User(
                 name=name,
                 email=email,
-                password_hash=secrets.token_urlsafe(32)  # Random hash, won't be used
+                password_hash=secrets.token_urlsafe(32),  # Random hash, won't be used
+                email_verified=True,  # OAuth users are pre-verified
+                verification_token=None
             )
             db.add(user)
             await db.commit()
@@ -161,10 +164,13 @@ async def github_callback(request: Request, db: AsyncSession = Depends(get_db)):
             
             if user is None:
                 # Create new user with OAuth
+                # OAuth users are automatically verified since the OAuth provider verified the email
                 user = User(
                     name=name,
                     email=email,
-                    password_hash=secrets.token_urlsafe(32)  # Random hash, won't be used
+                    password_hash=secrets.token_urlsafe(32),  # Random hash, won't be used
+                    email_verified=True,  # OAuth users are pre-verified
+                    verification_token=None
                 )
                 db.add(user)
                 await db.commit()
