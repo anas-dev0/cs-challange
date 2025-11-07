@@ -71,3 +71,14 @@ async def health():
 app.include_router(auth_router)
 app.include_router(oauth_router)
 app.include_router(service_router)
+
+if __name__ == "__main__":
+    import uvicorn
+    print("=" * 50)
+    print("🚀 Starting Unified Backend Service")
+    print("=" * 50)
+    print("📍 Server: http://localhost:8000")
+    print("📚 API Docs: http://localhost:8000/docs")
+    print("🏥 Health: http://localhost:8000/health")
+    print("=" * 50)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
