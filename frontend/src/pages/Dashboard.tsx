@@ -121,7 +121,7 @@ export default function Dashboard() {
           </div>
           <h3 className="text-lg font-semibold text-card-foreground">AI Interviewer</h3>
           <p className="text-muted-foreground mt-1">Practice behavioral and technical interviews with instant AI feedback.</p>
-          <button onClick={() => navigate('/interviewer/setup')} className="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 text-white font-medium shadow hover:shadow-md">Start session</button>
+          <button onClick={() => navigate('/interviewer/setup')} className="mt-4 px-4 py-2 rounded-lg border-2 border-border hover:border-primary hover:text-primary bg-card text-foreground font-medium">Start session</button>
         </div>
 
         {/* CV Reviewer */}
