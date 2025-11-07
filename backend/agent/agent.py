@@ -85,16 +85,16 @@ async def entrypoint(ctx: agents.JobContext):
 
         # Generate personalized prompts
         print("🤖 Generating prompts...")
-        # agent_instruction, session_instruction = create_initial_prompts(
-        #     cv_text=cv_text,
-        #     job_title=job_title,
-        #     job_description_text=job_description,
-        # )
-        agent_instruction, session_instruction = create_test_prompts(
+        agent_instruction, session_instruction = create_initial_prompts(
             cv_text=cv_text,
             job_title=job_title,
             job_description_text=job_description,
         )
+        # agent_instruction, session_instruction = create_test_prompts(
+        #     cv_text=cv_text,
+        #     job_title=job_title,
+        #     job_description_text=job_description,
+        # )
         # Initialize session
         print("🎤 Initializing voice session...")
         session = AgentSession(

@@ -259,15 +259,25 @@ export default function InterviewerSetup() {
     }
   };
 
-  // Prefill candidate email from logged-in user (if available) but allow edits
+  // Prefill candidate email from logged-in user and prefill name from account.
+  // Email is taken from the account and made read-only when available. Name is
+  // filled from the account but stays editable so the user can change it.
   const auth = useContext(AuthContext);
   useEffect(() => {
     const email = auth?.user?.email;
-    if (email && !candidateEmail) {
+    if (email) {
+      // Always prefer account email when available (overrides any saved value)
       setCandidateEmail(email);
     }
-    // only when auth user email changes
   }, [auth?.user?.email]);
+
+  useEffect(() => {
+    const name = auth?.user?.name;
+    // Only prefill name if there isn't already a candidateName (allow user edits)
+    if (name && !candidateName) {
+      setCandidateName(name);
+    }
+  }, [auth?.user?.name, candidateName]);
 
   const handleContinue = () => {
     if (!jobDescription.trim()) {
@@ -477,14 +487,20 @@ export default function InterviewerSetup() {
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Your Email Address
             </label>
+            {/* Make the input read-only when an account email is available. If
+                there's no account email (not logged in) it stays editable. */}
             <Input
               type="email"
               value={candidateEmail}
               onChange={(e) => setCandidateEmail(e.target.value)}
               placeholder="e.g., john.doe@example.com"
               disabled={loading || uploading}
-              readOnly
-              className="w-full bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+              readOnly={!!auth?.user?.email}
+              className={`w-full ${
+                auth?.user?.email
+                  ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+                  : ""
+              }`}
             />
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Your interview report will be sent to this email address
@@ -492,6 +508,7 @@ export default function InterviewerSetup() {
           </div>
 
           {/* Continue Button */}
+          <div className="has-[button:disabled]:cursor-not-allowed">
           <Button
             onClick={handleContinue}
             disabled={
@@ -503,10 +520,11 @@ export default function InterviewerSetup() {
               !candidateName.trim() ||
               !jobTitle.trim()
             }
-            className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white hover:text-gray-900 transition-all"
+            className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white hover:text-gray-900 transition-all margin-0"
           >
             {loading ? t("upload.starting") : t("upload.continue")}
           </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
