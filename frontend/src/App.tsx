@@ -23,7 +23,7 @@ import { useTranslation } from "react-i18next";
 import "./lib/i18n";
 import "./App.css";
 import Notfound from "./pages/Notfound";
-
+import GetJobs from "./pages/GetJobs";
 function OAuthHandler() {
   const context = useContext(AuthContext);
   const location = useLocation();
@@ -126,6 +126,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <JobMatcher />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/GetJobs"
+                element={
+                  <ProtectedRoute>
+                    <GetJobs />
                   </ProtectedRoute>
                 }
               />

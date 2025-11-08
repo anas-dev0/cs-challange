@@ -1,60 +1,162 @@
-import React, { useState } from 'react'
-import { useServices } from '../ServiceContext'
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-interface Job {
-  title: string
-  company: string
-  location: string
-  tags: string[]
-}
+const PostJob = () => {
+  const [formData, setFormData] = useState({
+    keywords: "",
+    location: "",
+    max_jobs: "",
+    timeRange: "", // default to no time range
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
-const exampleJobs = (keywords: string[] = []): Job[] => {
-  const base: Job[] = [
-    { title: 'Frontend Developer', company: 'TechNova', location: 'Remote', tags: ['React', 'JavaScript', 'UI'] },
-    { title: 'Full-Stack Engineer', company: 'DataCraft', location: 'Paris', tags: ['Node', 'React', 'API'] },
-    { title: 'React Developer', company: 'Skyline Labs', location: 'Berlin', tags: ['React', 'TypeScript', 'Tailwind'] },
-    { title: 'Software Engineer', company: 'BlueOrbit', location: 'Remote', tags: ['Algorithms', 'Systems'] },
-  ]
-  if (!keywords.length) return base
-  return base.filter(j => keywords.some(k => j.tags.join(' ').toLowerCase().includes(k)))
-}
+  const navigate = useNavigate();
 
-export default function JobMatcher() {
-  const [text, setText] = useState('')
-  const [jobs, setJobs] = useState<Job[]>([])
-  const { addHistory } = useServices()
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-  const match = () => {
-    const keys = text.toLowerCase().split(/[^a-zA-Z]+/).filter(Boolean)
-    const uniq = Array.from(new Set(keys))
-    const matched = exampleJobs(uniq)
-    setJobs(matched)
-    addHistory({ type: 'job-match', title: 'Job match', meta: { keywords: uniq.slice(0, 5), results: matched.length } })
-  }
+  // Handler specifically for the Select component
+  const handleSelectChange = (value: string) => {
+    setFormData({ ...formData, timeRange: value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/search_jobs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        navigate("/GetJobs");
+      } else {
+        console.error("Failed to submit form");
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="container py-10">
-      <h1 className="text-3xl font-bold text-foreground mb-6">Job Matcher</h1>
-      <p className="text-muted-foreground mb-4">Paste your CV text to get tailored job suggestions (demo)</p>
-      <textarea className="w-full min-h-[160px] rounded-xl border-2 border-gray-200 p-3 focus:border-primary-500" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste your CV here..." />
-      <button onClick={match} className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold">Find jobs</button>
-
-      <div className="mt-8 grid md:grid-cols-2 gap-4">
-        {jobs.map((j, idx) => (
-          <div key={idx} className="bg-white rounded-2xl p-4 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold text-gray-900">{j.title}</div>
-                <div className="text-sm text-gray-600">{j.company} — {j.location}</div>
-              </div>
-              <button className="text-sm px-3 py-2 rounded-lg border-2 border-gray-200 hover:border-primary-500 hover:text-primary-600">Apply</button>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {j.tags.map(t => <span key={t} className="text-xs px-2 py-1 rounded-full bg-primary-50 text-primary-700">{t}</span>)}
-            </div>
-          </div>
-        ))}
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-[500px] my-[50px] mx-auto p-[30px] rounded-[10px] backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.1)] font-['Arial',sans-serif] max-[600px]:p-5 font-extrabold"
+    >
+      <h2 className="text-center mb-5 text-white text-3xl">Search a Job</h2>
+      <div>
+        <label
+          htmlFor="keywords"
+          className="font-bold block mb-2 text-[#D1D5DB]"
+        >
+          Keywords:
+        </label>
+        <input
+          type="text"
+          id="keywords"
+          name="keywords"
+          value={formData.keywords}
+          onChange={handleChange}
+          required
+          className="w-full p-3 border border-[#007bff] my-[15px] rounded-[6px] text-white bg-transparent transition-[border-color] duration-300 ease-[ease] focus:border-white focus:outline-none focus:shadow-[0_0_5px_rgba(0,123,255,0.5)] max-[600px]:text-sm"
+        />
       </div>
-    </div>
-  )
-}
+      <div>
+        <label
+          htmlFor="location"
+          className="font-bold block mb-2 text-[#D1D5DB]"
+        >
+          Location:
+        </label>
+        <input
+          type="text"
+          id="location"
+          name="location"
+          value={formData.location}
+          onChange={handleChange}
+          required
+          className="w-full p-3 my-[15px] border border-[#007bff] rounded-[6px] text-white bg-transparent transition-[border-color] duration-300 ease-[ease] focus:border-white focus:outline-none focus:shadow-[0_0_5px_rgba(0,123,255,0.5)] max-[600px]:text-sm"
+        />
+      </div>
+      <div>
+        <label
+          htmlFor="max_jobs"
+          className="font-bold block mb-2 text-[#D1D5DB]"
+        >
+          Max Jobs:
+        </label>
+        <input
+          type="number"
+          id="max_jobs"
+          name="max_jobs"
+          value={formData.max_jobs}
+          onChange={handleChange}
+          required
+          className="w-full p-3 my-[15px] border border-[#007bff] rounded-[6px] text-base bg-transparent transition-[border-color] duration-300 ease-[ease] focus:border-white focus:outline-none focus:shadow-[0_0_5px_rgba(0,123,255,0.5)] max-[600px]:text-sm"
+        />
+      </div>
+      <div>
+        <label
+          htmlFor="timeRange"
+          className="font-bold block mb-2 text-[#D1D5DB]"
+        >
+          Time Range:
+        </label>
+        <Select value={formData.timeRange} onValueChange={handleSelectChange}>
+          <SelectTrigger className="w-full border border-[#007bff] my-[15px]">
+            <SelectValue placeholder="Select time range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="3600">1 hour</SelectItem>
+            <SelectItem value="86400">24 hours</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="has-[button:disabled]:cursor-not-allowed mt-10">
+        <Button
+          type="submit"
+          className="w-full"
+          variant="outline"
+          disabled={
+            !formData.keywords ||
+            !formData.location ||
+            !formData.max_jobs ||
+            !formData.timeRange ||
+            isLoading
+          }
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Searching...
+            </>
+          ) : (
+            "Submit"
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+export default PostJob;
