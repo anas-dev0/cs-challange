@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 const GetJob = () => {
   const [jobs, setJobs] = useState([]);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5000/get_jobs");
+        const response = await fetch("http://localhost:8000/api/jobs");
         if (!response.ok) {
           throw new Error("Failed to fetch jobs");
         }
@@ -38,17 +39,11 @@ const GetJob = () => {
       <h1 className="text-center text-[2.5rem] font-bold mb-10 text-white">
         Job Listings
       </h1>
-      {jobs.length === 0 ? (
-        <p className="text-center text-[#666] text-[1.1rem]">
-          No jobs available.
-        </p>
-      ) : (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-[25px] max-w-[1100px] mx-auto">
-          {jobs.map((job, index) => (
-            <JobCard key={index} job={job} />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-[25px] max-w-[1100px] mx-auto">
+        {jobs.map((job, index) => (
+          <JobCard key={index} job={job} />
+        ))}
+      </div>
     </div>
   );
 };

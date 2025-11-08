@@ -24,6 +24,7 @@ import "./lib/i18n";
 import "./App.css";
 import Notfound from "./pages/Notfound";
 import GetJobs from "./pages/GetJobs";
+import NoJobsFound from "./pages/NoJobsFound";
 function OAuthHandler() {
   const context = useContext(AuthContext);
   const location = useLocation();
@@ -134,6 +135,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <GetJobs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/no-jobs-found"
+                element={
+                  <ProtectedRoute>
+                    <NoJobsFound />
                   </ProtectedRoute>
                 }
               />

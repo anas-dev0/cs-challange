@@ -9,6 +9,7 @@ from .db import Base, engine
 from .auth_routes import router as auth_router
 from .oauth_routes import router as oauth_router
 from .service_routes import router as service_router
+from .job_routes import router as job_router
 from .middleware import logging_middleware
 
 app = FastAPI(title="Unified Backend Service - Auth & Services")
@@ -86,6 +87,7 @@ async def health():
 app.include_router(auth_router)
 app.include_router(oauth_router)
 app.include_router(service_router)
+app.include_router(job_router)
 
 if __name__ == "__main__":
     import uvicorn

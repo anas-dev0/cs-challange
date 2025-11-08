@@ -129,7 +129,11 @@ async def entrypoint(ctx: agents.JobContext):
                             report_text=content
                         ))
                     except Exception as e:
-                        print(f"❌ Error sending email: {str(e)}")  
+                        print(f"❌ Error sending email: {str(e)}")
+                if "i'm terminating this interview immediately" in content.lower():
+                    print("🛑 Interview terminated by assistant.")
+                    assistant.interview_complete = True
+                    session.shutdown()
     except Exception as e:
         print(f"❌ Error: {str(e)}")
         import traceback
