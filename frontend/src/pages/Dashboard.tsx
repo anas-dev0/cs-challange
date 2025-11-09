@@ -24,31 +24,25 @@ export default function Dashboard() {
   useEffect(() => {
     const email = user?.email
     if (!email) return
+    
     let active = true
     setLoadingInterviews(true)
-    // Call backend server on port 3001 instead of auth service on 8000
-    const backendUrl = 'http://localhost:3001'
-    fetch(`${backendUrl}/interviews/email/${encodeURIComponent(email)}`)
-      .then(async res => {
+    
+    API.get(`/interviews/email/${encodeURIComponent(email)}`)
+      .then((res) => {
         if (!active) return
-        if (!res.ok) {
-          if (res.status === 404) {
-            // User not found or no interviews yet
-            setInterviews([])
-            return
-          }
-          throw new Error(`HTTP ${res.status}`)
-        }
-        const data: UserInterviewsResponse = await res.json()
+        const data: UserInterviewsResponse = res.data
         const list = data?.interviews || []
         setInterviews(Array.isArray(list) ? list : [])
       })
       .catch((err) => {
-        // silently ignore; UI will show empty state
-        console.warn('Failed to fetch interviews:', err)
+        if (!active) return
         setInterviews([])
       })
-      .finally(() => active && setLoadingInterviews(false))
+      .finally(() => {
+        if (active) setLoadingInterviews(false)
+      })
+    
     return () => {
       active = false
     }

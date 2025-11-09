@@ -6,6 +6,7 @@ import { toast } from "sonner";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  token: string | null;
   login: (email: string, password: string) => Promise<AuthResponse>;
   register: (
     name: string,
@@ -17,6 +18,8 @@ interface AuthContextType {
   openAuthModal: (view?: "login" | "register") => void;
   closeAuthModal: () => void;
   oauthSignIn: (provider: string) => Promise<void>;
+  setUser: (user: User | null) => void;
+  setToken: (token: string | null) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -30,13 +33,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     open: false,
     view: "login",
   });
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
   // Expose setUser for OAuth callback handler
   (AuthProvider as any).setUser = setUser;
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    if (!storedToken) {
       setLoading(false);
       return;
     }
@@ -48,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
         setUser(null);
+        setToken(null);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -59,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await API.post("/auth/login", { email, password });
       localStorage.setItem("token", res.data.token);
+      setToken(res.data.token);
       if (res.data.refreshToken)
         localStorage.setItem("refreshToken", res.data.refreshToken);
       setUser(res.data.user);
@@ -95,10 +102,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    setUser(null);
-    toast.success("Logged out successfully");
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+  setUser(null);
+  setToken(null);
+  toast.success("Logged out successfully");
   };
 
   const openAuthModal = (view: "login" | "register" = "login") =>
@@ -125,20 +133,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={
-        {
-          user,
-          loading,
-          login,
-          register,
-          logout,
-          authModal,
-          openAuthModal,
-          closeAuthModal,
-          oauthSignIn,
-          setUser,
-        } as any
-      }
+      value={{
+        user,
+        loading,
+        token,
+        login,
+        register,
+        logout,
+        authModal,
+        openAuthModal,
+        closeAuthModal,
+        oauthSignIn,
+        setUser,
+        setToken,
+      }}
     >
       {children}
     </AuthContext.Provider>

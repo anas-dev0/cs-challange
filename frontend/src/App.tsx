@@ -28,7 +28,7 @@ import NoJobsFound from "./pages/NoJobsFound";
 function OAuthHandler() {
   const context = useContext(AuthContext);
   const location = useLocation();
-  const hasProcessed = React.useRef(false); // ✅ Better than useState
+  const hasProcessed = React.useRef(false);
 
   useEffect(() => {
     if (!context || hasProcessed.current) return;
@@ -38,11 +38,14 @@ function OAuthHandler() {
     const refreshToken = params.get("refreshToken");
 
     if (token && refreshToken) {
-      hasProcessed.current = true; // ✅ Mark as processed
+      hasProcessed.current = true;
 
       // Store tokens
       localStorage.setItem("token", token);
       localStorage.setItem("refreshToken", refreshToken);
+      
+      // Update token state in AuthContext
+      context.setToken(token);
 
       // Clean URL immediately
       window.history.replaceState({}, "", "/");
@@ -51,7 +54,7 @@ function OAuthHandler() {
       API.get("/auth/me")
         .then((res) => {
           const user: User = res.data.user;
-          (context as any).setUser?.(user);
+          context.setUser(user);
           toast.success(
             `Welcome back${user?.name ? `, ${user.name.split(" ")[0]}` : ""}!`
           );
@@ -60,6 +63,7 @@ function OAuthHandler() {
           console.error("OAuth error:", error);
           localStorage.removeItem("token");
           localStorage.removeItem("refreshToken");
+          context.setToken(null);
           toast.error("Failed to sign in. Please try again.");
         });
     }
