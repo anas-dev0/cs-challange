@@ -236,7 +236,7 @@ const PostJob = () => {
   // Filter countries based on search query
   const filteredCountries = searchQuery
     ? REGION_8_COUNTRIES.filter((country) =>
-        country.label.toLowerCase().includes(searchQuery.toLowerCase())
+        country.label.toLowerCase().startsWith(searchQuery.toLowerCase())
       )
     : REGION_8_COUNTRIES;
 
@@ -336,9 +336,10 @@ const PostJob = () => {
             value={searchQuery}
             onChange={handleSearchInputChange}
             onFocus={() => setIsDropdownOpen(true)}
+            onClick={() => setIsDropdownOpen(true)}
             className="w-full p-3 border border-[#007bff] my-[15px] rounded-[6px] text-white bg-transparent transition-[border-color] duration-300 ease-[ease] focus:border-white focus:outline-none focus:shadow-[0_0_5px_rgba(0,123,255,0.5)] max-[600px]:text-sm"
           />
-          {isDropdownOpen && searchQuery && (
+          {isDropdownOpen && (
             <div className="absolute z-50 w-full mt-1 max-h-[300px] overflow-y-auto bg-gray-900 border border-[#007bff] rounded-md shadow-lg">
               {Object.keys(filteredGroupedCountries).length > 0 ? (
                 Object.entries(filteredGroupedCountries).map(
