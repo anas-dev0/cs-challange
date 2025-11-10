@@ -544,6 +544,7 @@ export default function Interview() {
             candidate_email: candidateEmail,
             candidate_name: candidateName,
             job_title: jobTitle,
+            language: interviewConfig.language || "English",
           }),
         });
 

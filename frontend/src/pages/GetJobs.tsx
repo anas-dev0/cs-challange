@@ -16,7 +16,7 @@ const GetJob = () => {
         }
         const data = await response.json();
         setJobs(data.jobs);
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       }
     };
@@ -49,7 +49,7 @@ const GetJob = () => {
 };
 
 // Small subcomponent to render a job card with expandable description
-const JobCard = ({ job }) => {
+const JobCard = ({ job }: { job: any }) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
 

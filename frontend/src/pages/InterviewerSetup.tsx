@@ -21,6 +21,15 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { AuthContext } from "@/AuthContext";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 const TOKEN_SERVER_URL = "http://localhost:8000";
 
 // localStorage keys
@@ -29,6 +38,7 @@ const STORAGE_KEYS = {
   JOB_TITLE: "interviewer_job_title",
   CANDIDATE_NAME: "interviewer_candidate_name",
   CANDIDATE_EMAIL: "interviewer_candidate_email",
+  LANGUAGE: "interviewer_language",
   FILE_NAME: "interviewer_file_name",
   FILE_DATA: "interviewer_file_data",
   FILE_UPLOADED: "interviewer_file_uploaded",
@@ -44,7 +54,8 @@ export default function InterviewerSetup() {
     jobDesc: string,
     email: string,
     name: string,
-    title: string
+    title: string,
+    language: string
   ) => {
     try {
       setLoading(true);
@@ -54,7 +65,7 @@ export default function InterviewerSetup() {
         jobTitle: title,
         description: jobDesc,
         company: "", // Can be extracted from job description if needed
-        language: "English",
+        language: language,
         seniority: "Mid",
         experience: "",
         // Store additional fields
@@ -69,7 +80,7 @@ export default function InterviewerSetup() {
         title: title,
         meta: {
           company: "",
-          language: "English",
+          language: language,
           seniority: "Mid",
         },
       });
@@ -97,6 +108,7 @@ export default function InterviewerSetup() {
   const [candidateEmail, setCandidateEmail] = useState("");
   const [candidateName, setCandidateName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -110,6 +122,7 @@ export default function InterviewerSetup() {
     const savedCandidateEmail = localStorage.getItem(
       STORAGE_KEYS.CANDIDATE_EMAIL
     );
+    const savedLanguage = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
     const savedFileName = localStorage.getItem(STORAGE_KEYS.FILE_NAME);
     const savedFileData = localStorage.getItem(STORAGE_KEYS.FILE_DATA);
     const savedFileUploaded = localStorage.getItem(STORAGE_KEYS.FILE_UPLOADED);
@@ -118,6 +131,7 @@ export default function InterviewerSetup() {
     if (savedJobTitle) setJobTitle(savedJobTitle);
     if (savedCandidateName) setCandidateName(savedCandidateName);
     if (savedCandidateEmail) setCandidateEmail(savedCandidateEmail);
+    if (savedLanguage) setSelectedLanguage(savedLanguage);
 
     // Restore file if it was saved
     if (savedFileName && savedFileData && savedFileUploaded === "true") {
@@ -174,6 +188,12 @@ export default function InterviewerSetup() {
       localStorage.setItem(STORAGE_KEYS.CANDIDATE_EMAIL, candidateEmail);
     }
   }, [candidateEmail]);
+
+  useEffect(() => {
+    if (selectedLanguage) {
+      localStorage.setItem(STORAGE_KEYS.LANGUAGE, selectedLanguage);
+    }
+  }, [selectedLanguage]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -300,6 +320,11 @@ export default function InterviewerSetup() {
       return;
     }
 
+    if (!selectedLanguage) {
+      toast.error("Please select a language");
+      return;
+    }
+
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(candidateEmail)) {
@@ -313,7 +338,8 @@ export default function InterviewerSetup() {
         jobDescription,
         candidateEmail,
         candidateName,
-        jobTitle
+        jobTitle,
+        selectedLanguage
       );
     }
   };
@@ -507,23 +533,49 @@ export default function InterviewerSetup() {
             </p>
           </div>
 
+          {/* Language Selector */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Interview Language
+            </label>
+            <Select
+              value={selectedLanguage}
+              onValueChange={setSelectedLanguage}
+              disabled={loading || uploading}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="English">English</SelectItem>
+                  <SelectItem value="French">French</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              The interview will be conducted in this language
+            </p>
+          </div>
+
           {/* Continue Button */}
           <div className="has-[button:disabled]:cursor-not-allowed">
-          <Button
-            onClick={handleContinue}
-            disabled={
-              !uploaded ||
-              loading ||
-              uploading ||
-              !jobDescription.trim() ||
-              !candidateEmail.trim() ||
-              !candidateName.trim() ||
-              !jobTitle.trim()
-            }
-            className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white hover:text-gray-900 transition-all margin-0"
-          >
-            {loading ? t("upload.starting") : t("upload.continue")}
-          </Button>
+            <Button
+              onClick={handleContinue}
+              disabled={
+                !uploaded ||
+                loading ||
+                uploading ||
+                !jobDescription.trim() ||
+                !candidateEmail.trim() ||
+                !candidateName.trim() ||
+                !jobTitle.trim() ||
+                !selectedLanguage
+              }
+              className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white hover:text-gray-900 transition-all margin-0"
+            >
+              {loading ? t("upload.starting") : t("upload.continue")}
+            </Button>
           </div>
         </CardContent>
       </Card>
