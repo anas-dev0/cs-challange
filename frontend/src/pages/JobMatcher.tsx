@@ -310,7 +310,7 @@ const PostJob = () => {
           htmlFor="keywords"
           className="font-bold block mb-2 text-[#D1D5DB]"
         >
-          Keywords:
+          Job Title:
         </label>
         <input
           type="text"
@@ -403,8 +403,9 @@ const PostJob = () => {
             <SelectValue placeholder="Select time range" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="3600">1 hour</SelectItem>
             <SelectItem value="86400">24 hours</SelectItem>
+            <SelectItem value="604800">7 days</SelectItem>
+            <SelectItem value="2592000">30 days</SelectItem>
           </SelectContent>
         </Select>
       </div>
