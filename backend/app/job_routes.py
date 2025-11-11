@@ -135,7 +135,7 @@ class LinkedInJobsScraper:
         }
         
         # Only add time range parameter if it's provided
-        if time_range:
+        if time_range!=-1:
             params["f_TPR"] = f"r{time_range}"
         return f"{ScraperConfig.BASE_URL}?{'&'.join(f'{k}={quote(str(v))}' for k, v in params.items())}"
 
@@ -156,7 +156,7 @@ class LinkedInJobsScraper:
             return "N/A"
 
     def _check_time_range(self, posted_date_str: str, time_range: str) -> tuple[bool, str]:
-        if not time_range or posted_date_str == "N/A":
+        if time_range=="-1" or posted_date_str == "N/A":
             return True, ""
         
         try:
@@ -225,9 +225,13 @@ class LinkedInJobsScraper:
                 job_card.find("a", class_="base-card__full-link")["href"]
             )
             
-            # date
-            posted_date = job_card.find("time", class_="job-search-card__listdate")
-            posted_date = posted_date.text.strip() if posted_date else "N/A"
+            # date - LinkedIn uses different class names for date
+            posted_date_elem = (
+                job_card.find("time", class_="job-search-card__listdate") or 
+                job_card.find("time", class_="job-search-card__listdate--new") or
+                job_card.find("time")  # Fallback to any time element
+            )
+            posted_date = posted_date_elem.text.strip() if posted_date_elem else "N/A"
             
             # Check if the job is within the requested time range
             in_range, time_note = self._check_time_range(posted_date, time_range)
