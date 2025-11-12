@@ -1,0 +1,55 @@
+# Quick Commands - Copy & Paste
+
+## 🎯 All Commands in Order (Copy all at once)
+
+```powershell
+# Navigate to project
+cd d:\oussema\cs_challenge\utopia-hire
+
+# Initialize Git
+git init
+
+# Configure Git (replace with your email)
+git config --global user.name "Oussema Harrabi"
+git config --global user.email "your-email@example.com"
+
+# Add all files
+git add .
+
+# Commit
+git commit -m "Initial commit: UtopiaHire AI Skills Gap Analyzer"
+
+# Set main branch
+git branch -M main
+
+# Add remote (after creating repo on GitHub)
+git remote add origin https://github.com/OussemaHarrabi/utopia-hire.git
+
+# Push to GitHub
+git push -u origin main
+```
+
+---
+
+## ⚡ Before Running Above Commands:
+
+1. Go to https://github.com/new
+2. Create repository named: `utopia-hire`
+3. Choose Public or Private
+4. DO NOT add README, .gitignore, or license
+5. Click "Create repository"
+
+---
+
+## 🔄 For Future Updates:
+
+```powershell
+cd d:\oussema\cs_challenge\utopia-hire
+git add .
+git commit -m "Your change description"
+git push
+```
+
+---
+
+Your repository URL: **https://github.com/OussemaHarrabi/utopia-hire**
