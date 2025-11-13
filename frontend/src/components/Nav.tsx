@@ -1,19 +1,21 @@
 import React, { useContext } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { FaVideo } from 'react-icons/fa'
 import { AuthContext } from '../AuthContext'
 
 export default function Nav() {
   const context = useContext(AuthContext)
+  const location = useLocation()
   
   if (!context) {
     throw new Error('Nav must be used within AuthProvider')
   }
 
   const { user, logout, openAuthModal } = context
+  const isCVToolPage = location.pathname === '/cv'
 
   return (
-    <header className="sticky top-0 z-40 bg-black/40 backdrop-blur-md border-b border-white/10 shadow-[0_0_40px_rgba(153,75,255,0.15)]">
+    <header className={`sticky top-0 z-40 ${isCVToolPage ? 'bg-transparent' : 'bg-black/40 backdrop-blur-md'} border-b border-white/10 shadow-[0_0_40px_rgba(153,75,255,0.15)]`}>
       <div className="container">
         <div className="grid grid-cols-3 items-center py-4">
           {/* left: brand + interview cta */}

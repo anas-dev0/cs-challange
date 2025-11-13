@@ -9,6 +9,7 @@ import JobMatcher from "./pages/JobMatcher";
 import Pricing from "./pages/Pricing";
 import Dashboard from "./pages/Dashboard";
 import VerifyEmail from "./pages/VerifyEmail";
+import SkillsGapAnalyzer from "./pages/gap";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import { AuthProvider, AuthContext } from "./AuthContext";
@@ -155,6 +156,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/skills-gap"
+                element={
+                  <ProtectedRoute>
+                    <SkillsGapAnalyzer />
                   </ProtectedRoute>
                 }
               />

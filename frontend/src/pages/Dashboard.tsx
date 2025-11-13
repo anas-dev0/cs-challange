@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { AuthContext } from '../AuthContext'
 import { useServices } from '../ServiceContext'
 import { useNavigate } from 'react-router-dom'
-import { FaComments, FaFileAlt, FaBriefcase } from 'react-icons/fa'
+import { FaComments, FaFileAlt, FaBriefcase, FaChartLine } from 'react-icons/fa'
 import API from '@/api'
 import type { InterviewItem, UserInterviewsResponse } from '@/types'
 import { Button } from '@/components/ui/button'
@@ -107,35 +107,96 @@ export default function Dashboard() {
         <p className="text-muted-foreground mt-2">Pick a tool to continue your preparation</p>
       </section>
 
-      <section className="container pb-16 grid md:grid-cols-3 gap-6">
+      <section className="container pb-16 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* AI Interviewer */}
-        <div className="group bg-card rounded-2xl p-6 border border-border hover:border-primary/50 shadow-sm hover:shadow-lg transition-all">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <FaComments className="text-primary" />
+        <div className="group bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-2xl p-6 border border-purple-200 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 shadow-sm hover:shadow-lg transition-all">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4">
+            <FaComments className="text-white" />
           </div>
-          <h3 className="text-lg font-semibold text-card-foreground">AI Interviewer</h3>
-          <p className="text-muted-foreground mt-1">Practice behavioral and technical interviews with instant AI feedback.</p>
-          <button onClick={() => navigate('/interviewer/setup')} className="mt-4 px-4 py-2 rounded-lg border-2 border-border hover:border-primary hover:text-primary bg-card text-foreground font-medium">Start session</button>
+          <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">AI Interviewer</h3>
+          <p className="text-purple-700 dark:text-purple-300 mt-1">Practice behavioral and technical interviews with instant AI feedback.</p>
+          <button onClick={() => navigate('/interviewer/setup')} className="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-all">Start session</button>
         </div>
 
         {/* CV Reviewer */}
-        <div className="group bg-card rounded-2xl p-6 border border-border hover:border-primary/50 shadow-sm hover:shadow-lg transition-all">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <FaFileAlt className="text-primary" />
+        <div className="group bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-2xl p-6 border border-green-200 dark:border-green-800 hover:border-green-400 dark:hover:border-green-600 shadow-sm hover:shadow-lg transition-all">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-4">
+            <FaFileAlt className="text-white" />
           </div>
-          <h3 className="text-lg font-semibold text-card-foreground">CV Reviewer & Enhancer</h3>
-          <p className="text-muted-foreground mt-1">Upload your CV to get clarity, impact, and keyword suggestions.</p>
-          <button onClick={() => navigate('/cv')} className="mt-4 px-4 py-2 rounded-lg border-2 border-border hover:border-primary hover:text-primary bg-card text-foreground font-medium">Upload CV</button>
+          <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">CV Reviewer & Enhancer</h3>
+          <p className="text-green-700 dark:text-green-300 mt-1">Upload your CV to get clarity, impact, and keyword suggestions.</p>
+          <button onClick={() => navigate('/cv')} className="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium hover:from-green-600 hover:to-emerald-600 transition-all">Upload CV</button>
         </div>
 
         {/* Job Matcher */}
-        <div className="group bg-card rounded-2xl p-6 border border-border hover:border-primary/50 shadow-sm hover:shadow-lg transition-all">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-            <FaBriefcase className="text-primary" />
+        <div className="group bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-2xl p-6 border border-orange-200 dark:border-orange-800 hover:border-orange-400 dark:hover:border-orange-600 shadow-sm hover:shadow-lg transition-all">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center mb-4">
+            <FaBriefcase className="text-white" />
           </div>
-          <h3 className="text-lg font-semibold text-card-foreground">Job Matcher</h3>
-          <p className="text-muted-foreground mt-1">Discover tailored roles that fit your profile and preparation level.</p>
-          <button onClick={() => navigate('/jobs')} className="mt-4 px-4 py-2 rounded-lg border-2 border-border hover:border-primary hover:text-primary bg-card text-foreground font-medium">Find jobs</button>
+          <h3 className="text-lg font-semibold text-orange-900 dark:text-orange-100">Job Matcher</h3>
+          <p className="text-orange-700 dark:text-orange-300 mt-1">Discover tailored roles that fit your profile and preparation level.</p>
+          <button onClick={() => navigate('/jobs')} className="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:from-orange-600 hover:to-amber-600 transition-all">Find jobs</button>
+        </div>
+
+        {/* Skills Gap Analyzer - NEW */}
+        <div className="group bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 rounded-2xl p-6 border border-cyan-200 dark:border-cyan-800 hover:border-cyan-400 dark:hover:border-cyan-600 shadow-sm hover:shadow-lg transition-all">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mb-4">
+            <FaChartLine className="text-white" />
+          </div>
+          <h3 className="text-lg font-semibold text-cyan-900 dark:text-cyan-100">Skills Gap Analyzer</h3>
+          <p className="text-cyan-700 dark:text-cyan-300 mt-1">Analyze your skills against job requirements and get personalized learning paths.</p>
+          <button onClick={() => navigate('/skills-gap')} className="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium hover:from-cyan-600 hover:to-blue-600 transition-all">Analyze Skills</button>
+        </div>
+      </section>
+
+      {/* Skills Gap Analysis Spotlight */}
+      <section className="container pb-12">
+        <div className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-3xl p-8 border-2 border-cyan-200 dark:border-cyan-800 relative overflow-hidden">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-400/20 to-blue-400/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-400/20 to-blue-400/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-xl">
+                <FaChartLine className="text-white text-4xl" />
+              </div>
+            </div>
+            
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+                Discover Your Skills Gap
+              </h3>
+              <p className="text-muted-foreground text-lg mb-4">
+                Upload your CV and a job description to get AI-powered insights on your strengths, 
+                gaps, and personalized learning recommendations to close the gap.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                <div className="flex items-center gap-2 text-sm bg-white/50 dark:bg-gray-800/50 px-3 py-1.5 rounded-full border border-cyan-200 dark:border-cyan-800">
+                  <span className="text-green-500">✓</span>
+                  <span>AI-Powered Analysis</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm bg-white/50 dark:bg-gray-800/50 px-3 py-1.5 rounded-full border border-cyan-200 dark:border-cyan-800">
+                  <span className="text-green-500">✓</span>
+                  <span>Learning Paths</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm bg-white/50 dark:bg-gray-800/50 px-3 py-1.5 rounded-full border border-cyan-200 dark:border-cyan-800">
+                  <span className="text-green-500">✓</span>
+                  <span>Resume Tips</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex-shrink-0">
+              <button 
+                onClick={() => navigate('/skills-gap')} 
+                className="px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-lg hover:from-cyan-600 hover:to-blue-600 transition-all shadow-xl hover:shadow-2xl hover:scale-105 flex items-center gap-3"
+              >
+                <span>Start Analysis</span>
+                <span className="text-2xl">→</span>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
+from contextlib import asynccontextmanager
 from .config import settings
 from .db import Base, engine
 from .auth_routes import router as auth_router
@@ -12,7 +13,105 @@ from .service_routes import router as service_router
 from .job_routes import router as job_router
 from .middleware import logging_middleware
 
-app = FastAPI(title="Unified Backend Service - Auth & Services")
+# Import Skills Gap Analysis components
+import sys
+import os
+from dotenv import load_dotenv
+
+# Load environment variables first
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+load_dotenv(env_path)
+print(f"🔧 Loading .env from: {env_path}")
+
+# Add parent directory to path to import from core, api, etc.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+try:
+    from core.skill_extractor import gliner_extractor
+    from core.data_loader import data_loader
+    from api import analysis
+    # Check if Gemini is actually initialized
+    from core.ai_analyzer import model as gemini_model
+    if gemini_model is None:
+        print("⚠️  WARNING: Gemini AI model is not initialized. Skills Gap Analysis will not work.")
+        print("    Please check your GOOGLE_API_KEY or GEMINI_API_KEY in .env file")
+    SKILLS_GAP_ENABLED = True
+except ImportError as e:
+    print(f"⚠️  Skills Gap Analysis not available: {e}")
+    SKILLS_GAP_ENABLED = False
+    gliner_extractor = None
+    data_loader = None
+    analysis = None
+    gemini_model = None
+
+# --- Lifespan Event Handler ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Unified lifespan handler for both database and ML model initialization.
+    Replaces deprecated @app.on_event("startup")
+    """
+    print("=" * 60)
+    print("🚀 Starting Unified Backend Service")
+    print("=" * 60)
+    
+    # Initialize database
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            # Database migrations
+            try:
+                await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version integer NOT NULL DEFAULT 0"))
+            except Exception:
+                pass
+            try:
+                await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified integer NOT NULL DEFAULT 0"))
+                await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token varchar(255)"))
+            except Exception:
+                pass
+            try:
+                await conn.execute(text("ALTER TABLE interviews DROP CONSTRAINT IF EXISTS interviews_user_id_fkey"))
+                await conn.execute(text("ALTER TABLE interviews ADD CONSTRAINT interviews_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"))
+            except Exception as e:
+                print(f"Note: Foreign key constraint update skipped: {e}")
+                pass
+        print("✅ Database initialized successfully")
+    except Exception as e:
+        print(f"⚠️  Database initialization warning: {e}")
+    
+    # Initialize Skills Gap Analysis models
+    if SKILLS_GAP_ENABLED:
+        try:
+            print(f"📊 Loaded {len(data_loader.esco_df)} ESCO skills from market data")
+            print(f"🤖 GLiNER model '{gliner_extractor.model_name}' loaded and ready")
+            
+            # Check Gemini model status
+            if gemini_model is not None:
+                print("✅ Gemini AI model initialized successfully")
+            else:
+                print("❌ Gemini AI model NOT initialized - Skills Gap Analysis will fail")
+                print("   Check your GOOGLE_API_KEY or GEMINI_API_KEY in .env file")
+            
+            print("✅ Skills Gap Analysis ready")
+        except Exception as e:
+            print(f"⚠️  Skills Gap Analysis initialization warning: {e}")
+    
+    print("=" * 60)
+    print("📍 Server: http://localhost:8000")
+    print("📚 API Docs: http://localhost:8000/docs")
+    print("🏥 Health: http://localhost:8000/health")
+    print("=" * 60)
+    
+    yield  # Server is running
+    
+    # Cleanup on shutdown
+    print("🛑 Server shutting down...")
+
+app = FastAPI(
+    title="Unified Backend Service - Auth, Services & Skills Gap Analysis",
+    description="Complete backend API for authentication, services, jobs, CV tools, and AI-powered skills gap analysis",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 # Custom validation error handler
 @app.exception_handler(RequestValidationError)
@@ -48,54 +147,84 @@ app.add_middleware(
     same_site="lax",
 )
 
-@app.on_event("startup")
-async def on_startup():
-    # Create tables if not exist
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-        # Ensure token_version column exists (simple migration)
-        try:
-            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version integer NOT NULL DEFAULT 0"))
-        except Exception:
-            pass
-        # Add email verification columns
-        try:
-            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified integer NOT NULL DEFAULT 0"))
-            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token varchar(255)"))
-        except Exception:
-            pass
-        # Update foreign key constraint to CASCADE on delete
-        try:
-            # Drop old constraint
-            await conn.execute(text("ALTER TABLE interviews DROP CONSTRAINT IF EXISTS interviews_user_id_fkey"))
-            # Add new constraint with CASCADE
-            await conn.execute(text("ALTER TABLE interviews ADD CONSTRAINT interviews_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"))
-        except Exception as e:
-            print(f"Note: Foreign key constraint update skipped (may already exist): {e}")
-            pass
+@app.get("/")
+async def root():
+    """Root endpoint with service information"""
+    services = {
+        "authentication": "✅ Available",
+        "oauth": "✅ Available",
+        "services": "✅ Available",
+        "jobs": "✅ Available",
+        "cv_tools": "✅ Available",
+        "skills_gap_analysis": "✅ Available" if SKILLS_GAP_ENABLED else "❌ Not Available"
+    }
+    return {
+        "message": "Welcome to the Unified Backend API",
+        "version": "1.0.0",
+        "services": services,
+        "documentation": "/docs",
+        "health_check": "/health"
+    }
 
 @app.get("/health")
 async def health():
+    """Comprehensive health check for all services"""
+    health_status = {
+        "status": "ok",
+        "timestamp": None,
+        "services": {}
+    }
+    
+    # Check database
     try:
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
-        return {"status": "ok", "db": "up", "service": "unified"}
-    except Exception:
-        return {"status": "degraded", "db": "down"}
+        health_status["services"]["database"] = "up"
+    except Exception as e:
+        health_status["status"] = "degraded"
+        health_status["services"]["database"] = f"down: {str(e)}"
+    
+    # Check Skills Gap Analysis
+    if SKILLS_GAP_ENABLED:
+        try:
+            skills_available = data_loader is not None and len(data_loader.esco_df) > 0
+            model_loaded = gliner_extractor is not None
+            health_status["services"]["skills_gap"] = {
+                "status": "up" if (skills_available and model_loaded) else "degraded",
+                "esco_skills_loaded": len(data_loader.esco_df) if data_loader else 0,
+                "model_loaded": model_loaded
+            }
+        except Exception as e:
+            health_status["services"]["skills_gap"] = f"error: {str(e)}"
+    else:
+        health_status["services"]["skills_gap"] = "not_enabled"
+    
+    # Add timestamp
+    from datetime import datetime
+    health_status["timestamp"] = datetime.utcnow().isoformat()
+    
+    return health_status
 
 # Include routers
-app.include_router(auth_router)
-app.include_router(oauth_router)
-app.include_router(service_router)
-app.include_router(job_router)
+app.include_router(auth_router, tags=["Authentication"])
+app.include_router(oauth_router, tags=["OAuth"])
+app.include_router(service_router, tags=["Services"])
+app.include_router(job_router, tags=["Jobs"])
+
+
+# Include Skills Gap Analysis router if available
+if SKILLS_GAP_ENABLED and analysis:
+    app.include_router(analysis.router, prefix="/api", tags=["Skills Gap Analysis"])
+    print("✅ Skills Gap Analysis routes registered at /api/analyze")
+else:
+    print("⚠️  Skills Gap Analysis routes not available")
 
 if __name__ == "__main__":
     import uvicorn
-    print("=" * 50)
-    print("🚀 Starting Unified Backend Service")
-    print("=" * 50)
-    print("📍 Server: http://localhost:8000")
-    print("📚 API Docs: http://localhost:8000/docs")
-    print("🏥 Health: http://localhost:8000/health")
-    print("=" * 50)
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "app.main:app", 
+        host="0.0.0.0", 
+        port=8000, 
+        reload=True,
+        reload_dirs=["app", "core", "api", "cvtool", "agent"]
+    )

@@ -24,6 +24,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.15.0",
+    "html2pdf.js": "^0.12.1",
     "i18next": "^25.6.0",
     "livekit-client": "^2.15.14",
     "lucide-react": "^0.548.0",

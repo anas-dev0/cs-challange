@@ -2,9 +2,21 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
+// Define the Job interface
+interface Job {
+  title: string;
+  company: string;
+  location: string;
+  posted_date: string;
+  description?: string;
+  logo_tag?: string;
+  time_note?: string;
+  job_link: string;
+}
+
 const GetJob = () => {
-  const [jobs, setJobs] = useState([]);
-  const [error, setError] = useState(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,7 +29,7 @@ const GetJob = () => {
         const data = await response.json();
         setJobs(data.jobs);
       } catch (err) {
-        setError(err.message);
+        setError((err as Error).message);
       }
     };
 
@@ -49,7 +61,7 @@ const GetJob = () => {
 };
 
 // Small subcomponent to render a job card with expandable description
-const JobCard = ({ job }) => {
+const JobCard = ({ job }: { job: Job }) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
 
