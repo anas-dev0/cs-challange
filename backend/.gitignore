@@ -1,5 +1,8 @@
 venv/
+.venv/
 frontend/
 __pycache__/
 .env
 cv_uploads/
+*.pyc
+*.pyo
