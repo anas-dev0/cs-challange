@@ -42,6 +42,7 @@ class StartSessionRequest(BaseModel):
     candidate_email: EmailStr
     candidate_name: str
     job_title: str
+    language: str
 
 class SaveInterviewRequest(BaseModel):
     candidate_email: EmailStr

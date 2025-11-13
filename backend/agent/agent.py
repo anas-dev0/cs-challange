@@ -5,7 +5,7 @@ from livekit.agents import AgentSession, Agent
 from livekit.plugins import google, silero
 from cv_parser import extract_text_from_cv
 # Import the prompts and CV parser
-from prompts import create_initial_prompts
+from prompts import create_initial_prompts_en , create_initial_prompts_fr
 import os
 import requests
 # Import the mailing module
@@ -54,6 +54,7 @@ async def entrypoint(ctx: agents.JobContext):
                     candidate_email = data.get('candidate_email')
                     candidate_name = data.get('candidate_name')
                     job_title = data.get('job_title', 'Position')
+                    language = data.get('language')
                     print(f"✅ Got data from backend server")
             except Exception as e:
                 print(f"⚠️ Could not fetch from server: {e}")
@@ -85,21 +86,32 @@ async def entrypoint(ctx: agents.JobContext):
 
         # Generate personalized prompts
         print("🤖 Generating prompts...")
-        agent_instruction, session_instruction = create_initial_prompts(
-            cv_text=cv_text,
-            job_title=job_title,
-            job_description_text=job_description,
-        )
+        if language.lower() == "english":
+            agent_instruction, session_instruction = create_initial_prompts_en(
+                cv_text=cv_text,
+                job_title=job_title,
+                job_description_text=job_description,
+            )
+        else:
+            agent_instruction, session_instruction = create_initial_prompts_fr(
+                cv_text=cv_text,
+                job_title=job_title,
+                job_description_text=job_description,
+            )
         # agent_instruction, session_instruction = create_test_prompts(
         #     cv_text=cv_text,
         #     job_title=job_title,
         #     job_description_text=job_description,
         # )
         # Initialize session
+        if language.lower() == "english":
+            interview_language="en-US"
+        else:
+            interview_language="fr-FR"
         print("🎤 Initializing voice session...")
         session = AgentSession(
             vad=silero.VAD.load(min_silence_duration=2.5, min_speech_duration=0.5),
-            llm=google.beta.realtime.RealtimeModel(voice="charon"),
+            llm=google.beta.realtime.RealtimeModel(voice="charon", language=interview_language)
         )
         assistant = Assistant(agent_instruction)
         
@@ -134,6 +146,20 @@ async def entrypoint(ctx: agents.JobContext):
                     print("🛑 Interview terminated by assistant.")
                     assistant.interview_complete = True
                     session.shutdown()
+                if "merci pour votre temps aujourd'hui" in content.lower():
+                    print("🛑 Interview concluded by assistant.")
+                    assistant.interview_complete = True
+                    # Call async function in a synchronous callback
+                    session.shutdown()
+                    try:
+                        asyncio.create_task(send_interview_report_email(
+                            recipient_email=candidate_email,
+                            candidate_name=candidate_name, 
+                            job_title=job_title, 
+                            report_text=content
+                        ))
+                    except Exception as e:
+                        print(f"❌ Error sending email: {str(e)}")
     except Exception as e:
         print(f"❌ Error: {str(e)}")
         import traceback

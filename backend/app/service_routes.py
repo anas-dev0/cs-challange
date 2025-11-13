@@ -106,6 +106,7 @@ async def start_session(
         candidate_email = data.candidate_email
         candidate_name = data.candidate_name
         job_title = data.job_title
+        language = data.language
         
         # Normalize provided cv filename: ensure it maps to an actual saved file in UPLOAD_FOLDER
         candidate_path = os.path.join(UPLOAD_FOLDER, cv_filename)
@@ -132,7 +133,8 @@ async def start_session(
             "job_description": job_description,
             "candidate_email": candidate_email,
             "candidate_name": candidate_name,
-            "job_title": job_title
+            "job_title": job_title,
+            "language": language
         }
         print(f"📝 Session data stored for room: {room_name}")
         print(f"👤 Candidate: {candidate_name} ({candidate_email})")

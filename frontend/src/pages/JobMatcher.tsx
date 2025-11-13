@@ -6,9 +6,7 @@ import { toast } from "sonner";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -403,6 +401,7 @@ const PostJob = () => {
             <SelectValue placeholder="Select time range" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="-1">None</SelectItem>
             <SelectItem value="86400">24 hours</SelectItem>
             <SelectItem value="604800">7 days</SelectItem>
             <SelectItem value="2592000">30 days</SelectItem>
