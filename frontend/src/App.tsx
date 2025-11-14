@@ -4,7 +4,6 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import InterviewerSetup from "./pages/InterviewerSetup";
 import Interview from "./pages/Interview";
-import CVTool from "./pages/CVTool";
 import JobMatcher from "./pages/JobMatcher";
 import Pricing from "./pages/Pricing";
 import Dashboard from "./pages/Dashboard";
@@ -26,6 +25,7 @@ import "./App.css";
 import Notfound from "./pages/Notfound";
 import GetJobs from "./pages/GetJobs";
 import NoJobsFound from "./pages/NoJobsFound";
+import EnhancedCVAnalyzer from "./pages/CVTool"
 function OAuthHandler() {
   const context = useContext(AuthContext);
   const location = useLocation();
@@ -123,7 +123,7 @@ export default function App() {
                 path="/cv"
                 element={
                   <ProtectedRoute>
-                    <CVTool />
+                    <EnhancedCVAnalyzer />
                   </ProtectedRoute>
                 }
               />

@@ -1,0 +1,112 @@
+{
+  "timestamp": "2025-11-14T23:24:03.662447",
+  "structured_cv": {
+    "summary": "First-year ICT Engineering student at Sup'Com with a passion for machine learning, natural language processing, and web development. Led the development of the IndabaX Tunisia 2025 website as technical manager and placed 7th in an NLP-focused AI Anomaly Hackathon. Seeking a summer internship to apply expertise in C++, SQL, and Python to innovative projects.",
+    "contact": {
+      "name": "Anas Aouini",
+      "email": "anas.aouini@supcom.tn",
+      "phone": "+216 58934007",
+      "location": "Tunis, Tunisia",
+      "linkedin": "https://www.linkedin.com/in/anas.aouini",
+      "github": "Not provided",
+      "portfolio": "Not provided"
+    },
+    "experience": [
+      {
+        "id": "exp_1",
+        "title": "Technical Manager",
+        "company": "IndabaX Tunisia",
+        "location": "Not provided",
+        "startDate": "2024",
+        "endDate": "2025",
+        "description": "Served as technical manager, single-handedly developing a responsive website (indabaxtunisia.com/2025) using HTML, CSS, and JavaScript. Implemented SEO best practices to enhance visibility and ensured cross-device compatibility.",
+        "bullets": [
+          "Served as technical manager, single-handedly developing a responsive website (indabaxtunisia.com/2025) using HTML, CSS, and JavaScript.",
+          "Implemented SEO best practices to enhance visibility and ensured cross-device compatibility."
+        ]
+      }
+    ],
+    "education": [
+      {
+        "id": "edu_1",
+        "degree": "Engineering Cycle in Information and Communication Technologies",
+        "institution": "Sup'Com",
+        "location": "Tunis, Tunisia",
+        "startDate": "09/2024",
+        "endDate": "Present",
+        "gpa": "Not provided",
+        "description": "Not provided",
+        "achievements": []
+      },
+      {
+        "id": "edu_2",
+        "degree": "Preparatory Cycle for Engineering Studies, Focused on mathematics, physics, and foundational engineering principles",
+        "institution": "IPEIN - Institut Préparatoire aux Études d'Ingénieur de Nabeul",
+        "location": "Nabeul, Tunisia",
+        "startDate": "09/2022",
+        "endDate": "06/2024",
+        "gpa": "Not provided",
+        "description": "Not provided",
+        "achievements": []
+      }
+    ],
+    "skills": {
+      "technical": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Flask",
+        "Python",
+        "C++",
+        "SQL Databases",
+        "Machine Learning (Beginner)",
+        "Deep Learning (Beginner)"
+      ],
+      "languages": [
+        "Arabic (Native)",
+        "English (Fluent)",
+        "French (Fluent)",
+        "German (Beginner)"
+      ],
+      "tools": [],
+      "soft_skills": [
+        "Problem-Solving",
+        "Adaptability",
+        "Team Collaboration"
+      ],
+      "other": []
+    },
+    "projects": [],
+    "certifications": [],
+    "awards": [],
+    "publications": [],
+    "activities": [
+      {
+        "id": "act_1",
+        "organization": "GDG Sup'Com",
+        "title": "Participant (AI Anomaly Hackathon)",
+        "startDate": "2024",
+        "endDate": "2024",
+        "description": "Participated in first-ever NLP-focused hackathon, collaborating on a natural language processing project using Python, with team placing 7th out of 18 teams. Demonstrated teamwork and foundational NLP skills in a competitive setting."
+      },
+      {
+        "id": "act_2",
+        "organization": "ENIT",
+        "title": "Competitor (League of Coders)",
+        "startDate": "2024",
+        "endDate": "2024",
+        "description": "Competed in a competitive programming contest, solving algorithmic challenges using C++ and Python. Enhanced problem-solving and coding efficiency under time constraints."
+      }
+    ],
+    "volunteer": [],
+    "other_sections": {}
+  },
+  "original_text": "Processed from file",
+  "job_description": "",
+  "file_info": {
+    "filename": "Anas_Aouini_CV (11).pdf",
+    "file_size_bytes": 43936,
+    "links_found": 3,
+    "processing_method": "PDF visual analysis + extracted links"
+  }
+}

@@ -12,7 +12,7 @@ from .oauth_routes import router as oauth_router
 from .service_routes import router as service_router
 from .job_routes import router as job_router
 from .middleware import logging_middleware
-
+from .CvTools import router as cv_router
 # Import Skills Gap Analysis components
 import sys
 import os
@@ -210,7 +210,7 @@ app.include_router(auth_router, tags=["Authentication"])
 app.include_router(oauth_router, tags=["OAuth"])
 app.include_router(service_router, tags=["Services"])
 app.include_router(job_router, tags=["Jobs"])
-
+app.include_router(cv_router, tags=["CvTools"])
 
 # Include Skills Gap Analysis router if available
 if SKILLS_GAP_ENABLED and analysis:

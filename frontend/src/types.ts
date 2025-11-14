@@ -97,3 +97,165 @@ export interface FullAnalysisResponse {
   learning_paths: LearningPath[]
   resume_edits: ResumeEdit[]
 }
+export interface CVFile {
+  name: string;
+  size: number;
+  type: string;
+}
+
+export interface ContactInfo {
+  name?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  linkedin?: string;
+  github?: string;
+  website?: string;
+}
+
+export interface Experience {
+  title?: string;
+  company?: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
+  bullets?: string[];
+}
+
+export interface Education {
+  degree?: string;
+  institution?: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
+}
+
+export interface Project {
+  name?: string;
+  description?: string;
+  technologies?: string[];
+  url?: string;
+}
+
+export interface Certification {
+  name?: string;
+  issuer?: string;
+  date?: string;
+  credential?: string;
+}
+
+export interface Activity {
+  organization?: string;
+  title?: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
+}
+
+export interface Skills {
+  [category: string]: string[];
+}
+
+export interface StructuredCV {
+  contact?: ContactInfo;
+  summary?: string;
+  experience?: Experience[];
+  education?: Education[];
+  projects?: Project[];
+  skills?: Skills;
+  certifications?: Certification[];
+  activities?: Activity[];
+  other_sections?: {
+    [key: string]: any[];
+  };
+  original_text?: string;
+}
+
+export interface FieldSuggestion {
+  suggestionId: number;
+  targetField: string;
+  fieldPath: (string | number)[];
+  fieldId?: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  issue_type: string;
+  problem: string;
+  originalValue: string;
+  improvedValue: string;
+  explanation: string;
+}
+
+export interface SectionAnalysis {
+  section: string;
+  status: string;
+  issues: string[];
+  suggestions: string[];
+}
+
+export interface JobMatch {
+  relevance_score: number;
+  keyword_matches?: string[];
+  missing_keywords?: string[];
+  recommendations?: string[];
+}
+
+export interface TopPriority {
+  priority: number;
+  action: string;
+  impact: 'High' | 'Medium' | 'Low';
+  time_estimate: string;
+  category: string;
+}
+
+export interface Analysis {
+  overall_score: number;
+  ats_score: number;
+  field_suggestions?: FieldSuggestion[];
+  quick_wins?: string[];
+  section_analysis?: SectionAnalysis[];
+  job_match_analysis?: JobMatch;
+  top_priorities?: TopPriority[];
+  metadata?: {
+    filename?: string;
+    file_size_bytes?: number;
+  };
+  structured?: StructuredCV;
+}
+
+export interface OriginalFile {
+  filename: string;
+  content_type: string;
+  data: string;
+  size: number;
+}
+
+export interface AnalyzeResponse {
+  summary: string;
+  status: string;
+  structured_cv: StructuredCV;
+  original_file?: OriginalFile;
+  file_info: {
+    filename?: string;
+    file_size_bytes?: number;
+    links_found?: number;
+    processing_method?: string;
+    source?: string;
+  };
+  gemini_analysis?: {
+    status: string;
+    analysis: Partial<Analysis>;
+  };
+}
+
+export interface ApplySuggestionResponse {
+  status: string;
+  updated_cv: StructuredCV;
+  applied_suggestion: FieldSuggestion;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  error?: string;
+}
+

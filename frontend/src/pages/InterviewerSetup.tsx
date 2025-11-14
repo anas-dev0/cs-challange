@@ -96,8 +96,8 @@ export default function InterviewerSetup() {
   };
 
   const handleBack = () => {
-    navigate("/");
-    toast.info("Returned to home page");
+    navigate("/dashboard");
+    toast.info("Returned to home Dashboard");
   };
   const { t } = useTranslation();
   const [fileName, setFileName] = useState("");
