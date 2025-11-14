@@ -52,7 +52,7 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="text-xl md:text-2xl mb-10 max-w-2xl mx-auto font-medium"
           >
-            Practice with AI-powered simulations, get instant feedback, and land your dream job with confidence.
+            AI-powered interview practice, CV optimization, job matching, and skills analysis all in one platform.
           </motion.p>
           
           {/* CTA Buttons */}
@@ -87,26 +87,7 @@ export default function Home() {
             )}
           </motion.div>
 
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-            className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto"
-          >
-            <div>
-              <div className="text-3xl font-bold text-gradient">10K+</div>
-              <div className="text-sm text-muted-foreground mt-1">Users</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gradient">50K+</div>
-              <div className="text-sm text-muted-foreground mt-1">Interviews</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-gradient">95%</div>
-              <div className="text-sm text-muted-foreground mt-1">Success Rate</div>
-            </div>
-          </motion.div>
+          
         </div>
       </section>
 
@@ -127,9 +108,9 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-xl text-muted-foreground"
+            className="text-xl text-muted-foreground max-w-3xl mx-auto"
           >
-            Everything you need to ace your next interview
+            Everything you need to ace your next interview and advance your career
           </motion.p>
         </div>
 
@@ -148,8 +129,8 @@ export default function Home() {
               <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <FaBrain className="text-2xl text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-card-foreground mb-3">AI-Powered Feedback</h3>
-              <p className="text-muted-foreground">Get instant, personalized feedback on your answers with actionable insights to improve.</p>
+              <h3 className="text-xl font-semibold text-card-foreground mb-3">AI Interview Coach</h3>
+              <p className="text-muted-foreground">Adaptive AI interviewer that provides real-time feedback and detailed analysis of your responses.</p>
             </div>
           </motion.div>
 
@@ -167,8 +148,8 @@ export default function Home() {
               <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <FaChartLine className="text-2xl text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-card-foreground mb-3">Track Progress</h3>
-              <p className="text-muted-foreground">Monitor your improvement over time with detailed analytics and performance metrics.</p>
+              <h3 className="text-xl font-semibold text-card-foreground mb-3">Smart CV & Career Tools</h3>
+              <p className="text-muted-foreground">AI-powered CV optimization, ATS scoring, job matching, and personalized skill recommendations.</p>
             </div>
           </motion.div>
 
@@ -186,37 +167,74 @@ export default function Home() {
               <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <FaStar className="text-2xl text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-card-foreground mb-3">Real Scenarios</h3>
-              <p className="text-muted-foreground">Practice with realistic interview scenarios from top companies across industries.</p>
+              <h3 className="text-xl font-semibold text-card-foreground mb-3">Comprehensive Analytics</h3>
+              <p className="text-muted-foreground">Track progress with detailed dashboards, performance metrics, and personalized insights.</p>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Social Proof */}
+
+      {/* Services Section */}
       <section className="relative container py-20">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="background-gradient rounded-3xl p-12 text-center text-white shadow-2xl"
-        >
-          <div className="flex justify-center gap-1 mb-4">
-            {[...Array(5)].map((_, i) => <FaStar key={i} className="text-yellow-300 text-2xl" />)}
-          </div>
-          <h3 className="text-3xl font-bold mb-4">Loved by thousands of job seekers</h3>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            "This platform helped me land my dream job at a FAANG company. The AI feedback was incredibly detailed!"
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <div className="w-12 h-12 bg-white/20 rounded-full"></div>
-            <div className="text-left">
-              <div className="font-semibold">Sarah Chen</div>
-              <div className="text-sm text-white/80">Software Engineer at Google</div>
-            </div>
-          </div>
-        </motion.div>
+        <div className="text-center mb-16">
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-4xl font-bold text-foreground mb-4"
+          >
+            Complete Career Development Suite
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-xl text-muted-foreground max-w-3xl mx-auto"
+          >
+            All the tools you need to succeed in your job search journey
+          </motion.p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {[
+            {
+              title: ' AI Interview Practice',
+              desc: 'Adaptive AI interviewer with instant feedback and performance evaluation.'
+            },
+            {
+              title: ' CV Optimization',
+              desc: 'AI-powered analysis, ATS compatibility checks, and improvement suggestions.'
+            },
+            {
+              title: ' Smart Job Matching',
+              desc: 'Find relevant opportunities with intelligent matching based on your profile.'
+            },
+            {
+              title: ' Skills Gap Analysis',
+              desc: 'Identify missing skills and get personalized learning recommendations.'
+            },
+            {
+              title: ' Performance Dashboard',
+              desc: 'Track progress with detailed analytics and session history.'
+            }
+          ].map((service, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              whileHover={{ y: -5 }}
+              className="bg-card rounded-xl p-6 border border-border hover:border-primary shadow-sm hover:shadow-lg transition-all"
+            >
+              <h3 className="text-lg font-semibold text-card-foreground mb-2">{service.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{service.desc}</p>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* CTA Section */}
@@ -235,7 +253,7 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-xl text-muted-foreground mb-8"
+          className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
         >
           Join thousands of successful candidates today
         </motion.p>

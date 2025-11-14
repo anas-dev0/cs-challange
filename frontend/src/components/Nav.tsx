@@ -30,6 +30,7 @@ export default function Nav() {
 
           {/* center: main links */}
           <nav className="justify-self-center flex items-center gap-8">
+            <Link className="text-sm font-medium text-white/70 hover:text-white transition-colors" to="/">Home</Link>
             <Link className="text-sm font-medium text-white/70 hover:text-white transition-colors" to="/about">About</Link>
             <Link className="text-sm font-medium text-white/70 hover:text-white transition-colors" to="/pricing">Pricing</Link>
           </nav>

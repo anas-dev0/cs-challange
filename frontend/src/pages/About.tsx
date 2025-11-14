@@ -38,14 +38,17 @@ export default function About() {
           className="order-2 md:order-1"
         >
           <h2 className="text-2xl font-bold text-foreground mb-4">Our Mission</h2>
+          <p className="leading-relaxed text-[#D1D5DB] mb-4">
+            We're transforming how professionals prepare for career opportunities. Job searching and interview preparation shouldn't be overwhelming we make it accessible, personalized, and measurable.
+          </p>
           <p className="leading-relaxed text-[#D1D5DB]">
-            Interviews can be stressful and unpredictable. We believe preparation should be accessible, personalized, and measurable.
-            UtopiaHire simulates real-world interviews, provides immediate feedback, and guides your improvement over time.
+            Our platform combines AI-powered interview practice, CV optimization, job matching, skills analysis, and comprehensive analytics all in one place, supported in multiple languages.
           </p>
           <ul className="mt-6 space-y-3 text-foreground">
-            <li className="flex items-center gap-2"><FaCheckCircle className="text-primary" /> AI-driven interview practice</li>
-            <li className="flex items-center gap-2"><FaCheckCircle className="text-primary" /> Actionable, structured feedback</li>
-            <li className="flex items-center gap-2"><FaCheckCircle className="text-primary" /> Career tools across your journey</li>
+            <li className="flex items-center gap-2"><FaCheckCircle className="text-primary" /> End-to-end career development platform</li>
+            <li className="flex items-center gap-2"><FaCheckCircle className="text-primary" /> AI-powered tools for every job search stage</li>
+            <li className="flex items-center gap-2"><FaCheckCircle className="text-primary" /> Personalized insights and recommendations</li>
+            <li className="flex items-center gap-2"><FaCheckCircle className="text-primary" /> Multi-language support (EN, FR, AR)</li>
           </ul>
         </motion.div>
         <motion.div
@@ -162,8 +165,8 @@ export default function About() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="rounded-2xl p-6 bg-card border border-primary/20 shadow-md hover:shadow-xl transition-all"
           >
-            <h4 className="font-semibold text-card-foreground mb-2">AI Interviewer</h4>
-            <p className="text-muted-foreground">Practice behavioral and technical interviews with instant feedback.</p>
+            <h4 className="font-semibold text-card-foreground mb-2"> AI Interview Simulator</h4>
+            <p className="text-muted-foreground">Adaptive AI interviewer for behavioral and technical interviews with instant feedback.</p>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -172,8 +175,8 @@ export default function About() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="rounded-2xl p-6 bg-card border border-primary/20 shadow-md hover:shadow-xl transition-all"
           >
-            <h4 className="font-semibold text-card-foreground mb-2">CV Reviewer & Enhancer</h4>
-            <p className="text-muted-foreground">Get suggestions to improve clarity, impact and keyword alignment.</p>
+            <h4 className="font-semibold text-card-foreground mb-2"> CV Optimization Suite</h4>
+            <p className="text-muted-foreground">AI-powered analysis with ATS compatibility scoring and impactful improvement suggestions.</p>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -182,8 +185,28 @@ export default function About() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="rounded-2xl p-6 bg-card border border-primary/20 shadow-md hover:shadow-xl transition-all"
           >
-            <h4 className="font-semibold text-card-foreground mb-2">Job Matcher</h4>
-            <p className="text-muted-foreground">Match your profile with relevant roles and get tailored preparation.</p>
+            <h4 className="font-semibold text-card-foreground mb-2"> Intelligent Job Matching</h4>
+            <p className="text-muted-foreground">Find relevant positions with smart matching algorithm and fit scores.</p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="rounded-2xl p-6 bg-card border border-primary/20 shadow-md hover:shadow-xl transition-all"
+          >
+            <h4 className="font-semibold text-card-foreground mb-2"> Skills Gap Analysis</h4>
+            <p className="text-muted-foreground">Identify skill gaps and receive personalized learning paths with curated resources.</p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="rounded-2xl p-6 bg-card border border-primary/20 shadow-md hover:shadow-xl transition-all"
+          >
+            <h4 className="font-semibold text-card-foreground mb-2"> Comprehensive Dashboard</h4>
+            <p className="text-muted-foreground">Track your progress with detailed analytics and personalized insights.</p>
           </motion.div>
         </div>
       </section>
