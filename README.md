@@ -379,7 +379,6 @@ For production deployment:
 
 ### Starting the Application
 
-#### Option 1: Manual Start
 
 ```bash
 # Terminal 1: Start database
@@ -388,20 +387,19 @@ docker-compose up
 # Terminal 2: Start backend
 cd backend
 source venv/bin/activate  # or venv\Scripts\activate on Windows
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python -m app.main
 
-# Terminal 3: Start frontend
+# Terminal 3 : Start Agent
+cd backend
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+cd agent
+python agent.py dev
+
+# Terminal 4: Start frontend
 cd frontend
 npm run dev
 ```
 
-#### Option 2: Concurrent Start (requires setup)
-
-```bash
-# From project root
-npm install -g concurrently
-npm run start
-```
 
 ### Accessing the Application
 
