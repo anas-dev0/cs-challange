@@ -80,7 +80,15 @@ const JobCard = ({ job }: { job: Job }) => {
     // Navigate to the interview setup page
     navigate("/interviewer/setup");
   };
-
+  const handleMakePersonalizedCv = ()=> {
+    localStorage.setItem("cvtool_job_description", description);
+    navigate("/cv");
+  }
+const handleSkillGap = ()=> {
+  localStorage.setItem("gap_job_description",description);
+  localStorage.setItem("gap_job_title",job.title);
+  navigate("/skills-gap");
+}
   return (
     <div className="backdrop-blur-xl bg-black/40 rounded-2xl p-[25px] shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] duration-[0.25s] ease-[ease] hover:-translate-y-1.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)]">
       <div className="flex items-center gap-3 mb-2">
@@ -163,6 +171,15 @@ const JobCard = ({ job }: { job: Job }) => {
         <Button variant="outline" onClick={handleTakeInterview}>
           <p className="text-white">Take an Interview</p>
         </Button>
+      </div>
+      <div className="flex gap-3 mt-4">
+        <Button variant="outline" onClick={handleMakePersonalizedCv}>
+          <p className="text-white">Correct Cv</p>
+        </Button>
+        <Button variant="outline" onClick={handleSkillGap}>
+          <p className="text-white">Check Skill gap</p>
+        </Button>
+
       </div>
     </div>
   );

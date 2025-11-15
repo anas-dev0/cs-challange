@@ -2,7 +2,7 @@
  * Main App Component
  * Lightweight orchestrator for CV analysis application
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, FileText, Briefcase } from "lucide-react";
 import FileUpload from "../components/upload/FileUpload";
 import AnalysisContainer from "../components/analysis/AnalysisContainer";
@@ -18,6 +18,11 @@ import type {
   FieldSuggestion,
 } from "../types";
 
+// localStorage keys for CVTool
+const STORAGE_KEYS = {
+  JOB_DESCRIPTION: "cvtool_job_description",
+};
+
 export default function EnhancedCVAnalyzer() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [jobDesc, setJobDesc] = useState("");
@@ -28,6 +33,21 @@ export default function EnhancedCVAnalyzer() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Load job description from localStorage on mount
+  useEffect(() => {
+    const savedJobDesc = localStorage.getItem(STORAGE_KEYS.JOB_DESCRIPTION);
+    if (savedJobDesc) {
+      setJobDesc(savedJobDesc);
+    }
+  }, []);
+
+  // Save job description to localStorage whenever it changes
+  useEffect(() => {
+    if (jobDesc) {
+      localStorage.setItem(STORAGE_KEYS.JOB_DESCRIPTION, jobDesc);
+    }
+  }, [jobDesc]);
 
   const handleFileSelect = (file: File) => {
     const validation = validateCVFile(file);
@@ -127,7 +147,7 @@ export default function EnhancedCVAnalyzer() {
     setAnalysis(null);
     setStructuredCV(null);
     setCvFile(null);
-    setJobDesc("");
+    // Don't clear jobDesc - keep it for next analysis
     setCvText("");
     setOriginalFile(null);
     setError(null);

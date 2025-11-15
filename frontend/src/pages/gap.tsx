@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { FullAnalysisResponse, GapItem } from '../types';
 import { ReportCard } from '../components/skills/ReportCard';
@@ -7,6 +7,12 @@ import { UploadCloud, FileText, CheckCircle, AlertTriangle, ArrowRight, Brain, B
 
 // Get the API URL from environment or default
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+// localStorage keys for Skills Gap Analyzer
+const STORAGE_KEYS = {
+  JOB_TITLE: "gap_job_title",
+  JOB_DESCRIPTION: "gap_job_description",
+};
 
 export default function SkillsGapAnalyzer() {
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -19,6 +25,33 @@ export default function SkillsGapAnalyzer() {
   
   const [showAllMissing, setShowAllMissing] = useState(false);
   const [showAllMatched, setShowAllMatched] = useState(false);
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedJobTitle = localStorage.getItem(STORAGE_KEYS.JOB_TITLE);
+    const savedJobDescription = localStorage.getItem(STORAGE_KEYS.JOB_DESCRIPTION);
+
+    if (savedJobTitle) {
+      setJobTitle(savedJobTitle);
+    }
+    if (savedJobDescription) {
+      setJobDescription(savedJobDescription);
+    }
+  }, []);
+
+  // Save job title to localStorage whenever it changes
+  useEffect(() => {
+    if (jobTitle) {
+      localStorage.setItem(STORAGE_KEYS.JOB_TITLE, jobTitle);
+    }
+  }, [jobTitle]);
+
+  // Save job description to localStorage whenever it changes
+  useEffect(() => {
+    if (jobDescription) {
+      localStorage.setItem(STORAGE_KEYS.JOB_DESCRIPTION, jobDescription);
+    }
+  }, [jobDescription]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -136,7 +169,7 @@ export default function SkillsGapAnalyzer() {
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gradient">
           Skills Gap Analyzer
         </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
+        <p className="mt-4 text-lg text-[#D1D5DB]">
           Upload your CV and paste a job description to see where you match, 
           what’s missing, and get an AI-powered plan to close the gap.
         </p>
