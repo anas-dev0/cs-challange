@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { FullAnalysisResponse, GapItem } from "../types";
 import { ReportCard } from "../components/skills/ReportCard";
 import { SkillBar } from "../components/skills/SkillBar";
+import { useSharedCV } from "../hooks/useSharedCV";
 import {
   UploadCloud,
   FileText,
@@ -26,7 +27,7 @@ const STORAGE_KEYS = {
 };
 
 export default function SkillsGapAnalyzer() {
-  const [cvFile, setCvFile] = useState<File | null>(null);
+  const { cvFile, saveCV } = useSharedCV();
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
 
@@ -71,10 +72,9 @@ export default function SkillsGapAnalyzer() {
       const file = e.target.files[0];
       if (file.type !== "application/pdf") {
         toast.error("Invalid file type. Please upload a PDF.");
-        setCvFile(null);
         e.target.value = "";
       } else {
-        setCvFile(file);
+        saveCV(file);
         toast.success(`File "${file.name}" selected.`);
       }
     }

@@ -51,6 +51,9 @@ REGION_8_COUNTRIES = {
 # Allowed max_jobs values
 ALLOWED_MAX_JOBS = {10, 20, 30}
 
+# Experience levels
+EXPERIENCE_LEVELS = {"internship", "entry_level", "associate", "mid_senior", "director", "executive"}
+
 
 # Pydantic models for request/response validation
 class JobSearchRequest(BaseModel):
@@ -58,6 +61,7 @@ class JobSearchRequest(BaseModel):
     location: str
     max_jobs: int = 10
     timeRange: str = ""
+    experience_levels: List[str] = []
 
     @field_validator('location')
     @classmethod
@@ -73,6 +77,13 @@ class JobSearchRequest(BaseModel):
     def validate_max_jobs(cls, v: int) -> int:
         if v not in ALLOWED_MAX_JOBS:
             raise ValueError(f"max_jobs must be one of: {', '.join(map(str, sorted(ALLOWED_MAX_JOBS)))}")
+        return v
+
+    @field_validator('experience_levels')
+    @classmethod
+    def validate_experience_levels(cls, v: List[str]) -> List[str]:
+        if v and not all(level in EXPERIENCE_LEVELS for level in v):
+            raise ValueError(f"experience_levels must contain only: {', '.join(sorted(EXPERIENCE_LEVELS))}")
         return v
 
 
@@ -93,6 +104,7 @@ class JobData:
     logo_tag: str = ""
     in_time_range: bool = True
     time_note: str = ""
+    experience_level: str = "Not specified"
 
 
 class ScraperConfig:
@@ -187,6 +199,38 @@ class LinkedInJobsScraper:
         except (ValueError, IndexError):
             return True, ""
 
+    def _extract_experience_level(self, job_card: BeautifulSoup, description: str = "") -> str:
+        """
+        Extract experience level from job card or description.
+        LinkedIn doesn't always show experience level directly, so we try to infer it from text.
+        """
+        try:
+            # First, try to find explicit experience level metadata in the card
+            # Check for span or div with experience level information
+            level_indicators = {
+                "internship": ["intern", "internship"],
+                "entry_level": ["entry level", "entry-level", "graduate", "fresh", "junior", "junior level"],
+                "associate": ["associate", "level 2"],
+                "mid_senior": ["mid-level", "mid level", "senior", "lead", "5+ years", "6+ years", "7+ years", "8+ years"],
+                "director": ["director", "vp", "vice president", "head of"],
+                "executive": ["ceo", "cto", "cfo", "executive", "president", "chief"]
+            }
+            
+            # Combine card text and description for analysis
+            text_to_analyze = (job_card.get_text().lower() + " " + description.lower()).strip()
+            
+            # Check for each level
+            for level, keywords in level_indicators.items():
+                for keyword in keywords:
+                    if keyword in text_to_analyze:
+                        return level
+            
+            # Default to not specified if no match
+            return "Not specified"
+        except Exception as e:
+            print(f"Error extracting experience level: {str(e)}")
+            return "Not specified"
+
     def _extract_job_data(self, job_card: BeautifulSoup, time_range: str = "") -> Optional[JobData]:
         try:
             # title
@@ -257,6 +301,9 @@ class LinkedInJobsScraper:
                 except Exception:
                     pass
 
+            # Extract experience level
+            experience_level = self._extract_experience_level(job_card, description)
+
             return JobData(
                 title=title,
                 company=company,
@@ -267,7 +314,8 @@ class LinkedInJobsScraper:
                 logo=logo,
                 logo_tag=logo_tag,
                 in_time_range=in_range,
-                time_note=time_note
+                time_note=time_note,
+                experience_level=experience_level
             )
         except Exception as e:
             print(f"Failed to extract job data: {str(e)}")
@@ -285,8 +333,10 @@ class LinkedInJobsScraper:
             raise RuntimeError(f"Request failed: {str(e)}")
 
     def scrape_jobs(
-        self, keywords: str, location: str, max_jobs: int = 50, time_range: str = ""
+        self, keywords: str, location: str, max_jobs: int = 50, time_range: str = "", experience_levels: List[str] = None
     ) -> List[JobData]:
+        if experience_levels is None:
+            experience_levels = []
         max_jobs = int(max_jobs)
         all_jobs = []
         start = 0
@@ -303,6 +353,9 @@ class LinkedInJobsScraper:
                 for card in job_cards:
                     job_data = self._extract_job_data(card, time_range)
                     if job_data:
+                        # Filter by experience level if specified
+                        if experience_levels and job_data.experience_level not in experience_levels:
+                            continue
                         all_jobs.append(job_data)
                         if len(all_jobs) >= max_jobs:
                             break
@@ -345,18 +398,22 @@ async def search_jobs(request: JobSearchRequest):
     - **location**: Country (must be from Region 8: Europe, Middle East, or Africa)
     - **max_jobs**: Maximum number of jobs to scrape (10, 20, or 30)
     - **timeRange**: Time range filter in seconds (optional)
+    - **experience_levels**: Filter by experience levels (optional)
     """
     try:
         print(f"🔍 Starting job search: {request.keywords} in {request.location}")
         print(f"📊 Max jobs: {request.max_jobs}, Time range: {request.timeRange or 'Any'}")
         print(f"🌍 Region 8 country validated: {request.location}")
+        if request.experience_levels:
+            print(f"🎓 Experience levels filter: {', '.join(request.experience_levels)}")
         
         scraper = LinkedInJobsScraper()
         jobs = scraper.scrape_jobs(
             keywords=request.keywords,
             location=request.location,
             max_jobs=request.max_jobs,
-            time_range=request.timeRange
+            time_range=request.timeRange,
+            experience_levels=request.experience_levels
         )
         scraper.save_results(jobs, JOBS_FILE)
 

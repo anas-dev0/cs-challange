@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { AuthContext } from "@/AuthContext";
+import { useSharedCV } from "../hooks/useSharedCV";
 import {
   Select,
   SelectContent,
@@ -32,22 +33,21 @@ import {
 } from "@/components/ui/select";
 const TOKEN_SERVER_URL = "http://localhost:8000";
 
-// localStorage keys
+// localStorage keys - only for interview-specific data
 const STORAGE_KEYS = {
   JOB_DESCRIPTION: "interviewer_job_description",
   JOB_TITLE: "interviewer_job_title",
   CANDIDATE_NAME: "interviewer_candidate_name",
   CANDIDATE_EMAIL: "interviewer_candidate_email",
   LANGUAGE: "interviewer_language",
-  FILE_NAME: "interviewer_file_name",
-  FILE_DATA: "interviewer_file_data",
-  FILE_UPLOADED: "interviewer_file_uploaded",
 };
 
 export default function InterviewerSetup() {
   const navigate = useNavigate();
   const { setCvFile, setInterviewConfig, addHistory } = useServices();
   const [loading, setLoading] = useState(false);
+  const { cvFile, saveCV, clearSharedCV } = useSharedCV();
+  const [uploading, setUploading] = useState(false);
 
   const handleUploadComplete = async (
     filename: string,
@@ -100,10 +100,6 @@ export default function InterviewerSetup() {
     toast.info("Returned to home Dashboard");
   };
   const { t } = useTranslation();
-  const [fileName, setFileName] = useState("");
-  const [uploaded, setUploaded] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [candidateEmail, setCandidateEmail] = useState("");
   const [candidateName, setCandidateName] = useState("");
@@ -123,45 +119,12 @@ export default function InterviewerSetup() {
       STORAGE_KEYS.CANDIDATE_EMAIL
     );
     const savedLanguage = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
-    const savedFileName = localStorage.getItem(STORAGE_KEYS.FILE_NAME);
-    const savedFileData = localStorage.getItem(STORAGE_KEYS.FILE_DATA);
-    const savedFileUploaded = localStorage.getItem(STORAGE_KEYS.FILE_UPLOADED);
 
     if (savedJobDescription) setJobDescription(savedJobDescription);
     if (savedJobTitle) setJobTitle(savedJobTitle);
     if (savedCandidateName) setCandidateName(savedCandidateName);
     if (savedCandidateEmail) setCandidateEmail(savedCandidateEmail);
     if (savedLanguage) setSelectedLanguage(savedLanguage);
-
-    // Restore file if it was saved
-    if (savedFileName && savedFileData && savedFileUploaded === "true") {
-      try {
-        // Convert base64 back to file
-        const byteString = atob(savedFileData.split(",")[1]);
-        const mimeString = savedFileData
-          .split(",")[0]
-          .split(":")[1]
-          .split(";")[0];
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-          ia[i] = byteString.charCodeAt(i);
-        }
-        const blob = new Blob([ab], { type: mimeString });
-        const restoredFile = new File([blob], savedFileName, {
-          type: mimeString,
-        });
-
-        setFile(restoredFile);
-        setFileName(savedFileName);
-        setUploaded(true);
-      } catch (error) {
-        console.error("Error restoring file from localStorage:", error);
-        localStorage.removeItem(STORAGE_KEYS.FILE_NAME);
-        localStorage.removeItem(STORAGE_KEYS.FILE_DATA);
-        localStorage.removeItem(STORAGE_KEYS.FILE_UPLOADED);
-      }
-    }
   }, []);
 
   // Save text inputs to localStorage whenever they change
@@ -220,8 +183,6 @@ export default function InterviewerSetup() {
         return;
       }
 
-      setFile(selectedFile);
-      setFileName(selectedFile.name);
       setUploading(true);
 
       try {
@@ -246,33 +207,15 @@ export default function InterviewerSetup() {
 
         const data = await response.json();
         console.log("File uploaded:", data);
-        setUploaded(true);
-        toast.success(t("upload.uploadSuccess"));
 
-        // Save file to localStorage if it's under 5MB
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-        if (selectedFile.size < MAX_FILE_SIZE) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const base64Data = reader.result as string;
-            localStorage.setItem(STORAGE_KEYS.FILE_NAME, selectedFile.name);
-            localStorage.setItem(STORAGE_KEYS.FILE_DATA, base64Data);
-            localStorage.setItem(STORAGE_KEYS.FILE_UPLOADED, "true");
-          };
-          reader.readAsDataURL(selectedFile);
-        } else {
-          // File is too large for localStorage, just save the filename
-          localStorage.setItem(STORAGE_KEYS.FILE_NAME, selectedFile.name);
-          localStorage.setItem(STORAGE_KEYS.FILE_UPLOADED, "true");
-        }
+        // Save to shared CV storage
+        saveCV(selectedFile);
+        toast.success(t("upload.uploadSuccess"));
       } catch (error) {
         console.error("Error uploading file:", error);
         toast.error(
           t("upload.uploadError") || "Failed to upload file. Please try again."
         );
-        setUploaded(false);
-        setFileName("");
-        setFile(null);
       } finally {
         setUploading(false);
       }
@@ -332,9 +275,9 @@ export default function InterviewerSetup() {
       return;
     }
 
-    if (uploaded && file && fileName) {
+    if (cvFile) {
       handleUploadComplete(
-        fileName,
+        cvFile.name,
         jobDescription,
         candidateEmail,
         candidateName,
@@ -373,7 +316,7 @@ export default function InterviewerSetup() {
           {/* Upload Area */}
           <div
             className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
-              uploaded
+              cvFile
                 ? "border-green-500 bg-green-50 dark:bg-green-950/20"
                 : "border-gray-300 bg-gray-50 dark:bg-gray-900/20"
             }`}
@@ -387,7 +330,7 @@ export default function InterviewerSetup() {
               className="hidden"
             />
 
-            {!uploaded ? (
+            {!cvFile ? (
               <div className="space-y-4">
                 <Upload
                   className={`w-12 h-12 mx-auto ${
@@ -427,18 +370,12 @@ export default function InterviewerSetup() {
                     {t("upload.uploadSuccess")}
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    {fileName}
+                    {cvFile?.name}
                   </p>
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setUploaded(false);
-                      setFileName("");
-                      setFile(null);
-                      // Clear file from localStorage when uploading a different file
-                      localStorage.removeItem(STORAGE_KEYS.FILE_NAME);
-                      localStorage.removeItem(STORAGE_KEYS.FILE_DATA);
-                      localStorage.removeItem(STORAGE_KEYS.FILE_UPLOADED);
+                      clearSharedCV();
                     }}
                     disabled={loading}
                     className="border-purple-600 hover:bg-purple-600 hover:text-white"
@@ -563,7 +500,7 @@ export default function InterviewerSetup() {
             <Button
               onClick={handleContinue}
               disabled={
-                !uploaded ||
+                !cvFile ||
                 loading ||
                 uploading ||
                 !jobDescription.trim() ||

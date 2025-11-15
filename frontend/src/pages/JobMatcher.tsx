@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Loader2,ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import {
   Select,
@@ -10,6 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+// Experience levels like LinkedIn
+const EXPERIENCE_LEVELS = [
+  { value: "internship", label: "Internship" },
+  { value: "entry_level", label: "Entry level" },
+  { value: "associate", label: "Associate" },
+  { value: "mid_senior", label: "Mid-Senior level" },
+  { value: "director", label: "Director" },
+  { value: "executive", label: "Executive" },
+];
 
 // Region 8 countries (Europe, Middle East, and Africa)
 const REGION_8_COUNTRIES = [
@@ -168,6 +178,7 @@ const PostJob = () => {
     location: "",
     max_jobs: "",
     timeRange: "",
+    experience_levels: [] as string[],
   });
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -182,6 +193,10 @@ const PostJob = () => {
     if (lastSearch) {
       try {
         const parsedSearch = JSON.parse(lastSearch);
+        // Ensure experience_levels exists (for compatibility with old saved data)
+        if (!parsedSearch.experience_levels) {
+          parsedSearch.experience_levels = [];
+        }
         setFormData(parsedSearch);
         setSearchQuery(parsedSearch.location || "");
       } catch (error) {
@@ -255,6 +270,16 @@ const PostJob = () => {
   // Handler for time range select
   const handleTimeRangeChange = (value: string) => {
     setFormData({ ...formData, timeRange: value });
+  };
+
+  // Handler for experience level checkboxes
+  const handleExperienceLevelChange = (level: string) => {
+    setFormData((prevData) => {
+      const levels = prevData.experience_levels.includes(level)
+        ? prevData.experience_levels.filter((l) => l !== level)
+        : [...prevData.experience_levels, level];
+      return { ...prevData, experience_levels: levels };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -407,6 +432,30 @@ const PostJob = () => {
             <SelectItem value="2592000">30 days</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+      <div>
+        <label className="font-bold block mb-3 text-[#D1D5DB]">
+          Experience Level:
+        </label>
+        <div className="space-y-2 bg-gray-900/50 p-4 rounded-[6px]">
+          {EXPERIENCE_LEVELS.map((level) => (
+            <div key={level.value} className="flex items-center">
+              <input
+                type="checkbox"
+                id={level.value}
+                checked={(formData.experience_levels || []).includes(level.value)}
+                onChange={() => handleExperienceLevelChange(level.value)}
+                className="w-4 h-4 rounded border-gray-300 text-[#007bff] focus:ring-[#007bff] cursor-pointer"
+              />
+              <label
+                htmlFor={level.value}
+                className="ml-3 text-[#D1D5DB] cursor-pointer select-none"
+              >
+                {level.label}
+              </label>
+            </div>
+          ))}
+        </div>
       </div>
       <div className="has-[button:disabled]:cursor-not-allowed mt-10">
         <Button

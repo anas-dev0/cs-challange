@@ -11,6 +11,7 @@ import LoadingSpinner from "../components/ui/LoadingSpinner";
 import ErrorMessage from "../components/ui/ErrorMessage";
 import ProgressBar from "../components/ui/ProgressBar";
 import { analyzeStructuredCV, validateCVFile, applySuggestion } from "../api";
+import { useSharedCV } from "../hooks/useSharedCV";
 import type {
   Analysis,
   StructuredCV,
@@ -24,7 +25,7 @@ const STORAGE_KEYS = {
 };
 
 export default function EnhancedCVAnalyzer() {
-  const [cvFile, setCvFile] = useState<File | null>(null);
+  const { cvFile, saveCV, clearSharedCV } = useSharedCV();
   const [jobDesc, setJobDesc] = useState("");
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [structuredCV, setStructuredCV] = useState<StructuredCV | null>(null);
@@ -55,12 +56,12 @@ export default function EnhancedCVAnalyzer() {
       setError(validation.error || "Invalid file");
       return;
     }
-    setCvFile(file);
+    saveCV(file);
     setError(null);
   };
 
   const handleFileRemove = () => {
-    setCvFile(null);
+    clearSharedCV();
   };
 
   const handleAnalyze = async () => {
@@ -146,7 +147,6 @@ export default function EnhancedCVAnalyzer() {
   const handleNewAnalysis = () => {
     setAnalysis(null);
     setStructuredCV(null);
-    setCvFile(null);
     // Don't clear jobDesc - keep it for next analysis
     setCvText("");
     setOriginalFile(null);
