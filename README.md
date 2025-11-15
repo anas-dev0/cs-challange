@@ -1,341 +1,794 @@
-# 🎯 AI Interview Coach - UtopiaHire Platform
+# 🎯 UtopiaHire - AI-Powered Interview Practice Platform
 
-> **Personalized Interview Preparation with Advanced AI Technology**
+> **Professional Interview Preparation with Advanced AI Technology and Enterprise Security**
 
-An intelligent interview coaching platform that combines CV parsing, real-time AI voice interaction, OAuth authentication, and personalized feedback to help job seekers excel in their interviews. Built with a professional platform frontend and LiveKit-powered interview sessions.
+[![Security](https://img.shields.io/badge/security-enterprise%20grade-brightgreen)](SECURITY.md)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
+[![React](https://img.shields.io/badge/react-18.2+-61dafb.svg)](https://reactjs.org/)
+[![FastAPI](https://img.shields.io/badge/fastapi-latest-009688.svg)](https://fastapi.tiangolo.com/)
+
+An intelligent, secure interview coaching platform that combines CV parsing, real-time AI voice interaction, comprehensive authentication, and personalized feedback to help job seekers excel in their interviews.
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Security](#-security)
+- [Architecture](#-architecture)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Usage](#-usage)
+- [API Documentation](#-api-documentation)
+- [Development](#-development)
+- [Deployment](#-deployment)
+- [Testing](#-testing)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
 
 ## 🌟 Features
 
-### 🔐 Authentication & User Management
-- OAuth 2.0 authentication (Google & GitHub)
-- Traditional email/password sign-in
-- JWT-based secure sessions
-- Protected routes and user dashboard
+### 🔐 Enterprise-Grade Security
+- **Authentication & Authorization**
+  - JWT-based secure sessions (2-hour access, 7-day refresh)
+  - OAuth 2.0 (Google & GitHub)
+  - Email verification system
+  - Strong password requirements
+  - Account lockout protection (5 attempts, 15-min lockout)
+  
+- **Protection Layers**
+  - SQL injection prevention (parameterized queries)
+  - XSS protection (input sanitization, CSP headers)
+  - CSRF protection tokens
+  - Rate limiting (per-endpoint throttling)
+  - Secure file upload validation
+  - Request size limits
+  
+- **Security Headers**
+  - Content Security Policy (CSP)
+  - HTTP Strict Transport Security (HSTS)
+  - X-Frame-Options, X-Content-Type-Options
+  - X-XSS-Protection
 
-### 📄 CV Analysis & Upload
-- Multi-format support (PDF, DOCX)
-- Intelligent CV upload and processing
-- Job description matching
-- Candidate information management
+### 📄 CV Analysis & Management
+- **Multi-Format Support**
+  - PDF, DOCX, DOC, TXT, ODT, TEX, HTML, RTF
+  - 10MB file size limit
+  - Secure file validation and storage
+  
+- **Intelligent Processing**
+  - AI-powered CV parsing
+  - Job description matching
+  - ATS score calculation
+  - Skills gap analysis
+  - Personalized recommendations
 
 ### 🎤 Real-Time Voice Interviews
-- LiveKit-powered voice communication
-- Natural conversation with AI interviewer
-- Real-time feedback and coaching
-- Audio visualization with agent state indicators
-- Draggable/resizable video preview
+- **LiveKit Integration**
+  - Real-time voice communication
+  - Video preview (optional)
+  - Natural AI conversation
+  - Low-latency audio processing
+  
+- **Interview Features**
+  - Personalized questions based on CV
+  - Adaptive difficulty
+  - Real-time feedback
+  - Performance scoring
+  - Email report delivery
 
 ### 🤖 AI-Powered Coaching
-- Personalized questions based on your CV
-- Adaptive interview scenarios
-- Detailed performance feedback
-- Multiple interview practice modes
+- **Google Gemini AI**
+  - Context-aware questioning
+  - Natural language understanding
+  - Behavioral assessment
+  - Technical skill evaluation
+  
+- **Personalization**
+  - Industry-specific questions
+  - Role-based scenarios
+  - Experience level adaptation
+  - Cultural fit assessment
 
-### 📊 Performance Tracking
-- Interview analytics and progress monitoring
-- Score trends and improvement metrics
-- Session history and insights
+### 📊 Performance Analytics
+- **Interview Tracking**
+  - Score history
+  - Performance trends
+  - Improvement metrics
+  - Session replays
+  
+- **Skills Assessment**
+  - Technical skills evaluation
+  - Soft skills analysis
+  - Communication effectiveness
+  - Areas for improvement
 
-### 🎨 Modern UI/UX
-- Dark-themed responsive design
-- Interactive 3D shader backgrounds
-- Smooth animations with Framer Motion
-- Professional navigation and layout
-- Multi-language support (EN, FR, AR)
+### 🎨 Modern User Experience
+- **Responsive Design**
+  - Dark theme interface
+  - Mobile-friendly layout
+  - Accessibility features
+  - Smooth animations
+  
+- **Internationalization**
+  - Multi-language support (EN, FR, AR)
+  - RTL language support
+  - Localized content
+  
+- **Interactive Elements**
+  - 3D shader backgrounds
+  - Drag-and-drop file upload
+  - Real-time validation
+  - Toast notifications
 
-## 🏗️ Project Structure
+---
+
+## 🔒 Security
+
+This application implements **enterprise-grade security** measures to protect your data:
+
+- ✅ **OWASP Top 10 Protection**
+- ✅ **End-to-End Encryption** (in transit)
+- ✅ **Secure Password Storage** (bcrypt hashing)
+- ✅ **Rate Limiting** (prevents brute force)
+- ✅ **Input Validation** (prevents injection attacks)
+- ✅ **Secure File Uploads** (magic number validation)
+- ✅ **Session Management** (token rotation)
+- ✅ **Audit Logging** (security events)
+
+📖 **[Read Full Security Documentation](SECURITY.md)**
+
+---
+
+## 🏗️ Architecture
 
 ```
-cs-challange/
-├── backend/                      # Python backend services
-│   ├── server.py                # Flask API server (token generation & CV upload)
-│   ├── agent.py                 # LiveKit voice agent
-│   ├── app.py                   # Streamlit web app (alternative UI)
-│   ├── cv_parser.py             # CV text extraction
-│   ├── prompts.py               # AI prompt generation
-│   └── requirements.txt         # Python dependencies
+UtopiaHire Platform
 │
-└── frontend/                    # React/TypeScript frontend (UtopiaHire platform)
-    ├── src/
-    │   ├── App.tsx              # Main application with routing
-    │   ├── AuthContext.tsx      # Authentication context
-    │   ├── ServiceContext.tsx   # Interview service context
-    │   ├── components/
-    │   │   ├── SessionView.tsx  # LiveKit interview session (from cs-challange)
-    │   │   ├── UploadView.tsx   # CV upload interface (from cs-challange)
-    │   │   ├── Nav.tsx          # Navigation bar
-    │   │   ├── AuthModal.tsx    # OAuth/Login modal
-    │   │   ├── BackgroundShader.tsx  # 3D animated background
-    │   │   └── ui/              # shadcn UI components
-    │   ├── pages/
-    │   │   ├── Home.tsx         # Landing page
-    │   │   ├── About.tsx        # About page
-    │   │   ├── Pricing.tsx      # Pricing page
-    │   │   ├── InterviewerSetup.tsx  # Interview setup (uses UploadView)
-    │   │   ├── Interview.tsx    # Interview session (uses SessionView)
-    │   │   ├── Dashboard.tsx    # User dashboard
-    │   │   ├── CVTool.tsx       # CV optimization tool
-    │   │   └── JobMatcher.tsx   # Job matching tool
-    │   ├── lib/
-    │   │   ├── i18n.ts          # Internationalization setup
-    │   │   └── utils.ts         # Utility functions
-    │   └── locales/             # Translation files (EN, FR, AR)
-    └── package.json             # Node.js dependencies
+├── Frontend (React + TypeScript)
+│   ├── Vite Build System
+│   ├── React Router v6
+│   ├── LiveKit Components
+│   ├── Tailwind CSS
+│   ├── Security Utilities
+│   └── i18n Support
+│
+├── Backend (Python + FastAPI)
+│   ├── Authentication API
+│   ├── OAuth Integration
+│   ├── File Upload Service
+│   ├── LiveKit Token Service
+│   ├── Interview Agent
+│   ├── CV Analysis Engine
+│   ├── Skills Gap Analysis
+│   └── Security Middleware
+│
+└── Database (PostgreSQL)
+    ├── User Management
+    ├── Interview History
+    └── Secure Configuration
 ```
 
-## 🚀 Quick Start
+### Technology Stack
 
-### Prerequisites
-
+#### Backend
 - **Python 3.13+**
-- **Node.js 18+**
-- **LiveKit Account** ([Sign up here](https://cloud.livekit.io/))
-- **Google AI API Key** ([Get it here](https://ai.google.dev/))
-- **Optional**: Google OAuth & GitHub OAuth credentials for authentication
+- **FastAPI** - High-performance async API
+- **SQLAlchemy** - ORM with asyncpg
+- **PostgreSQL** - Relational database
+- **LiveKit** - Real-time communication
+- **Google Gemini AI** - Natural language processing
+- **Security**: SlowAPI, bleach, bcrypt, python-jose
 
-### 1. Backend Setup
+#### Frontend
+- **React 18** with **TypeScript**
+- **Vite** - Fast build tool
+- **React Router v6** - Client-side routing
+- **LiveKit Components React** - Voice/video UI
+- **Tailwind CSS** - Utility-first styling
+- **Framer Motion** - Animations
+- **Axios** - HTTP client with interceptors
+- **i18next** - Internationalization
+
+#### Infrastructure
+- **Docker Compose** - Container orchestration
+- **PostgreSQL 15** - Database container
+- **pgAdmin 4** - Database management UI
+
+---
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Python 3.13+** ([Download](https://www.python.org/downloads/))
+- **Node.js 18+** ([Download](https://nodejs.org/))
+- **Docker & Docker Compose** ([Download](https://www.docker.com/))
+- **Git** ([Download](https://git-scm.com/))
+
+### API Keys & Accounts
+
+You'll need accounts and API keys for:
+
+1. **LiveKit** ([Sign up](https://cloud.livekit.io/))
+   - WebSocket URL
+   - API Key
+   - API Secret
+
+2. **Google Gemini AI** ([Get API Key](https://ai.google.dev/))
+   - API Key
+
+3. **OAuth (Optional)**
+   - Google OAuth ([Console](https://console.cloud.google.com/))
+   - GitHub OAuth ([Settings](https://github.com/settings/developers))
+
+4. **Email (Optional)**
+   - SMTP server credentials (e.g., Gmail App Password)
+
+---
+
+## 🚀 Installation
+
+### 1. Clone the Repository
 
 ```bash
-# Navigate to backend directory
+git clone https://github.com/anas-dev0/cs-challange.git
+cd cs-challange
+```
+
+### 2. Database Setup (Docker)
+
+```bash
+# Copy environment template
+cp .env.docker.example .env
+
+# Edit .env and change default passwords
+nano .env
+
+# Start PostgreSQL and pgAdmin
+docker-compose up -d
+
+# Verify containers are running
+docker-compose ps
+```
+
+**Database will be available at:**
+- PostgreSQL: `localhost:5432`
+- pgAdmin: `http://localhost:5050`
+
+### 3. Backend Setup
+
+```bash
 cd backend
 
-# Install Python dependencies
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 
 # Copy environment template
 cp .env.example .env
 
-# Edit .env and add your credentials
-# LIVEKIT_URL=wss://your-project.livekit.cloud
-# LIVEKIT_API_KEY=your_api_key
-# LIVEKIT_API_SECRET=your_api_secret
-# GOOGLE_API_KEY=your_google_api_key
-
-# Start the Flask API server
-python server.py
+# Edit .env and configure your settings
+nano .env
 ```
 
-The backend server will start on `http://localhost:3001`
+**Required Environment Variables:**
+```bash
+# Generate strong secrets
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 
-### 2. Frontend Setup
+# Add to .env:
+JWT_SECRET=<generated-secret>
+REFRESH_SECRET=<generated-secret>
+DATABASE_URL=postgresql+asyncpg://postgres:your-password@localhost:5432/utopiahire
+GOOGLE_API_KEY=<your-gemini-api-key>
+LIVEKIT_API_KEY=<your-livekit-key>
+LIVEKIT_API_SECRET=<your-livekit-secret>
+LIVEKIT_URL=wss://your-project.livekit.cloud
+```
+
+### 4. Frontend Setup
 
 ```bash
-# Navigate to frontend directory
-cd frontend
+cd ../frontend
 
-# Install Node.js dependencies
+# Install dependencies
 npm install
 
-# Copy environment template (optional)
-cp .env.example .env
+# Create .env file (optional)
+echo "VITE_API_URL=http://localhost:8000" > .env
+```
 
-# Start the development server
+---
+
+## ⚙️ Configuration
+
+### Security Configuration
+
+1. **Change Default Passwords**
+   ```bash
+   # In .env (root directory for Docker)
+   POSTGRES_PASSWORD=<strong-password>
+   PGADMIN_PASSWORD=<strong-password>
+   
+   # In backend/.env
+   JWT_SECRET=<32+ character random string>
+   REFRESH_SECRET=<32+ character random string>
+   SESSION_SECRET=<32+ character random string>
+   ```
+
+2. **Configure CORS Origins**
+   ```bash
+   # backend/.env
+   CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+   ```
+
+3. **Email Configuration (Optional)**
+   ```bash
+   # backend/.env
+   SMTP_SERVER=smtp.gmail.com
+   SMTP_PORT=587
+   SENDER_EMAIL=your-email@gmail.com
+   SENDER_PASSWORD=your-app-password
+   ```
+
+4. **OAuth Setup (Optional)**
+   - Configure Google OAuth in [Google Console](https://console.cloud.google.com/)
+   - Configure GitHub OAuth in [GitHub Settings](https://github.com/settings/developers)
+   - Add credentials to `backend/.env`
+
+### Production Configuration
+
+For production deployment:
+
+1. **Enable HTTPS**
+   ```python
+   # backend/app/main.py
+   # Set secure=True for session cookies
+   ```
+
+2. **Update CSP Headers**
+   ```python
+   # Add your production domain to CSP
+   ```
+
+3. **Database SSL**
+   ```bash
+   DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/db?ssl=require
+   ```
+
+4. **Rate Limiting**
+   - Review and adjust rate limits in `security_middleware.py`
+
+---
+
+## 🎮 Usage
+
+### Starting the Application
+
+#### Option 1: Manual Start
+
+```bash
+# Terminal 1: Start database
+docker-compose up
+
+# Terminal 2: Start backend
+cd backend
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Terminal 3: Start frontend
+cd frontend
 npm run dev
 ```
 
-The frontend will start on `http://localhost:5173`
-
-### 3. Access the Application
-
-Open your browser and navigate to:
-- **Main Platform**: http://localhost:5173
-  - Landing page with authentication
-  - Professional platform navigation
-  - OAuth sign-in options
-  - Protected interview features
-- **Alternative UI**: Run `streamlit run backend/app.py` for Streamlit-based UI
-
-## 🎯 Usage
-
-### Platform Navigation
-
-1. **Home Page**: Browse features, pricing, and information
-2. **Sign Up/Login**: Use OAuth (Google/GitHub) or email/password
-3. **Dashboard**: Access your interview history and progress
-
-### Interview Workflow
-
-1. **Start Backend**: Ensure `python server.py` is running on port 3001
-2. **Login**: Sign in to the platform using your preferred method
-3. **Setup Interview**:
-   - Navigate to "Interview Setup" from the dashboard or navigation
-   - Upload your CV (PDF or DOCX)
-   - Enter job description and details
-   - Provide your email for the interview report
-4. **Begin Session**:
-   - Grant microphone access when prompted
-   - Video camera is optional (can be toggled)
-   - The LiveKit session will connect automatically
-   - AI interviewer will conduct the interview
-5. **During Interview**:
-   - Speak naturally to answer questions
-   - Toggle camera and mic as needed
-   - Drag and resize video preview window
-   - End call when complete
-6. **Post-Interview**: Receive feedback and analysis via email
-
-### Alternative Streamlit Mode
-
-1. **Upload CV**: Go to the CV Parser section and upload your resume
-2. **Job Description**: Enter your target job description
-3. **Generate Questions**: Get personalized interview questions
-4. **Practice**: Use text-based or voice-based interview modes
-5. **Analytics**: Track your progress in the Analytics section
-
-## 🔧 Configuration
-
-### LiveKit Setup
-
-1. Create an account at [LiveKit Cloud](https://cloud.livekit.io/)
-2. Create a new project
-3. Copy your API credentials:
-   - API Key
-   - API Secret
-   - WebSocket URL
-4. Add them to `backend/.env`
-
-### Google AI Setup
-
-1. Get an API key from [Google AI](https://ai.google.dev/)
-2. Add it to `backend/.env` as `GOOGLE_API_KEY`
-
-### OAuth Setup (Optional)
-
-For authentication features:
-
-**Google OAuth**:
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create OAuth 2.0 credentials
-3. Add authorized redirect URI: `http://localhost:8000/api/auth/oauth/google/callback`
-4. Add credentials to your auth backend `.env`
-
-**GitHub OAuth**:
-1. Go to GitHub Settings > Developer Settings > OAuth Apps
-2. Create new OAuth App
-3. Set callback URL: `http://localhost:8000/api/auth/oauth/github/callback`
-4. Add credentials to your auth backend `.env`
-
-## 📦 Available Scripts
-
-### Backend
+#### Option 2: Concurrent Start (requires setup)
 
 ```bash
-# Start Flask API server (LiveKit token generation & CV upload)
-python server.py
-
-# Start Streamlit web app (alternative UI)
-streamlit run app.py
-
-# Run voice interview agent
-python agent.py
+# From project root
+npm install -g concurrently
+npm run start
 ```
 
-### Frontend
+### Accessing the Application
+
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
+- **pgAdmin**: http://localhost:5050
+
+### Using the Platform
+
+#### 1. Create Account
+- Navigate to http://localhost:5173
+- Click "Sign Up"
+- Enter name, email, and strong password
+- Verify email (check inbox)
+
+#### 2. Upload CV
+- Log in to your account
+- Go to "Interview Setup"
+- Upload your CV (PDF, DOCX, etc.)
+- Enter job description
+- Provide interview details
+
+#### 3. Start Interview
+- Click "Start Interview"
+- Grant microphone access
+- Answer AI interviewer's questions
+- Toggle camera/mic as needed
+- End call when complete
+
+#### 4. Review Results
+- Check email for detailed report
+- View score and feedback
+- Track progress in dashboard
+
+---
+
+## 📚 API Documentation
+
+### Authentication Endpoints
 
 ```bash
-# Start development server
-npm run dev
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/verify-email
+POST /api/auth/resend-verification
+POST /api/auth/refresh
+GET  /api/auth/me
+```
 
-# Build for production
+### Service Endpoints
+
+```bash
+POST /api/upload-cv            # JWT required
+POST /api/start-session        # JWT required
+POST /api/save-interview       # JWT required
+```
+
+### OAuth Endpoints
+
+```bash
+GET  /api/auth/oauth/google
+GET  /api/auth/oauth/google/callback
+GET  /api/auth/oauth/github
+GET  /api/auth/oauth/github/callback
+```
+
+### Interactive API Documentation
+
+Visit http://localhost:8000/docs for:
+- Complete API reference
+- Try-it-out functionality
+- Request/response schemas
+- Authentication testing
+
+---
+
+## 🛠️ Development
+
+### Project Structure
+
+```
+cs-challange/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI application
+│   │   ├── auth_routes.py       # Authentication endpoints
+│   │   ├── security.py          # JWT utilities
+│   │   ├── security_middleware.py  # Security layers
+│   │   ├── models.py            # Database models
+│   │   ├── schemas.py           # Pydantic schemas
+│   │   └── config.py            # Configuration
+│   ├── agent/
+│   │   ├── agent.py             # LiveKit interview agent
+│   │   ├── cv_parser.py         # CV text extraction
+│   │   └── mailer.py            # Email service
+│   └── core/
+│       ├── ai_analyzer.py       # Gemini AI integration
+│       └── skill_extractor.py   # Skills analysis
+│
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx              # Main application
+│   │   ├── api.ts               # API client
+│   │   ├── components/          # React components
+│   │   ├── pages/               # Page components
+│   │   ├── utils/               # Utilities
+│   │   │   └── security.ts      # Security functions
+│   │   └── locales/             # Translations
+│   └── public/                  # Static assets
+│
+├── docker-compose.yml           # Database containers
+├── SECURITY.md                  # Security documentation
+└── README.md                    # This file
+```
+
+### Development Workflow
+
+1. **Create Feature Branch**
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+
+2. **Make Changes**
+   - Follow existing code style
+   - Add comments for complex logic
+   - Update tests if applicable
+
+3. **Test Locally**
+   ```bash
+   # Backend
+   cd backend
+   python -m pytest
+   
+   # Frontend
+   cd frontend
+   npm run lint
+   npm run build
+   ```
+
+4. **Commit Changes**
+   ```bash
+   git add .
+   git commit -m "feat: your feature description"
+   ```
+
+5. **Push and Create PR**
+   ```bash
+   git push origin feature/your-feature
+   ```
+
+### Code Style
+
+- **Python**: Follow PEP 8
+- **TypeScript**: Follow Airbnb style guide
+- **Commits**: Use conventional commits
+
+---
+
+## 🚢 Deployment
+
+### Production Checklist
+
+- [ ] Change all default passwords
+- [ ] Generate strong secrets (32+ characters)
+- [ ] Configure HTTPS/SSL
+- [ ] Update CORS origins
+- [ ] Enable secure cookies
+- [ ] Configure database SSL
+- [ ] Set up database backups
+- [ ] Configure monitoring
+- [ ] Set up logging aggregation
+- [ ] Review rate limits
+- [ ] Test OAuth callbacks
+- [ ] Set up CDN (optional)
+- [ ] Configure firewall rules
+
+### Deployment Options
+
+#### Docker Compose (Simple)
+
+```bash
+# Build and start all services
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+#### Cloud Platforms
+
+- **Backend**: Heroku, AWS, DigitalOcean, Railway
+- **Frontend**: Vercel, Netlify, AWS S3 + CloudFront
+- **Database**: AWS RDS, DigitalOcean Managed DB
+
+### Environment Variables
+
+Set the following in production:
+
+```bash
+# Backend
+JWT_SECRET=<production-secret>
+REFRESH_SECRET=<production-secret>
+DATABASE_URL=<production-db-url>
+CORS_ORIGINS=https://your-domain.com
+FRONTEND_URL=https://your-domain.com
+
+# Frontend
+VITE_API_URL=https://api.your-domain.com
+```
+
+---
+
+## 🧪 Testing
+
+### Backend Tests
+
+```bash
+cd backend
+
+# Run all tests
+python -m pytest
+
+# Run with coverage
+python -m pytest --cov=app
+
+# Run specific test
+python -m pytest tests/test_auth.py
+```
+
+### Frontend Tests
+
+```bash
+cd frontend
+
+# Lint
+npm run lint
+
+# Build test
 npm run build
 
-# Preview production build
-npm run preview
-
-# Lint code
-npm run lint
+# Type check
+npm run tsc --noEmit
 ```
 
-## 🛠️ Technology Stack
+### Security Testing
 
-### Backend
-- **Python 3.13+**
-- **Flask** - REST API server for LiveKit tokens and CV upload
-- **LiveKit** - Real-time voice communication infrastructure
-- **Google AI (Gemini)** - Natural language processing and interview AI
-- **Streamlit** - Alternative web interface
-- **PyMuPDF** - PDF text extraction
-- **EasyOCR** - Optical character recognition
+```bash
+# Install OWASP ZAP
+# Run security scan against localhost:8000
 
-### Frontend
-- **React 18** with **TypeScript** - Type-safe UI framework
-- **Vite** - Lightning-fast build tool and dev server
-- **React Router v6** - Client-side routing
-- **LiveKit Components React** - Pre-built real-time voice/video components
-- **Tailwind CSS** - Utility-first styling framework
-- **Framer Motion** - Smooth animations
-- **@shadergradient/react** - Interactive 3D shader backgrounds
-- **Axios** - HTTP client with token refresh
-- **i18next** - Internationalization (EN, FR, AR)
-- **Sonner** - Toast notifications
-- **shadcn/ui** - Re-usable UI components
+# Test rate limiting
+for i in {1..20}; do curl http://localhost:8000/api/auth/login; done
 
-### Authentication (UtopiaHire Platform)
-- **FastAPI** - High-performance async Python backend (optional)
-- **PostgreSQL** - User database (optional)
-- **JWT** - Token-based authentication
-- **OAuth 2.0** - Google and GitHub social login
+# Test file upload
+curl -X POST -F "cv=@malicious.pdf" http://localhost:8000/api/upload-cv
+```
 
-## 🔐 Security & Privacy
+---
 
-- Local CV processing (no permanent storage)
-- Encrypted API communications
-- Temporary file cleanup
-- Session-based data handling
-- Environment variable protection
-- JWT-based secure authentication
-- OAuth 2.0 integration for trusted providers
+## 🔧 Troubleshooting
 
-## 🐛 Troubleshooting
+### Common Issues
 
-### Backend Issues
+#### Database Connection Failed
 
-**"LiveKit credentials not configured"**
-- Ensure `.env` file exists in the `backend/` directory
-- Verify `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET` are set correctly
+```bash
+# Check if PostgreSQL is running
+docker-compose ps
 
-**"Port 3001 already in use"**
-- Stop any other services using port 3001
-- Or modify the port in `server.py`
+# Check logs
+docker-compose logs db
 
-### Frontend Issues
+# Restart database
+docker-compose restart db
+```
 
-**"Failed to connect to server"**
-- Make sure the backend server is running (`python server.py`)
-- Check that the backend is accessible at http://localhost:3001
-- Verify CORS is properly configured
+#### LiveKit Connection Error
 
-**"Microphone access denied"**
-- Grant microphone permissions in your browser
-- Refresh the page after granting permissions
+```bash
+# Verify credentials in backend/.env
+LIVEKIT_API_KEY=your_key
+LIVEKIT_API_SECRET=your_secret
+LIVEKIT_URL=wss://your-project.livekit.cloud
 
-## 📈 Future Enhancements
+# Check LiveKit dashboard for active rooms
+```
 
-- [ ] Multi-language support
-- [ ] Video interview practice
-- [ ] Industry-specific question banks
-- [ ] Team interview simulations
-- [ ] Mobile application
-- [ ] Advanced analytics with ML insights
+#### Frontend Can't Reach Backend
+
+```bash
+# Verify backend is running
+curl http://localhost:8000/health
+
+# Check CORS configuration
+# backend/.env: CORS_ORIGINS=http://localhost:5173
+```
+
+#### Email Verification Not Working
+
+```bash
+# Check SMTP settings in backend/.env
+SMTP_SERVER=smtp.gmail.com
+SENDER_EMAIL=your-email@gmail.com
+SENDER_PASSWORD=<app-password>  # Not your regular password!
+
+# Check backend logs for email errors
+```
+
+#### Rate Limit Errors
+
+```bash
+# Wait for rate limit window to reset (usually 1 minute)
+# Or adjust limits in backend/app/security_middleware.py
+```
+
+### Getting Help
+
+1. **Check Logs**
+   ```bash
+   # Backend logs
+   docker-compose logs backend
+   
+   # Database logs
+   docker-compose logs db
+   ```
+
+2. **GitHub Issues**: [Create an issue](https://github.com/anas-dev0/cs-challange/issues)
+
+3. **Documentation**: Read [SECURITY.md](SECURITY.md) for security-related issues
+
+---
 
 ## 🤝 Contributing
 
+We welcome contributions! Please follow these steps:
+
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Update documentation
+6. Submit a pull request
+
+### Contribution Guidelines
+
+- Follow existing code style
+- Write clear commit messages
+- Add comments for complex logic
+- Update README if adding features
+- Test your changes thoroughly
+- Don't commit sensitive data
+
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
 
 ## 🙏 Acknowledgments
 
 - **LiveKit Team** - Real-time communication platform
-- **Google AI** - Advanced language models
-- **React & Vite** - Modern frontend tooling
+- **Google AI** - Gemini language models
+- **FastAPI** - Modern Python web framework
+- **React Team** - Frontend library
 - **Open Source Community** - Various libraries and tools
+
+---
+
+## 📞 Contact
+
+- **Developer**: Anas
+- **Email**: contact@utopiahire.com
+- **Security**: security@utopiahire.com
+- **GitHub**: [anas-dev0/cs-challange](https://github.com/anas-dev0/cs-challange)
+
+---
+
+## 🔄 Version History
+
+- **v1.0.0** (2024-11-15)
+  - Initial release
+  - Enterprise security implementation
+  - Full authentication system
+  - LiveKit interview integration
+  - CV analysis features
+  - Multi-language support
 
 ---
 
@@ -343,6 +796,6 @@ This project is licensed under the MIT License.
 
 **Built with ❤️ for better interview preparation**
 
-[Report Bug](https://github.com/anas-dev0/cs-challange/issues) • [Request Feature](https://github.com/anas-dev0/cs-challange/issues)
+[🐛 Report Bug](https://github.com/anas-dev0/cs-challange/issues) • [✨ Request Feature](https://github.com/anas-dev0/cs-challange/issues) • [📖 Documentation](https://github.com/anas-dev0/cs-challange/wiki)
 
 </div>
