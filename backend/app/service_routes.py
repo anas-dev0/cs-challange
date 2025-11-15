@@ -1,6 +1,6 @@
 import os
 import secrets
-from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
+from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -10,6 +10,11 @@ from .db import get_db
 from .models import User, Interview
 from .schemas import StartSessionRequest, SaveInterviewRequest
 from .security import get_current_user
+from .security_middleware import (
+    limiter,
+    validate_file_upload,
+    get_safe_filename,
+)
 
 router = APIRouter(tags=["services"])
 
@@ -35,11 +40,13 @@ async def health():
     }
 
 @router.post('/api/upload-cv')
+@limiter.limit("10/minute")
 async def upload_cv(
+    request: Request,
     cv: UploadFile = File(...),
     current_user: User = Depends(get_current_user)
 ):
-    """Upload CV file - JWT protected"""
+    """Upload CV file - JWT protected with rate limiting"""
     try:
         # Check if file is provided
         if not cv:
@@ -48,30 +55,25 @@ async def upload_cv(
         if cv.filename == '':
             raise HTTPException(status_code=400, detail="No file selected")
         
-        # Validate file
-        if not allowed_file(cv.filename):
-            raise HTTPException(
-                status_code=400, 
-                detail="Invalid file type. Only PDF, DOC, and DOCX are allowed"
-            )
-        
-        # Read file content to check size
+        # Read file content
         file_content = await cv.read()
-        if len(file_content) > MAX_FILE_SIZE:
-            raise HTTPException(
-                status_code=400, 
-                detail="File is too large. Maximum size is 10MB"
-            )
         
-        # Save file
-        filename = cv.filename
-        # Secure the filename
-        filename = "".join(c for c in filename if c.isalnum() or c in '._- ')
-        filename = f"{secrets.token_hex(4)}_{filename}"
+        # Validate file using security middleware
+        is_valid, error_message = validate_file_upload(cv.filename, file_content)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_message)
+        
+        # Generate secure filename
+        safe_filename = get_safe_filename(cv.filename)
+        filename = f"{secrets.token_hex(8)}_{safe_filename}"
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         
+        # Save file securely
         with open(filepath, 'wb') as f:
             f.write(file_content)
+        
+        # Set restrictive permissions (owner read/write only)
+        os.chmod(filepath, 0o600)
         
         print(f"✅ CV uploaded by user {current_user.email}: {filename}")
         
@@ -89,7 +91,9 @@ async def upload_cv(
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 @router.post('/api/start-session')
+@limiter.limit("20/minute")
 async def start_session(
+    request: Request,
     data: StartSessionRequest,
     current_user: User = Depends(get_current_user)
 ):
