@@ -559,7 +559,7 @@ export default function InterviewerSetup() {
           </div>
 
           {/* Continue Button */}
-          <div className="has-[button:disabled]:cursor-not-allowed">
+          <div className="inline-block has-[button:disabled]:cursor-not-allowed ">
             <Button
               onClick={handleContinue}
               disabled={

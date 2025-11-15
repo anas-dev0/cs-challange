@@ -12,7 +12,8 @@ import AnalysisTab from './tabs/AnalysisTab';
 import StatisticsTab from './tabs/StatisticsTab';
 import FieldSuggestions from './FieldSuggestions';
 import type { Analysis, FieldSuggestion, StructuredCV, OriginalFile } from '../../types';
-
+import {Button} from "../ui/button"
+ 
 interface AnalysisContainerProps {
   analysis: Analysis;
   cvFile: File | null;
@@ -49,40 +50,40 @@ export default function AnalysisContainer({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-transparent">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <div className="bg-transparent shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Sparkles className="w-8 h-8 text-blue-600" />
               <div>
                 <h1 className="text-2xl font-bold">AI CV Analysis</h1>
-                <p className="text-sm text-gray-600">{cvFile?.name}</p>
+                <p className="text-sm text-[#D1D5DB]">{cvFile?.name}</p>
               </div>
             </div>
 
             {/* Score Display */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-6 backdrop-blur-xl">
               <div className="text-center">
                 <div className={`text-4xl font-bold ${getScoreColor(analysis.overall_score || 0)}`}>
                   {analysis.overall_score || 0}
                 </div>
-                <div className="text-xs text-gray-600 uppercase font-semibold">Overall</div>
+                <div className="text-xs text-white uppercase font-semibold">Overall</div>
               </div>
               <div className="text-center">
                 <div className={`text-4xl font-bold ${getScoreColor(analysis.ats_score || 0)}`}>
                   {analysis.ats_score || 0}
                 </div>
-                <div className="text-xs text-gray-600 uppercase font-semibold">ATS</div>
+                <div className="text-xs text-white uppercase font-semibold">ATS</div>
               </div>
 
-              <button
+              <Button
                 onClick={onNewAnalysis}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-medium"
+                variant="outline"
               >
                 New Analysis
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -92,7 +93,7 @@ export default function AnalysisContainer({
         <div className="grid grid-cols-12 gap-6">
           {/* Left Sidebar - Navigation */}
           <div className="col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-24">
+            <div className="backdrop-blur-xl bg-black/40 rounded-lg shadow-sm p-4 sticky top-24">
               <nav className="space-y-2">
                 {[
                   { id: 'overview', icon: Target, label: 'Overview' },
@@ -129,7 +130,7 @@ export default function AnalysisContainer({
 
             {activeTab === 'field-suggestions' && (
               <div>
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-6 mb-6">
+                <div className="backdrop-blur-xl rounded-lg p-6 mb-6">
                   <div className="flex items-start gap-3">
                     <Layers className="w-8 h-8 text-blue-600 flex-shrink-0" />
                     <div>
