@@ -443,7 +443,9 @@ const PostJob = () => {
               <input
                 type="checkbox"
                 id={level.value}
-                checked={(formData.experience_levels || []).includes(level.value)}
+                checked={(formData.experience_levels || []).includes(
+                  level.value
+                )}
                 onChange={() => handleExperienceLevelChange(level.value)}
                 className="w-4 h-4 rounded border-gray-300 text-[#007bff] focus:ring-[#007bff] cursor-pointer"
               />
