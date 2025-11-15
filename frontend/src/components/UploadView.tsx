@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { AuthContext } from "@/AuthContext";
+import { useSharedCV } from "../hooks/useSharedCV";
 
 interface UploadViewProps {
   onUploadComplete: (
@@ -40,6 +41,7 @@ export default function UploadView({
   loading,
 }: UploadViewProps) {
   const { t } = useTranslation();
+  const { saveCV: saveCVToShared } = useSharedCV();
   const [fileName, setFileName] = useState("");
   const [uploaded, setUploaded] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -100,6 +102,10 @@ export default function UploadView({
 
         const data = await response.json();
         console.log("File uploaded:", data);
+
+        // Save to shared CV storage with server filename
+        saveCVToShared(selectedFile, data.filename);
+
         setUploaded(true);
         toast.success(t("upload.uploadSuccess"));
       } catch (error) {

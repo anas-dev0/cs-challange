@@ -60,10 +60,12 @@ async def google_login(
 async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
     """Handle Google OAuth callback"""
     try:
+        print("📥 Google OAuth callback received")
         token = await oauth.google.authorize_access_token(request)
         user_info = token.get('userinfo')
         
         if not user_info:
+            print("❌ Failed to get user info from Google")
             raise HTTPException(status_code=400, detail="Failed to get user info from Google")
         
         email = user_info.get('email')
@@ -97,10 +99,16 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
         # Redirect back to frontend with tokens in URL fragments (more secure than query params)
         frontend_url = settings.frontend_url
         redirect_url = f"{frontend_url}?token={access}&refreshToken={refresh}"
+        print(f"🔑 OAuth Success - Redirecting to: {frontend_url}?token=***&refreshToken=***")
+        print(f"👤 User: {user.email} (ID: {user.id})")
         return RedirectResponse(url=redirect_url)
         
     except OAuthError as e:
-        raise HTTPException(status_code=400, detail=f"OAuth error: {str(e)}")
+        print(f"❌ OAuth Error: {str(e)}")
+        # Redirect to frontend with error
+        frontend_url = settings.frontend_url
+        error_url = f"{frontend_url}?error=oauth_failed&message={str(e)}"
+        return RedirectResponse(url=error_url)
 
 
 @router.get("/github")

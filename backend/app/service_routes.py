@@ -114,21 +114,50 @@ async def start_session(
         
         # Normalize provided cv filename: ensure it maps to an actual saved file in UPLOAD_FOLDER
         candidate_path = os.path.join(UPLOAD_FOLDER, cv_filename)
+        print(f"🔍 Looking for CV file: {cv_filename}")
+        print(f"📁 Full path: {candidate_path}")
+        
         if not os.path.exists(candidate_path):
-            # Try to find a saved file that ends with the sanitized filename
-            sanitized = "".join(c for c in cv_filename if c.isalnum() or c in '._- ')
+            print(f"⚠️ File not found at path, trying to match...")
+            print(f"📂 Files in upload folder: {os.listdir(UPLOAD_FOLDER)}")
+            
+            # Try multiple matching strategies
             matched = None
+            
+            # Strategy 1: Try to find a saved file that ends with the provided filename
             for f in os.listdir(UPLOAD_FOLDER):
-                if f.endswith(sanitized):
+                if f.endswith(cv_filename):
                     matched = f
+                    print(f"✅ Strategy 1 - Matched by suffix: {matched}")
                     break
+            
+            # Strategy 2: If still not found, try sanitized filename
+            if not matched:
+                sanitized = "".join(c for c in cv_filename if c.isalnum() or c in '._- ')
+                for f in os.listdir(UPLOAD_FOLDER):
+                    if f.endswith(sanitized):
+                        matched = f
+                        print(f"✅ Strategy 2 - Matched by sanitized suffix: {matched}")
+                        break
+            
+            # Strategy 3: If still not found, try matching by base filename (without hash prefix)
+            if not matched:
+                # Extract the base name without the hash prefix
+                base_name = cv_filename.split('_', 1)[-1] if '_' in cv_filename else cv_filename
+                for f in os.listdir(UPLOAD_FOLDER):
+                    if f.endswith(base_name):
+                        matched = f
+                        print(f"✅ Strategy 3 - Matched by base name: {matched}")
+                        break
+            
             if matched:
                 cv_filename = matched
-                print(f"🔎 Mapped provided filename to saved file: {cv_filename}")
+                print(f"🔎 Final mapped filename: {cv_filename}")
             else:
+                print(f"❌ No match found for: {cv_filename}")
                 raise HTTPException(
                     status_code=400, 
-                    detail=f"CV file not found on server: {cv_filename}"
+                    detail=f"CV file not found on server: {cv_filename}. Available files: {', '.join(os.listdir(UPLOAD_FOLDER))}"
                 )
 
         # Store session data for agent to retrieve (use the actual saved filename)

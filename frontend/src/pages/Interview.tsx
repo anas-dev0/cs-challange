@@ -519,6 +519,9 @@ export default function Interview() {
   const candidateName = (interviewConfig as any).candidateName || "User";
   const jobTitle = interviewConfig.jobTitle || "";
 
+  console.log("📄 Interview starting with CV filename:", cvFilename);
+  console.log("📋 Interview config:", interviewConfig);
+
   // Auto-start session when component mounts
   useEffect(() => {
     const startSession = async () => {

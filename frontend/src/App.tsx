@@ -25,7 +25,7 @@ import "./App.css";
 import Notfound from "./pages/Notfound";
 import GetJobs from "./pages/GetJobs";
 import NoJobsFound from "./pages/NoJobsFound";
-import EnhancedCVAnalyzer from "./pages/CVTool"
+import EnhancedCVAnalyzer from "./pages/CVTool";
 function OAuthHandler() {
   const context = useContext(AuthContext);
   const location = useLocation();
@@ -41,27 +41,37 @@ function OAuthHandler() {
     if (token && refreshToken) {
       hasProcessed.current = true;
 
-      // Store tokens
+      console.log("🔑 OAuth tokens received, storing and fetching user...");
+
+      // Store tokens FIRST
       localStorage.setItem("token", token);
       localStorage.setItem("refreshToken", refreshToken);
-      
+
       // Update token state in AuthContext
       context.setToken(token);
 
-      // Clean URL immediately
-      window.history.replaceState({}, "", "/");
-
-      // Fetch user info
+      // Fetch user info BEFORE cleaning URL
       API.get("/auth/me")
         .then((res) => {
           const user: User = res.data.user;
+          console.log("✅ User fetched successfully:", user.email);
           context.setUser(user);
+
+          // Clean URL AFTER success
+          window.history.replaceState({}, "", "/");
+
           toast.success(
             `Welcome back${user?.name ? `, ${user.name.split(" ")[0]}` : ""}!`
           );
         })
         .catch((error) => {
-          console.error("OAuth error:", error);
+          console.error("❌ OAuth /auth/me error:", error);
+          console.error("Error details:", error.response?.data);
+          console.error("Error status:", error.response?.status);
+
+          // Clean URL even on error
+          window.history.replaceState({}, "", "/");
+
           localStorage.removeItem("token");
           localStorage.removeItem("refreshToken");
           context.setToken(null);

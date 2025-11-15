@@ -56,6 +56,7 @@ export default function EnhancedCVAnalyzer() {
       setError(validation.error || "Invalid file");
       return;
     }
+    // CVTool doesn't upload to backend, so no server filename
     saveCV(file);
     setError(null);
   };

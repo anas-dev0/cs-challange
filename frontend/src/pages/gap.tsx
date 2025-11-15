@@ -74,6 +74,7 @@ export default function SkillsGapAnalyzer() {
         toast.error("Invalid file type. Please upload a PDF.");
         e.target.value = "";
       } else {
+        // Gap analyzer doesn't upload to backend, so no server filename
         saveCV(file);
         toast.success(`File "${file.name}" selected.`);
       }

@@ -5,17 +5,20 @@ const SHARED_CV_STORAGE = {
   CV_FILE_NAME: 'shared_cv_file_name',
   CV_FILE_DATA: 'shared_cv_file_data',
   CV_FILE_UPLOADED: 'shared_cv_file_uploaded',
+  CV_SERVER_FILENAME: 'shared_cv_server_filename', // Server-generated filename
 };
 
 export function useSharedCV() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState('');
+  const [serverFilename, setServerFilename] = useState(''); // Server-generated filename
 
   // Load CV from shared localStorage on mount
   useEffect(() => {
     const savedFileName = localStorage.getItem(SHARED_CV_STORAGE.CV_FILE_NAME);
     const savedFileData = localStorage.getItem(SHARED_CV_STORAGE.CV_FILE_DATA);
     const savedFileUploaded = localStorage.getItem(SHARED_CV_STORAGE.CV_FILE_UPLOADED);
+    const savedServerFilename = localStorage.getItem(SHARED_CV_STORAGE.CV_SERVER_FILENAME);
 
     if (savedFileName && savedFileData && savedFileUploaded === 'true') {
       try {
@@ -37,6 +40,7 @@ export function useSharedCV() {
 
         setCvFile(restoredFile);
         setFileName(savedFileName);
+        setServerFilename(savedServerFilename || savedFileName); // Use server filename if available
       } catch (error) {
         console.error('Error restoring CV from localStorage:', error);
         clearSharedCV();
@@ -45,9 +49,15 @@ export function useSharedCV() {
   }, []);
 
   // Save CV file to shared localStorage
-  const saveCV = (file: File) => {
+  const saveCV = (file: File, serverFilenameParam?: string) => {
     setCvFile(file);
     setFileName(file.name);
+    
+    // Save server filename if provided
+    if (serverFilenameParam) {
+      setServerFilename(serverFilenameParam);
+      localStorage.setItem(SHARED_CV_STORAGE.CV_SERVER_FILENAME, serverFilenameParam);
+    }
 
     // Save file to localStorage if it's under 5MB
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
@@ -71,14 +81,17 @@ export function useSharedCV() {
   const clearSharedCV = () => {
     setCvFile(null);
     setFileName('');
+    setServerFilename('');
     localStorage.removeItem(SHARED_CV_STORAGE.CV_FILE_NAME);
     localStorage.removeItem(SHARED_CV_STORAGE.CV_FILE_DATA);
     localStorage.removeItem(SHARED_CV_STORAGE.CV_FILE_UPLOADED);
+    localStorage.removeItem(SHARED_CV_STORAGE.CV_SERVER_FILENAME);
   };
 
   return {
     cvFile,
     fileName,
+    serverFilename, // Export server filename
     saveCV,
     clearSharedCV,
     setCvFile,

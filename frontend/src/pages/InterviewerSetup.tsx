@@ -46,7 +46,7 @@ export default function InterviewerSetup() {
   const navigate = useNavigate();
   const { setCvFile, setInterviewConfig, addHistory } = useServices();
   const [loading, setLoading] = useState(false);
-  const { cvFile, saveCV, clearSharedCV } = useSharedCV();
+  const { cvFile, serverFilename, saveCV, clearSharedCV } = useSharedCV();
   const [uploading, setUploading] = useState(false);
 
   const handleUploadComplete = async (
@@ -61,6 +61,7 @@ export default function InterviewerSetup() {
       setLoading(true);
 
       // Store all the interview data in ServiceContext
+      // Use server filename (from upload response) instead of original filename
       setInterviewConfig({
         jobTitle: title,
         description: jobDesc,
@@ -68,7 +69,7 @@ export default function InterviewerSetup() {
         language: language,
         seniority: "Mid",
         experience: "",
-        // Store additional fields
+        // Store additional fields - use server filename
         cvFilename: filename,
         candidateEmail: email,
         candidateName: name,
@@ -208,8 +209,8 @@ export default function InterviewerSetup() {
         const data = await response.json();
         console.log("File uploaded:", data);
 
-        // Save to shared CV storage
-        saveCV(selectedFile);
+        // Save to shared CV storage with server filename
+        saveCV(selectedFile, data.filename);
         toast.success(t("upload.uploadSuccess"));
       } catch (error) {
         console.error("Error uploading file:", error);
@@ -276,8 +277,9 @@ export default function InterviewerSetup() {
     }
 
     if (cvFile) {
+      // Use server filename instead of original filename
       handleUploadComplete(
-        cvFile.name,
+        serverFilename || cvFile.name,
         jobDescription,
         candidateEmail,
         candidateName,
