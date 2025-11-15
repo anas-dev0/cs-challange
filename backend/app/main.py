@@ -33,19 +33,30 @@ print(f"🔧 Loading .env from: {env_path}")
 
 # Add parent directory to path to import from core, api, etc.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-try:
-    from core.skill_extractor import gliner_extractor
-    from core.data_loader import data_loader
-    from api import analysis
-    # Check if Gemini is actually initialized
-    from core.ai_analyzer import model as gemini_model
-    if gemini_model is None:
-        print("⚠️  WARNING: Gemini AI model is not initialized. Skills Gap Analysis will not work.")
-        print("    Please check your GOOGLE_API_KEY or GEMINI_API_KEY in .env file")
-    SKILLS_GAP_ENABLED = True
-except ImportError as e:
-    print(f"⚠️  Skills Gap Analysis not available: {e}")
-    SKILLS_GAP_ENABLED = False
+
+# ⚠️ TEMPORARY: Skills Gap Analysis disabled for faster development
+# TODO: Re-enable for production by setting SKILLS_GAP_ENABLED = True
+SKILLS_GAP_ENABLED = False
+
+if SKILLS_GAP_ENABLED:
+    try:
+        from core.skill_extractor import gliner_extractor
+        from core.data_loader import data_loader
+        from api import analysis
+        # Check if Gemini is actually initialized
+        from core.ai_analyzer import model as gemini_model
+        if gemini_model is None:
+            print("⚠️  WARNING: Gemini AI model is not initialized. Skills Gap Analysis will not work.")
+            print("    Please check your GOOGLE_API_KEY or GEMINI_API_KEY in .env file")
+    except ImportError as e:
+        print(f"⚠️  Skills Gap Analysis not available: {e}")
+        SKILLS_GAP_ENABLED = False
+        gliner_extractor = None
+        data_loader = None
+        analysis = None
+        gemini_model = None
+else:
+    print("⚠️  Skills Gap Analysis DISABLED for development")
     gliner_extractor = None
     data_loader = None
     analysis = None
@@ -167,8 +178,7 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=(settings.session_secret or settings.jwt_secret),
     same_site="lax",
-    httponly=True,  # Prevent JavaScript access to session cookies
-    secure=False,  # Set to True in production with HTTPS
+    
 )
 
 @app.get("/")
