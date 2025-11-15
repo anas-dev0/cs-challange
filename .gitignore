@@ -15,7 +15,28 @@ dist/
 venv/
 env/
 ENV/
+
+# Sensitive files - NEVER commit these!
 .env
+.env.local
+.env.production
+.env.*.local
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets and credentials
+secrets/
+credentials/
+*.secret
+*.credential
 
 # Node artifacts
 node_modules/
@@ -33,6 +54,36 @@ yarn.lock
 out/
 coverage/
 *.tsbuildinfo
+dist/
+build/
+
+# Uploaded files (CVs and user data)
+cv_uploads/
+uploads/
+user_files/
 
 # Backup directories
 frontend-backup-current/
+backups/
+*.backup
+
+# Logs
+logs/
+*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+docker-compose.override.yml
+.dockerignore

@@ -5,6 +5,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from contextlib import asynccontextmanager
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from .config import settings
 from .db import Base, engine
 from .auth_routes import router as auth_router
@@ -13,6 +15,12 @@ from .service_routes import router as service_router
 from .job_routes import router as job_router
 from .middleware import logging_middleware
 from .CvTools import router as cv_router
+from .security_middleware import (
+    limiter,
+    SecurityHeadersMiddleware,
+    RequestSizeLimitMiddleware,
+    InputSanitizationMiddleware,
+)
 # Import Skills Gap Analysis components
 import sys
 import os
@@ -113,6 +121,10 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Add rate limiter state
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # Custom validation error handler
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -137,6 +149,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Security Middleware - order matters!
+# 1. Security headers (first to apply to all responses)
+app.add_middleware(SecurityHeadersMiddleware)
+
+# 2. Request size limits (prevent DoS)
+app.add_middleware(RequestSizeLimitMiddleware)
+
+# 3. Input sanitization
+app.add_middleware(InputSanitizationMiddleware)
+
 # Logging middleware
 app.middleware("http")(logging_middleware)
 
@@ -145,6 +167,8 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=(settings.session_secret or settings.jwt_secret),
     same_site="lax",
+    httponly=True,  # Prevent JavaScript access to session cookies
+    secure=False,  # Set to True in production with HTTPS
 )
 
 @app.get("/")

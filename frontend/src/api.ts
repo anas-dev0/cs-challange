@@ -6,9 +6,14 @@ import type {
   FieldSuggestion,
   StructuredCV 
 } from './types';
+import { sanitizeInput, detectSQLInjection } from './utils/security';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  // Security: Set timeout to prevent hanging requests
+  timeout: 30000,
+  // Security: Enable credentials for CORS
+  withCredentials: true,
 })
 
 API.interceptors.request.use((config: InternalAxiosRequestConfig) => {
@@ -16,6 +21,10 @@ API.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  
+  // Security: Add request timestamp for monitoring
+  config.headers['X-Request-Time'] = new Date().toISOString();
+  
   return config
 })
 

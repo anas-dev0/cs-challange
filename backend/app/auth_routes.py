@@ -1,16 +1,34 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from .db import get_db
 from .models import User
 from .schemas import RegisterRequest, LoginRequest, TokenResponse, UserOut, MeResponse, Message, RefreshRequest, VerifyEmailRequest
 from .security import is_strong_password, hash_password, verify_password, create_access_token, create_refresh_token, get_current_user
+from .security_middleware import (
+    limiter,
+    sanitize_html,
+    sanitize_sql_input,
+    validate_email_format,
+    is_account_locked,
+    record_failed_login,
+    clear_failed_logins,
+)
 import secrets
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/register", response_model=Message, responses={400: {"model": Message}})
-async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def register(request: Request, payload: RegisterRequest, db: AsyncSession = Depends(get_db)):
+    # Validate and sanitize inputs
+    if not validate_email_format(payload.email):
+        raise HTTPException(status_code=400, detail="Invalid email format")
+    
+    # Sanitize name and email
+    payload.name = sanitize_html(payload.name)
+    payload.email = payload.email.lower().strip()
+    
     # Validate password
     if not is_strong_password(payload.password):
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters and include lowercase (a-z), uppercase (A-Z), a number (0-9), and a symbol.")
@@ -111,7 +129,8 @@ async def verify_email(payload: VerifyEmailRequest, db: AsyncSession = Depends(g
     return TokenResponse(token=access, refreshToken=refresh, user=UserOut(id=user.id, name=user.name, email=user.email))
 
 @router.post("/resend-verification", response_model=Message, responses={400: {"model": Message}})
-async def resend_verification(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("3/minute")
+async def resend_verification(request: Request, payload: LoginRequest, db: AsyncSession = Depends(get_db)):
     # Find user by email
     res = await db.execute(select(User).where(User.email == payload.email))
     user = res.scalar_one_or_none()
@@ -149,12 +168,29 @@ async def resend_verification(payload: LoginRequest, db: AsyncSession = Depends(
     return Message(message="Verification email sent! Please check your inbox.")
 
 @router.post("/login", response_model=TokenResponse, responses={400: {"model": Message}})
-async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
-    res = await db.execute(select(User).where(User.email == payload.email))
+@limiter.limit("10/minute")
+async def login(request: Request, payload: LoginRequest, db: AsyncSession = Depends(get_db)):
+    # Validate email format
+    if not validate_email_format(payload.email):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    
+    # Normalize email
+    email = payload.email.lower().strip()
+    
+    # Check if account is locked
+    if is_account_locked(email):
+        raise HTTPException(
+            status_code=429, 
+            detail="Account temporarily locked due to too many failed login attempts. Please try again in 15 minutes."
+        )
+    
+    res = await db.execute(select(User).where(User.email == email))
     user = res.scalar_one_or_none()
     if user is None:
+        record_failed_login(email)
         raise HTTPException(status_code=400, detail="Invalid credentials")
     if not verify_password(payload.password, user.password_hash):
+        record_failed_login(email)
         raise HTTPException(status_code=400, detail="Invalid credentials")
     
     # Check if email is verified
@@ -179,6 +215,9 @@ async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
         except Exception as e:
             print(f"⚠️ Failed to send verification email: {str(e)}")
             raise HTTPException(status_code=403, detail="Please verify your email before logging in. Check your inbox for the verification link.")
+    
+    # Clear failed login attempts on successful login
+    clear_failed_logins(email)
     
     access = create_access_token({"id": user.id, "email": user.email})
     refresh = create_refresh_token({"id": user.id, "email": user.email, "tv": user.token_version})
