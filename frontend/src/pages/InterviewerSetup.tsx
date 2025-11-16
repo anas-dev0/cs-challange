@@ -498,7 +498,7 @@ export default function InterviewerSetup() {
           </div>
 
           {/* Continue Button */}
-          <div className="inline-block has-[button:disabled]:cursor-not-allowed ">
+          <div className="has-[button:disabled]:cursor-not-allowed">
             <Button
               onClick={handleContinue}
               disabled={
@@ -511,7 +511,7 @@ export default function InterviewerSetup() {
                 !jobTitle.trim() ||
                 !selectedLanguage
               }
-              className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white hover:text-gray-900 transition-all margin-0"
+              className="w-full h-12 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white hover:text-gray-900 transition-all"
             >
               {loading ? t("upload.starting") : t("upload.continue")}
             </Button>
