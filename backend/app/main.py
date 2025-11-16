@@ -36,7 +36,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # ⚠️ TEMPORARY: Skills Gap Analysis disabled for faster development
 # TODO: Re-enable for production by setting SKILLS_GAP_ENABLED = True
-SKILLS_GAP_ENABLED = True
+SKILLS_GAP_ENABLED = False
 
 if SKILLS_GAP_ENABLED:
     try:

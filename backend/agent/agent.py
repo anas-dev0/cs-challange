@@ -6,6 +6,7 @@ from livekit.plugins import google, silero
 from cv_parser import extract_text_from_cv
 # Import the prompts and CV parser
 from prompts import create_initial_prompts_en , create_initial_prompts_fr
+from test_prompts import create_test_prompts, create_test_prompts_fr
 import os
 import requests
 # Import the mailing module
@@ -14,7 +15,6 @@ from livekit.agents import ConversationItemAddedEvent
 
 # Load .env from parent directory (backend/)
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
-from test_prompts import create_test_prompts
 
 class Assistant(Agent):
     def __init__(self, agent_instruction) -> None:
@@ -86,23 +86,37 @@ async def entrypoint(ctx: agents.JobContext):
 
         # Generate personalized prompts
         print("🤖 Generating prompts...")
+        # if language.lower() == "english":
+        #     agent_instruction, session_instruction = create_initial_prompts_en(
+        #         cv_text=cv_text,
+        #         job_title=job_title,
+        #         job_description_text=job_description,
+        #     )
+        # else:
+        #     agent_instruction, session_instruction = create_initial_prompts_fr(
+        #         cv_text=cv_text,
+        #         job_title=job_title,
+        #         job_description_text=job_description,
+        #     )
+        
+        # ===== TEST MODE =====
+        # Uncomment the lines below to enable fast test mode (2 questions only)
+        # Comment out the production prompts above when testing
+        # 
         if language.lower() == "english":
-            agent_instruction, session_instruction = create_initial_prompts_en(
+            agent_instruction, session_instruction = create_test_prompts(
                 cv_text=cv_text,
                 job_title=job_title,
                 job_description_text=job_description,
             )
         else:
-            agent_instruction, session_instruction = create_initial_prompts_fr(
+            agent_instruction, session_instruction = create_test_prompts_fr(
                 cv_text=cv_text,
                 job_title=job_title,
                 job_description_text=job_description,
             )
-        # agent_instruction, session_instruction = create_test_prompts(
-        #     cv_text=cv_text,
-        #     job_title=job_title,
-        #     job_description_text=job_description,
-        # )
+        # =====================
+        
         # Initialize session
         if language.lower() == "english":
             interview_language="en-US"

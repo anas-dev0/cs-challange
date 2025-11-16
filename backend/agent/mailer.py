@@ -22,24 +22,34 @@ def parse_report(report_text: str) -> dict:
     """
     Parses the interview report text and extracts structured data
     Handles the specific format from the agent's prompts
+    Supports both English and French reports
     """
     # First, clean up the text - remove any preamble
     clean_text = report_text
     
-    # Remove "Thank you for your time today" type phrases
+    # Detect language based on keywords
+    is_french = "Score Global" in report_text or "Points Forts Clés" in report_text
+    
+    # Remove "Thank you for your time today" type phrases (English and French)
     preamble_phrases = [
         "Thank you for your time today. That concludes the interview questions.",
         "That concludes the interview questions.",
-        "Thank you for your time today."
+        "Thank you for your time today.",
+        "Merci pour votre temps aujourd'hui. Ceci conclut les questions d'entretien.",
+        "Ceci conclut les questions d'entretien.",
+        "Merci pour votre temps aujourd'hui."
     ]
     for phrase in preamble_phrases:
         clean_text = clean_text.replace(phrase, "")
     
-    # Remove closing phrases
+    # Remove closing phrases (English and French)
     closing_phrases = [
         "Best of luck with your interview preparation. This session is now complete.",
         "Best of luck with your interview preparation.",
         "This session is now complete.",
+        "Bonne chance pour la préparation de vos entretiens. Cette session est maintenant terminée.",
+        "Bonne chance pour la préparation de vos entretiens.",
+        "Cette session est maintenant terminée."
     ]
     for phrase in closing_phrases:
         if phrase in clean_text:
@@ -55,56 +65,121 @@ def parse_report(report_text: str) -> dict:
         "communication": {},
         "recommendations": [],
         "role_fit": "",
-        "final_note": ""
+        "final_note": "",
+        "language": "french" if is_french else "english"
     }
     
-    # Extract overall score
-    score_match = re.search(r'\*\*Overall Score:\*\*\s*(\d+/10)\s*[-–]\s*(.+?)(?=\n|$)', clean_text)
-    if score_match:
-        data["overall_score"] = score_match.group(1)
-        data["score_justification"] = score_match.group(2).strip()
-    
-    # Extract strengths
-    strengths_section = re.search(r'\*\*Key Strengths:\*\*(.*?)\*\*Areas for Development:\*\*', clean_text, re.DOTALL)
-    if strengths_section:
-        strengths_text = strengths_section.group(1)
-        strengths = re.findall(r'-\s*(.+?)(?=\n-|\n\*\*|\Z)', strengths_text, re.DOTALL)
-        data["strengths"] = [s.strip() for s in strengths if s.strip()]
-    
-    # Extract weaknesses/areas for development
-    weaknesses_section = re.search(r'\*\*Areas for Development:\*\*(.*?)\*\*Communication & Delivery Assessment:\*\*', clean_text, re.DOTALL)
-    if weaknesses_section:
-        weaknesses_text = weaknesses_section.group(1)
-        weaknesses = re.findall(r'-\s*\*\*(.+?)\*\*:\s*(.+?)(?=\n-|\n\*\*|\Z)', weaknesses_text, re.DOTALL)
-        for weakness in weaknesses:
-            data["weaknesses"].append({
-                "title": weakness[0].strip(),
-                "description": weakness[1].strip()
-            })
-    
-    # Extract communication assessment
-    comm_fields = ["Confidence", "Clarity", "Pace & Fluency", "Enthusiasm", "Professionalism"]
-    for field in comm_fields:
-        match = re.search(f'-\s*{field}:\s*(.+?)(?=\n-|\n\*\*|\Z)', clean_text, re.DOTALL)
-        if match:
-            data["communication"][field.lower().replace(" & ", "_").replace(" ", "_")] = match.group(1).strip()
-    
-    # Extract recommendations
-    recommendations_section = re.search(r'\*\*Recommendations for Improvement:\*\*(.*?)\*\*Role Fit Assessment:\*\*', clean_text, re.DOTALL)
-    if recommendations_section:
-        recs_text = recommendations_section.group(1)
-        recs = re.findall(r'-\s*(.+?)(?=\n-|\n\*\*|\Z)', recs_text, re.DOTALL)
-        data["recommendations"] = [r.strip() for r in recs if r.strip()]
-    
-    # Extract role fit
-    role_fit_match = re.search(r'\*\*Role Fit Assessment:\*\*\s*(.+?)(?=\*\*Final Note:\*\*|\n\n---|\Z)', clean_text, re.DOTALL)
-    if role_fit_match:
-        data["role_fit"] = role_fit_match.group(1).strip()
-    
-    # Extract final note (optional)
-    final_note_match = re.search(r'\*\*Final Note:\*\*\s*(.+?)(?=\n\n---|\Z)', clean_text, re.DOTALL)
-    if final_note_match:
-        data["final_note"] = final_note_match.group(1).strip()
+    if is_french:
+        # French report parsing - matches exact format from prompts.py
+        # Format: **Score Global :** (space before colon, colon inside bold)
+        # Also handles unformatted reports without bold markers
+        
+        # Extract overall score - handle both formatted and unformatted
+        score_match = re.search(r'\*{0,2}Score Global\s*:\s*\*{0,2}\s*(\d+/10)\s*[-–]\s*(.+?)(?=\n|$)', clean_text)
+        if score_match:
+            data["overall_score"] = score_match.group(1)
+            data["score_justification"] = score_match.group(2).strip()
+        
+        # Extract strengths - handle both formatted and unformatted
+        strengths_section = re.search(r"\*{0,2}Points Forts Clés\s*:\s*\*{0,2}(.*?)(?:\*{0,2}Axes d['\u2019]Amélioration\s*:\s*\*{0,2})", clean_text, re.DOTALL)
+        if strengths_section:
+            strengths_text = strengths_section.group(1)
+            strengths = re.findall(r'-\s*(.+?)(?=\n-|\n\*|\n[A-ZÉÈÊË]|\Z)', strengths_text, re.DOTALL)
+            data["strengths"] = [s.strip() for s in strengths if s.strip()]
+        
+        # Extract weaknesses/areas for development
+        weaknesses_section = re.search(r"\*{0,2}Axes d['\u2019]Amélioration\s*:\s*\*{0,2}(.*?)(?:\*{0,2}Évaluation de la Communication et de la Prestation\s*:\s*\*{0,2})", clean_text, re.DOTALL)
+        if weaknesses_section:
+            weaknesses_text = weaknesses_section.group(1)
+            # Try to match formatted weaknesses first
+            weaknesses = re.findall(r'-\s*\*{0,2}(.+?)\*{0,2}\s*:\s*(.+?)(?=\n-|\n\*|\n[A-ZÉÈÊË]|\Z)', weaknesses_text, re.DOTALL)
+            if weaknesses:
+                for weakness in weaknesses:
+                    data["weaknesses"].append({
+                        "title": weakness[0].strip(),
+                        "description": weakness[1].strip()
+                    })
+            else:
+                # If no formatted weaknesses, treat as bullet points
+                simple_weaknesses = re.findall(r'-\s*(.+?)(?=\n-|\n\*|\n[A-ZÉÈÊË]|\Z)', weaknesses_text, re.DOTALL)
+                for weak in simple_weaknesses:
+                    data["weaknesses"].append({
+                        "title": "Point d'amélioration",
+                        "description": weak.strip()
+                    })
+        
+        # Extract communication assessment
+        comm_fields = ["Confiance", "Clarté", "Rythme et Fluidité", "Enthousiasme", "Professionnalisme"]
+        for field in comm_fields:
+            match = re.search(f'-\s*{re.escape(field)}\s*:\s*(.+?)(?=\n-|\n\*|\n[A-ZÉÈÊË]|\Z)', clean_text, re.DOTALL)
+            if match:
+                data["communication"][field.lower().replace(" ", "_").replace("é", "e")] = match.group(1).strip()
+        
+        # Extract recommendations
+        recommendations_section = re.search(r"\*{0,2}Recommandations d['\u2019]Amélioration\s*:\s*\*{0,2}(.*?)(?:\*{0,2}Évaluation de l['\u2019]Adéquation au Poste\s*:\s*\*{0,2})", clean_text, re.DOTALL)
+        if recommendations_section:
+            recs_text = recommendations_section.group(1)
+            recs = re.findall(r'-\s*(.+?)(?=\n-|\n\*|\n[A-ZÉÈÊË]|\Z)', recs_text, re.DOTALL)
+            data["recommendations"] = [r.strip() for r in recs if r.strip()]
+        
+        # Extract role fit
+        role_fit_match = re.search(r"\*{0,2}Évaluation de l['\u2019]Adéquation au Poste\s*:\s*\*{0,2}\s*(.+?)(?=\*{0,2}Note Finale\s*:\s*\*{0,2}|\n\n---|\Z)", clean_text, re.DOTALL)
+        if role_fit_match:
+            data["role_fit"] = role_fit_match.group(1).strip()
+        
+        # Extract final note (optional)
+        final_note_match = re.search(r"\*{0,2}Note Finale\s*:\s*\*{0,2}\s*(.+?)(?=\n\n---|\nBonne chance|\Z)", clean_text, re.DOTALL)
+        if final_note_match:
+            data["final_note"] = final_note_match.group(1).strip()
+    else:
+        # English report parsing
+        # Extract overall score
+        score_match = re.search(r'\*\*Overall Score\s*:\*\*\s*(\d+/10)\s*[-–]\s*(.+?)(?=\n|$)', clean_text)
+        if score_match:
+            data["overall_score"] = score_match.group(1)
+            data["score_justification"] = score_match.group(2).strip()
+        
+        # Extract strengths
+        strengths_section = re.search(r'\*\*Key Strengths\s*:\*\*(.*?)\*\*Areas for Development\s*:\*\*', clean_text, re.DOTALL)
+        if strengths_section:
+            strengths_text = strengths_section.group(1)
+            strengths = re.findall(r'-\s*(.+?)(?=\n-|\n\*\*|\Z)', strengths_text, re.DOTALL)
+            data["strengths"] = [s.strip() for s in strengths if s.strip()]
+        
+        # Extract weaknesses/areas for development
+        weaknesses_section = re.search(r'\*\*Areas for Development\s*:\*\*(.*?)\*\*Communication & Delivery Assessment\s*:\*\*', clean_text, re.DOTALL)
+        if weaknesses_section:
+            weaknesses_text = weaknesses_section.group(1)
+            weaknesses = re.findall(r'-\s*\*\*(.+?)\*\*\s*:\s*(.+?)(?=\n-|\n\*\*|\Z)', weaknesses_text, re.DOTALL)
+            for weakness in weaknesses:
+                data["weaknesses"].append({
+                    "title": weakness[0].strip(),
+                    "description": weakness[1].strip()
+                })
+        
+        # Extract communication assessment
+        comm_fields = ["Confidence", "Clarity", "Pace & Fluency", "Enthusiasm", "Professionalism"]
+        for field in comm_fields:
+            match = re.search(f'-\s*{field}\s*:\s*(.+?)(?=\n-|\n\*\*|\Z)', clean_text, re.DOTALL)
+            if match:
+                data["communication"][field.lower().replace(" & ", "_").replace(" ", "_")] = match.group(1).strip()
+        
+        # Extract recommendations
+        recommendations_section = re.search(r'\*\*Recommendations for Improvement\s*:\*\*(.*?)\*\*Role Fit Assessment\s*:\*\*', clean_text, re.DOTALL)
+        if recommendations_section:
+            recs_text = recommendations_section.group(1)
+            recs = re.findall(r'-\s*(.+?)(?=\n-|\n\*\*|\Z)', recs_text, re.DOTALL)
+            data["recommendations"] = [r.strip() for r in recs if r.strip()]
+        
+        # Extract role fit
+        role_fit_match = re.search(r'\*\*Role Fit Assessment\s*:\*\*\s*(.+?)(?=\*\*Final Note\s*:\*\*|\n\n---|\Z)', clean_text, re.DOTALL)
+        if role_fit_match:
+            data["role_fit"] = role_fit_match.group(1).strip()
+        
+        # Extract final note (optional)
+        final_note_match = re.search(r'\*\*Final Note\s*:\*\*\s*(.+?)(?=\n\n---|\Z)', clean_text, re.DOTALL)
+        if final_note_match:
+            data["final_note"] = final_note_match.group(1).strip()
     
     return data
 
@@ -112,7 +187,56 @@ def parse_report(report_text: str) -> dict:
 def create_html_email(candidate_name: str, job_title: str, report_data: dict) -> str:
     """
     Creates a beautiful HTML email template for the interview report
+    Supports both English and French
     """
+    from datetime import datetime
+    import locale
+    
+    is_french = report_data.get("language") == "french"
+    
+    # Translations
+    if is_french:
+        translations = {
+            "title": "Rapport de Performance d'Entretien",
+            "subtitle": "Analyse d'Entretien Assistée par IA",
+            "candidate": "Candidat",
+            "position": "Poste",
+            "date": "Date",
+            "overall_performance": "Performance Globale",
+            "key_strengths": "✨ Points Forts Clés",
+            "areas_development": "📈 Axes d'Amélioration",
+            "communication_delivery": "🎤 Communication et Prestation",
+            "confidence": "Confiance",
+            "clarity": "Clarté",
+            "pace_fluency": "Rythme et Fluidité",
+            "enthusiasm": "Enthousiasme",
+            "professionalism": "Professionnalisme",
+            "recommendations": "💡 Recommandations d'Amélioration",
+            "role_fit": "🎯 Évaluation de l'Adéquation au Poste",
+            "footer_text": "Ce rapport a été généré par AI Interview Coach",
+            "footer_subtext": "Conservez ce rapport pour vos dossiers et votre future préparation d'entretien"
+        }
+    else:
+        translations = {
+            "title": "Interview Performance Report",
+            "subtitle": "AI-Powered Interview Analysis",
+            "candidate": "Candidate",
+            "position": "Position",
+            "date": "Date",
+            "overall_performance": "Overall Performance",
+            "key_strengths": "✨ Key Strengths",
+            "areas_development": "📈 Areas for Development",
+            "communication_delivery": "🎤 Communication & Delivery",
+            "confidence": "Confidence",
+            "clarity": "Clarity",
+            "pace_fluency": "Pace & Fluency",
+            "enthusiasm": "Enthusiasm",
+            "professionalism": "Professionalism",
+            "recommendations": "💡 Recommendations for Improvement",
+            "role_fit": "🎯 Role Fit Assessment",
+            "footer_text": "This report was generated by AI Interview Coach",
+            "footer_subtext": "Keep this report for your records and future interview preparation"
+        }
     
     # Generate strengths HTML
     strengths_html = ""
@@ -133,21 +257,29 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
     
     # Generate communication assessment HTML
     communication_html = ""
-    comm_labels = {
-        "confidence": "Confidence",
-        "clarity": "Clarity",
-        "pace_fluency": "Pace & Fluency",
-        "enthusiasm": "Enthusiasm",
-        "professionalism": "Professionalism"
+    # Map the keys to translated labels
+    comm_key_map = {
+        "confiance": translations["confidence"],
+        "clarte": translations["clarity"],
+        "rythme_et_fluidite": translations["pace_fluency"],
+        "enthousiasme": translations["enthusiasm"],
+        "professionnalisme": translations["professionalism"],
+        # English keys
+        "confidence": translations["confidence"],
+        "clarity": translations["clarity"],
+        "pace_fluency": translations["pace_fluency"],
+        "enthusiasm": translations["enthusiasm"],
+        "professionalism": translations["professionalism"]
     }
-    for key, label in comm_labels.items():
-        if key in report_data["communication"]:
-            communication_html += f"""
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #374151;">{label}:</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">{report_data["communication"][key]}</td>
-            </tr>
-            """
+    
+    for key, value in report_data["communication"].items():
+        label = comm_key_map.get(key, key.replace("_", " ").title())
+        communication_html += f"""
+        <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #374151;">{label}:</td>
+            <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">{value}</td>
+        </tr>
+        """
     
     # Generate recommendations HTML
     recommendations_html = ""
@@ -165,13 +297,23 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
     else:
         score_color = "#ef4444"  # Red
     
+    # Format date based on language
+    if is_french:
+        try:
+            locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+        except:
+            pass
+        date_str = datetime.now().strftime("%d %B %Y")
+    else:
+        date_str = datetime.now().strftime("%B %d, %Y")
+    
     html = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Interview Performance Report</title>
+        <title>{translations["title"]}</title>
     </head>
     <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
         <table role="presentation" style="width: 100%; border-collapse: collapse;">
@@ -181,8 +323,8 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                         <!-- Header -->
                         <tr>
                             <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; border-radius: 12px 12px 0 0; text-align: center;">
-                                <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">Interview Performance Report</h1>
-                                <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">AI-Powered Interview Analysis</p>
+                                <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">{translations["title"]}</h1>
+                                <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">{translations["subtitle"]}</p>
                             </td>
                         </tr>
                         
@@ -190,12 +332,12 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                         <tr>
                             <td style="padding: 30px;">
                                 <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea;">
-                                    <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">Candidate</p>
+                                    <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">{translations["candidate"]}</p>
                                     <p style="margin: 0 0 12px 0; color: #111827; font-size: 18px; font-weight: 600;">{candidate_name}</p>
-                                    <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">Position</p>
+                                    <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">{translations["position"]}</p>
                                     <p style="margin: 0 0 12px 0; color: #111827; font-size: 16px; font-weight: 500;">{job_title}</p>
-                                    <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">Date</p>
-                                    <p style="margin: 0; color: #111827; font-size: 16px;">{datetime.now().strftime("%B %d, %Y")}</p>
+                                    <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">{translations["date"]}</p>
+                                    <p style="margin: 0; color: #111827; font-size: 16px;">{date_str}</p>
                                 </div>
                             </td>
                         </tr>
@@ -203,7 +345,7 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                         <!-- Overall Score -->
                         <tr>
                             <td style="padding: 0 30px 30px 30px;">
-                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">Overall Performance</h2>
+                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">{translations["overall_performance"]}</h2>
                                 <div style="text-align: center; background-color: #f9fafb; padding: 30px; border-radius: 8px;">
                                     <div style="display: inline-block; background-color: {score_color}; color: #ffffff; font-size: 48px; font-weight: 700; padding: 20px 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                                         {report_data["overall_score"]}
@@ -216,7 +358,7 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                         <!-- Key Strengths -->
                         <tr>
                             <td style="padding: 0 30px 30px 30px;">
-                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">✨ Key Strengths</h2>
+                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">{translations["key_strengths"]}</h2>
                                 <ul style="margin: 0; padding-left: 20px; color: #374151;">
                                     {strengths_html}
                                 </ul>
@@ -226,7 +368,7 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                         <!-- Areas for Development -->
                         <tr>
                             <td style="padding: 0 30px 30px 30px;">
-                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">📈 Areas for Development</h2>
+                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">{translations["areas_development"]}</h2>
                                 <div style="color: #374151;">
                                     {weaknesses_html}
                                 </div>
@@ -236,7 +378,7 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                         <!-- Communication Assessment -->
                         <tr>
                             <td style="padding: 0 30px 30px 30px;">
-                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">🎤 Communication & Delivery</h2>
+                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">{translations["communication_delivery"]}</h2>
                                 <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border-radius: 8px; overflow: hidden;">
                                     {communication_html}
                                 </table>
@@ -246,7 +388,7 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                         <!-- Recommendations -->
                         <tr>
                             <td style="padding: 0 30px 30px 30px;">
-                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">💡 Recommendations for Improvement</h2>
+                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">{translations["recommendations"]}</h2>
                                 <ul style="margin: 0; padding-left: 20px; color: #374151;">
                                     {recommendations_html}
                                 </ul>
@@ -256,7 +398,7 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                         <!-- Role Fit Assessment -->
                         <tr>
                             <td style="padding: 0 30px 30px 30px;">
-                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">🎯 Role Fit Assessment</h2>
+                                <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 22px; font-weight: 700;">{translations["role_fit"]}</h2>
                                 <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
                                     <p style="margin: 0; color: #1e40af; line-height: 1.6;">{report_data["role_fit"]}</p>
                                 </div>
@@ -269,8 +411,8 @@ def create_html_email(candidate_name: str, job_title: str, report_data: dict) ->
                         <!-- Footer -->
                         <tr>
                             <td style="padding: 30px; background-color: #f9fafb; border-radius: 0 0 12px 12px; text-align: center;">
-                                <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">This report was generated by AI Interview Coach</p>
-                                <p style="margin: 0; color: #9ca3af; font-size: 12px;">Keep this report for your records and future interview preparation</p>
+                                <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">{translations["footer_text"]}</p>
+                                <p style="margin: 0; color: #9ca3af; font-size: 12px;">{translations["footer_subtext"]}</p>
                             </td>
                         </tr>
                     </table>
@@ -314,14 +456,33 @@ async def send_interview_report_email(
         # Create HTML email
         html_content = create_html_email(candidate_name, job_title, report_data)
         
+        # Determine language for subject
+        is_french = report_data.get("language") == "french"
+        subject = f"Rapport de Performance d'Entretien - {job_title}" if is_french else f"Interview Performance Report - {job_title}"
+        
         # Create message
         message = MIMEMultipart("alternative")
-        message["Subject"] = f"Interview Performance Report - {job_title}"
+        message["Subject"] = subject
         message["From"] = f"{SENDER_NAME} <{SENDER_EMAIL}>"
         message["To"] = recipient_email
         
-        # Create plain text version (fallback)
-        text_content = f"""
+        # Create plain text version (fallback) - multilingual
+        from datetime import datetime
+        if is_french:
+            text_content = f"""
+Rapport de Performance d'Entretien
+
+Candidat : {candidate_name}
+Poste : {job_title}
+Date : {datetime.now().strftime("%d %B %Y")}
+
+{report_text}
+
+---
+Ce rapport a été généré par AI Interview Coach
+        """
+        else:
+            text_content = f"""
 Interview Performance Report
 
 Candidate: {candidate_name}
