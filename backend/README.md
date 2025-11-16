@@ -1,290 +1,427 @@
-# 🎯 AI Interview Coach
+# 🎯 UtopiaHire Backend - Modular Architecture
 
-> **Personalized Interview Preparation with Advanced AI Technology**
+> **Professional, Secure, and Scalable Interview Preparation Platform**
 
-An intelligent interview coaching platform that combines CV parsing, real-time AI interaction, and personalized feedback to help job seekers excel in their interviews.
+A well-structured backend application following industry best practices with **modular architecture**, **security by design**, and **privacy by design** principles.
 
-## 🚀 Features
+## 🌟 Key Features
 
-### 📄 Advanced CV Parsing
-- **Multi-format Support**: PDF, DOCX, PNG, JPG, JPEG
-- **OCR Technology**: Extract text from scanned documents using EasyOCR
-- **Content Analysis**: Word count, reading time, and structure analysis
-- **Real-time Processing**: Instant text extraction and validation
+### 🏗️ **Modular Architecture**
+- **Clear Separation of Concerns**: Routes, services, models, and utilities are organized into dedicated modules
+- **High Maintainability**: Each module has a single, well-defined responsibility
+- **Easy to Extend**: Add new features without affecting existing code
+- **Professional Structure**: Follows industry best practices for Python web applications
 
-### 🤖 AI-Powered Interview Coaching
-- **Personalized Questions**: Generated based on your CV and target job description
-- **Real-time Voice Interviews**: Using LiveKit and Google AI for natural conversations
-- **Text-based Practice**: Interactive chat interface for practice sessions
-- **Adaptive Feedback**: Constructive criticism tailored to your responses
+### 🔒 **Security by Design**
+- **Multi-Layer Security**: Defense in depth with security at every layer
+- **Input Validation**: Comprehensive validation and sanitization
+- **Authentication**: JWT-based authentication with refresh tokens
+- **Rate Limiting**: Protect against brute force and DDoS attacks
+- **Security Headers**: CSP, HSTS, X-Frame-Options, and more
+- **SQL Injection Prevention**: Parameterized queries throughout
+- **XSS Protection**: HTML sanitization and output encoding
 
-### 📊 Performance Analytics
-- **Progress Tracking**: Monitor improvement over multiple sessions
-- **Score Analysis**: Detailed breakdown of interview performance
-- **Trend Visualization**: Interactive charts showing your development
-- **Session History**: Review past interviews and feedback
+### 🔐 **Privacy by Design**
+- **Data Minimization**: Only collect necessary information
+- **Secure Storage**: bcrypt password hashing, secure file handling
+- **Access Control**: Role-based access with JWT tokens
+- **Audit Logging**: Security events tracked for accountability
+- **GDPR Compliance**: User data protection and privacy controls
 
-### 🛠️ Interview Preparation Tools
-- **STAR Method Framework**: Structured approach for behavioral questions
-- **Question Banks**: Curated questions by category (Technical, Behavioral, etc.)
-- **Answer Templates**: Pre-built frameworks for different question types
-- **Random Question Generator**: Practice with surprise questions
-
-## 🏗️ Technology Stack
-
-### Backend
-- **Python 3.13+**: Core application logic
-- **LiveKit**: Real-time voice communication platform
-- **Google AI APIs**: Advanced natural language processing
-- **PyMuPDF**: PDF text extraction and processing
-- **EasyOCR**: Optical Character Recognition for images
-- **python-docx**: Microsoft Word document processing
-
-### Frontend
-- **Streamlit**: Interactive web application framework
-- **Plotly**: Dynamic data visualization and charts
-- **Pandas**: Data manipulation and analysis
-- **NumPy**: Numerical computing support
-
-### AI & Machine Learning
-- **Google Gemini**: Large language model for interview coaching
-- **LiveKit Agents**: Voice-based AI interaction
-- **OCR Processing**: Intelligent text extraction from images
-
-## 📦 Installation
-
-### Prerequisites
-- Python 3.13 or higher
-- Microphone and speakers (for voice interviews)
-- Stable internet connection
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/Tarekazabou/cs-challange.git
-cd cs-challange
-```
-
-### 2. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Environment Setup
-Create a `.env` file in the project root:
-```bash
-# LiveKit Configuration
-LIVEKIT_URL=your_livekit_url
-LIVEKIT_API_KEY=your_api_key
-LIVEKIT_API_SECRET=your_api_secret
-
-# Google AI Configuration
-GOOGLE_API_KEY=your_google_api_key
-```
-
-### 4. Initialize OCR Models
-The first run will download EasyOCR models (~100MB):
-```bash
-python -c "import easyocr; reader = easyocr.Reader(['en'])"
-```
-
-## 🚀 Quick Start
-
-### Web Application (Streamlit)
-```bash
-streamlit run app.py
-```
-Access the web interface at `http://localhost:8501`
-
-### Voice Interview Agent
-```bash
-python agent.py
-```
-Follow the prompts to join a real-time voice interview session.
-
-## 📖 Usage Guide
-
-### 1. CV Upload & Analysis
-1. Navigate to the **📄 CV Parser** section
-2. Upload your resume (PDF, DOCX, or image format)
-3. Review the extracted content and analysis
-4. The system will store your CV for use in other sections
-
-### 2. Interview Preparation
-1. Go to the **🤖 Interview Coach** section
-2. Enter the job description for your target role
-3. Click "Generate Interview Questions" to create personalized prompts
-4. Choose between text-based or voice-based interview practice
-
-### 3. Performance Tracking
-1. Visit the **📊 Analytics** section to view your progress
-2. Analyze score trends, session duration, and improvement metrics
-3. Review detailed feedback from previous sessions
-
-### 4. Practice Tools
-1. Use the **🛠️ Tools** section for additional preparation
-2. Generate STAR method answers for behavioral questions
-3. Practice with random questions from curated question banks
-4. Structure technical problem responses
-
-## 🔧 Configuration
-
-### LiveKit Setup
-1. Create a LiveKit account at [livekit.io](https://livekit.io)
-2. Generate API credentials
-3. Update your `.env` file with the credentials
-
-### Google AI Setup
-1. Obtain a Google AI API key
-2. Enable the necessary AI services
-3. Add the API key to your `.env` file
-
-### OCR Optimization
-For better OCR performance:
-- Ensure clear, high-resolution images
-- Use good lighting for scanned documents
-- Consider preprocessing images for better contrast
+### 👥 **User-Centric Design**
+- **Fast Performance**: Async/await for non-blocking operations
+- **Clear Error Messages**: User-friendly error responses
+- **Comprehensive API**: RESTful design with OpenAPI documentation
+- **Reliable**: Graceful error handling and recovery
 
 ## 📁 Project Structure
 
 ```
-cs-challange/
-├── 📄 Core Application Files
-│   ├── app.py              # Main Streamlit web application
-│   ├── agent.py            # LiveKit voice interview agent
-│   ├── cv_parser.py        # CV text extraction module
-│   └── prompts.py          # AI prompt generation
-├── 📋 Configuration
-│   ├── requirements.txt    # Python dependencies
-│   ├── .env               # Environment variables (create this)
-│   └── .gitignore         # Git ignore rules
-├── 📄 Sample CVs
-│   ├── cv_intershipb&w.pdf
-│   └── cv_khawla.pdf
-└── 📖 Documentation
-    └── README.md          # This file
+backend/
+├── agent/                    # Interview Agent (separate process)
+│   ├── agent.py             # LiveKit voice interview agent
+│   ├── cv_parser.py         # CV parsing utilities
+│   ├── mailer.py            # Email service for reports
+│   └── prompts.py           # AI prompt templates
+│
+├── app/                     # Main Application
+│   ├── main.py             # Application entry point
+│   │
+│   ├── config/             # Configuration
+│   │   └── settings.py     # Environment-based settings
+│   │
+│   ├── database/           # Database Layer
+│   │   └── connection.py   # SQLAlchemy engine & sessions
+│   │
+│   ├── models/             # ORM Models
+│   │   └── user.py         # User and Interview models
+│   │
+│   ├── schemas/            # API Schemas
+│   │   └── auth_schemas.py # Pydantic request/response models
+│   │
+│   ├── routes/             # API Endpoints
+│   │   ├── auth.py         # Authentication
+│   │   ├── oauth.py        # OAuth (Google, GitHub)
+│   │   ├── service.py      # Interview services
+│   │   ├── job.py          # Job search
+│   │   └── cv_tools.py     # CV analysis & generation
+│   │
+│   ├── services/           # Business Logic
+│   │   └── gemini_service.py # AI analysis
+│   │
+│   ├── middleware/         # Middleware
+│   │   ├── logging.py      # Request logging
+│   │   └── security.py     # Security middleware
+│   │
+│   ├── utils/              # Utilities
+│   │   └── security_utils.py # JWT, passwords, validation
+│   │
+│   └── parsers/            # Document Processing
+│       ├── cv_parser.py    # Multi-format CV extraction
+│       ├── cv_structure_parser.py # AI-powered parsing
+│       └── latex_generator.py # LaTeX CV generation
+│
+├── api/                    # Skills Gap Analysis
+├── core/                   # AI/ML Components
+├── data/                   # Static Data
+├── cv_uploads/             # Temporary File Storage
+│
+├── .env.example           # Environment template
+├── requirements.txt       # Python dependencies
+├── ARCHITECTURE.md        # Detailed architecture docs
+└── README.md             # This file
 ```
 
-## 🎯 Core Features Breakdown
+## 🚀 Quick Start
 
-### CV Parser (`cv_parser.py`)
-- Supports multiple file formats (PDF, DOCX, images)
-- Intelligent fallback to OCR for scanned documents
-- Error handling and validation
-- Efficient text extraction algorithms
+### Prerequisites
+- Python 3.13+
+- PostgreSQL 15+
+- LiveKit account (for voice interviews)
+- Google Gemini API key (for AI)
 
-### Interview Agent (`agent.py`)
-- Real-time voice interaction using LiveKit
-- Personalized question generation based on CV analysis
-- Automatic feedback generation after interviews
-- Session management and completion tracking
+### 1. Clone Repository
+```bash
+git clone https://github.com/anas-dev0/cs-challange.git
+cd cs-challange/backend
+```
 
-### Prompt Engineering (`prompts.py`)
-- Dynamic prompt generation based on CV content and job descriptions
-- STAR method framework integration
-- Behavioral and technical question templates
-- Feedback scoring and improvement suggestions
+### 2. Install Dependencies
+```bash
+# Create virtual environment
+python -m venv venv
 
-### Web Interface (`app.py`)
-- Multi-page application with intuitive navigation
-- File upload and processing interface
-- Interactive charts and analytics
-- Real-time interview simulation
-- Comprehensive tool suite for interview preparation
+# Activate (Windows)
+venv\Scripts\activate
 
-## 🔐 Security & Privacy
+# Activate (Linux/Mac)
+source venv/bin/activate
 
-- **Local Processing**: CV content is processed locally and not stored permanently
-- **Secure APIs**: All API communications use encrypted connections
-- **Temporary Files**: Uploaded files are automatically cleaned up after processing
-- **No Data Persistence**: Interview content is only stored in session state
+# Install packages
+pip install -r requirements.txt
+```
+
+### 3. Configure Environment
+```bash
+# Copy template
+cp .env.example .env
+
+# Edit with your values
+nano .env
+```
+
+**Required Environment Variables:**
+```bash
+# Security (generate with: python -c "import secrets; print(secrets.token_urlsafe(32))")
+JWT_SECRET=your-secret-here
+REFRESH_SECRET=your-secret-here
+SESSION_SECRET=your-secret-here
+
+# Database
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/utopiahire
+
+# CORS
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174
+
+# LiveKit
+LIVEKIT_API_KEY=your-key
+LIVEKIT_API_SECRET=your-secret
+LIVEKIT_URL=wss://your-project.livekit.cloud
+
+# Google AI
+GOOGLE_API_KEY=your-gemini-key
+
+# OAuth (optional)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+```
+
+### 4. Start Database
+```bash
+# From project root
+docker-compose up -d
+```
+
+### 5. Run Application
+```bash
+# Main application
+python -m app.main
+
+# Access at:
+# - API: http://localhost:8000
+# - Docs: http://localhost:8000/docs
+# - Health: http://localhost:8000/health
+```
+
+### 6. Run Interview Agent (separate terminal)
+```bash
+cd agent
+python agent.py dev
+```
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+```
+POST   /api/auth/register          - Create account
+POST   /api/auth/login             - Login
+POST   /api/auth/refresh           - Refresh token
+POST   /api/auth/verify-email      - Verify email
+POST   /api/auth/resend-verification - Resend verification
+GET    /api/auth/me                - Get current user
+```
+
+### OAuth Endpoints
+```
+GET    /api/auth/oauth/google      - Google OAuth
+GET    /api/auth/oauth/google/callback
+GET    /api/auth/oauth/github      - GitHub OAuth
+GET    /api/auth/oauth/github/callback
+```
+
+### Service Endpoints
+```
+POST   /api/upload-cv              - Upload CV
+POST   /api/start-session          - Start interview
+POST   /api/save-interview         - Save results
+```
+
+### CV Tools Endpoints
+```
+POST   /api/analyze-structured     - Analyze CV
+POST   /api/apply-suggestion       - Apply suggestion
+POST   /api/generate-latex         - Generate LaTeX CV
+```
+
+### Job Endpoints
+```
+POST   /api/search-jobs            - Search jobs
+GET    /api/jobs/{id}              - Get job details
+```
+
+**Interactive Documentation**: Visit `http://localhost:8000/docs` for complete API reference with try-it-out functionality.
+
+## 🔒 Security Features
+
+### Authentication & Authorization
+- **JWT Tokens**: Access (2h) and refresh (7d) tokens
+- **Password Security**: bcrypt hashing with salt
+- **Account Protection**: 5 failed attempts → 15min lockout
+- **Email Verification**: Required for new accounts
+- **OAuth Support**: Google and GitHub integration
+
+### Input Validation
+- **Client-side**: Frontend validation
+- **API Layer**: Pydantic schema validation
+- **Middleware**: HTML sanitization, SQL injection detection
+- **Database**: Parameterized queries, type safety
+
+### Security Headers
+```
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Strict-Transport-Security: max-age=31536000
+Content-Security-Policy: ...
+```
+
+### Rate Limiting
+| Endpoint | Limit |
+|----------|-------|
+| Registration | 5/min |
+| Login | 10/min |
+| Email Resend | 3/min |
+| File Upload | 10/min |
+| General API | 100/min |
+
+### File Upload Security
+- **Type Validation**: Extension and MIME type checking
+- **Size Limit**: 10MB maximum
+- **Filename Sanitization**: Remove dangerous characters
+- **Path Traversal Prevention**: Block directory navigation
+- **Restricted Permissions**: Owner read/write only
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+python -m pytest
+
+# With coverage
+python -m pytest --cov=app
+
+# Specific module
+python -m pytest tests/test_routes/test_auth.py
+```
+
+## 📖 Development
+
+### Adding a New Feature
+
+1. **Update models** (if database changes needed)
+   ```python
+   # app/models/user.py
+   ```
+
+2. **Create/update schemas**
+   ```python
+   # app/schemas/
+   ```
+
+3. **Add route handler**
+   ```python
+   # app/routes/
+   ```
+
+4. **Implement business logic**
+   ```python
+   # app/services/
+   ```
+
+5. **Add tests**
+
+6. **Update documentation**
+
+### Code Style
+- Follow PEP 8
+- Use type hints
+- Document with docstrings
+- Write descriptive variable names
+- Keep functions focused and small
+
+### Security Checklist
+Before deploying:
+- [ ] Input validation implemented
+- [ ] Authentication required (if protected)
+- [ ] Authorization checked (if user-specific)
+- [ ] Rate limiting configured
+- [ ] Error messages don't leak info
+- [ ] Logging excludes sensitive data
+- [ ] Tests include security scenarios
+
+## 🚢 Deployment
+
+### Production Checklist
+- [ ] Strong secrets generated (32+ chars)
+- [ ] Database SSL enabled
+- [ ] CORS origins configured
+- [ ] HTTPS enforced
+- [ ] Rate limits reviewed
+- [ ] Logging configured
+- [ ] Error tracking enabled
+- [ ] Backups configured
+- [ ] Monitoring setup
+
+### Environment Setup
+```bash
+# Generate strong secrets
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# Update production .env
+JWT_SECRET=<generated-secret>
+REFRESH_SECRET=<generated-secret>
+DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/db?ssl=require
+CORS_ORIGINS=https://yourdomain.com
+```
+
+## 📊 Monitoring
+
+### What to Monitor
+- **Performance**: Response times, query times, resource usage
+- **Security**: Failed logins, rate limit hits, suspicious patterns
+- **Errors**: 4xx/5xx responses, exceptions, database errors
+
+### Log Format
+```
+INFO:     GET /api/auth/me -> 200 (42.3 ms)
+WARNING:  Failed login attempt for user@example.com
+ERROR:    Database connection timeout
+```
+
+## 🔧 Troubleshooting
+
+### Import Errors
+```bash
+# Check Python path
+python -c "import sys; print(sys.path)"
+
+# Verify module structure
+python -c "from app.main import app; print('OK')"
+```
+
+### Database Connection
+```bash
+# Test connection
+python -c "import asyncio; from app.database.connection import engine; asyncio.run(engine.dispose())"
+
+# Check PostgreSQL
+docker-compose ps
+docker-compose logs db
+```
+
+### Authentication Issues
+- Verify JWT_SECRET matches in .env
+- Check token hasn't expired
+- Confirm user exists in database
+- Review middleware logs
+
+## 📚 Documentation
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Detailed architecture documentation
+- **[SECURITY.md](../SECURITY.md)**: Comprehensive security guide
+- **[Main README](../README.md)**: Project overview and setup
+- **[API Docs](http://localhost:8000/docs)**: Interactive API documentation
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📊 Performance Metrics
-
-The system tracks various metrics to help improve your interview skills:
-
-- **Overall Performance Score**: 1-10 scale based on response quality
-- **Response Time**: How quickly you answer questions
-- **Clarity Score**: Speech clarity and articulation (voice mode)
-- **Content Relevance**: How well answers match the question
-- **Technical Accuracy**: Correctness of technical responses
-- **Communication Skills**: Overall presentation and professionalism
-
-## 🛟 Troubleshooting
-
-### Common Issues
-
-**OCR Not Working**
-- Ensure EasyOCR models are downloaded
-- Check image quality and resolution
-- Verify file format is supported
-
-**Voice Interview Connection Issues**
-- Verify LiveKit credentials in `.env`
-- Check internet connection stability
-- Ensure microphone permissions are granted
-
-**Streamlit App Not Loading**
-- Confirm all dependencies are installed
-- Check for port conflicts (default: 8501)
-- Review error logs for missing modules
-
-**CV Parsing Errors**
-- Verify file is not corrupted
-- Try converting to a different format
-- Check file size limits
-
-### Getting Help
-
-- 📧 **Email Support**: support@aiinterviewcoach.com
-- 💬 **Community Discord**: AI Interview Coach Community
-- 📖 **Documentation**: Detailed guides and tutorials
-- 🐛 **Issue Tracking**: GitHub Issues for bug reports
-
-## 📈 Roadmap
-
-### Upcoming Features
-- [ ] Multi-language support for international users
-- [ ] Industry-specific question banks
-- [ ] Video interview practice with facial expression analysis
-- [ ] Team interview simulations
-- [ ] Integration with job boards and ATS systems
-- [ ] Mobile application for on-the-go practice
-- [ ] Advanced analytics with machine learning insights
-
-### Version History
-- **v1.0.0**: Initial release with core features
-- **v1.1.0**: Enhanced OCR and analytics
-- **v1.2.0**: Voice interview improvements
-- **v1.3.0**: Web interface redesign
+1. Follow the existing modular structure
+2. Update ARCHITECTURE.md for significant changes
+3. Add tests for new features
+4. Update SECURITY.md for security changes
+5. Keep modules focused and cohesive
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](../LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- **LiveKit Team**: For the excellent real-time communication platform
-- **Google AI**: For providing advanced language model capabilities
-- **EasyOCR Contributors**: For the robust OCR solution
-- **Streamlit Community**: For the amazing web framework
-- **Open Source Community**: For the various libraries and tools used
+- **FastAPI**: Modern Python web framework
+- **SQLAlchemy**: Powerful ORM
+- **LiveKit**: Real-time communication
+- **Google AI**: Gemini language models
+- **Open Source Community**: Various tools and libraries
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/anas-dev0/cs-challange/issues)
+- **Security**: security@utopiahire.com
+- **Documentation**: [Project Wiki](https://github.com/anas-dev0/cs-challange/wiki)
 
 ---
 
-<div align="center">
+**Built with ❤️ for professional interview preparation**
 
-**🎯 Ready to ace your next interview?**
-
-[Get Started](http://localhost:8501) • [View Demo](#) • [Report Bug](#) • [Request Feature](#)
-
-*Built with ❤️ by the AI Interview Coach Team*
-
-</div>
+*Last Updated: November 2024 | Version 1.0.0*
