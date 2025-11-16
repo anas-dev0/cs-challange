@@ -1,9 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, Form, Body ,APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
-from .parser import parse_document_with_metadata
-from .cv_structure_parser import parse_and_analyze_cv, apply_suggestion_to_structured_cv
-from .latex_generator import generate_latex_cv, compile_latex_to_pdf
+from ..parsers.cv_parser import parse_document_with_metadata
+from ..parsers.cv_structure_parser import parse_and_analyze_cv, apply_suggestion_to_structured_cv
+from ..parsers.latex_generator import generate_latex_cv, compile_latex_to_pdf
 import tempfile
 import os
 import json

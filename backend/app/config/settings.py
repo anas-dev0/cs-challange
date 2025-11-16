@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     livekit_url: str = Field("wss://interview-coach-44v9xge4.livekit.cloud", alias="LIVEKIT_URL")
 
     model_config = ConfigDict(
-        env_file=os.path.join(os.path.dirname(__file__), "..", ".env"),
+        env_file=os.path.join(os.path.dirname(__file__), "..", "..", ".env"),
         case_sensitive=True,
         extra="ignore"
     )

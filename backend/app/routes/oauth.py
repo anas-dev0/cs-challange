@@ -3,11 +3,11 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from authlib.integrations.starlette_client import OAuth, OAuthError
-from .config import settings
-from .db import get_db
-from .models import User
-from .security import create_access_token, create_refresh_token
-from .schemas import UserOut
+from ..config.settings import settings
+from ..database.connection import get_db
+from ..models.user import User
+from ..utils.security_utils import create_access_token, create_refresh_token
+from ..schemas.auth_schemas import UserOut
 import secrets
 
 router = APIRouter(prefix="/api/auth/oauth", tags=["oauth"])

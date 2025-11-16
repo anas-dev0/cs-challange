@@ -6,9 +6,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import bcrypt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from .config import settings
-from .db import get_db
-from .models import User
+from ..config.settings import settings
+from ..database.connection import get_db
+from ..models.user import User
 
 oauth2_scheme = HTTPBearer(auto_error=False)
 

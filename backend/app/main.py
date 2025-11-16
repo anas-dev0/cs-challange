@@ -7,15 +7,15 @@ from sqlalchemy import text
 from contextlib import asynccontextmanager
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from .config import settings
-from .db import Base, engine
-from .auth_routes import router as auth_router
-from .oauth_routes import router as oauth_router
-from .service_routes import router as service_router
-from .job_routes import router as job_router
-from .middleware import logging_middleware
-from .CvTools import router as cv_router
-from .security_middleware import (
+from .config.settings import settings
+from .database.connection import Base, engine
+from .routes.auth import router as auth_router
+from .routes.oauth import router as oauth_router
+from .routes.service import router as service_router
+from .routes.job import router as job_router
+from .middleware.logging import logging_middleware
+from .routes.cv_tools import router as cv_router
+from .middleware.security import (
     limiter,
     SecurityHeadersMiddleware,
     RequestSizeLimitMiddleware,
