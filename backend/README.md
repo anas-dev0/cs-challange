@@ -394,34 +394,7 @@ docker-compose logs db
 - **[Main README](../README.md)**: Project overview and setup
 - **[API Docs](http://localhost:8000/docs)**: Interactive API documentation
 
-## 🤝 Contributing
 
-1. Follow the existing modular structure
-2. Update ARCHITECTURE.md for significant changes
-3. Add tests for new features
-4. Update SECURITY.md for security changes
-5. Keep modules focused and cohesive
-
-## 📄 License
-
-MIT License - see [LICENSE](../LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **FastAPI**: Modern Python web framework
-- **SQLAlchemy**: Powerful ORM
-- **LiveKit**: Real-time communication
-- **Google AI**: Gemini language models
-- **Open Source Community**: Various tools and libraries
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/anas-dev0/cs-challange/issues)
-- **Security**: security@utopiahire.com
-- **Documentation**: [Project Wiki](https://github.com/anas-dev0/cs-challange/wiki)
-
----
 
 **Built with ❤️ for professional interview preparation**
 
-*Last Updated: November 2024 | Version 1.0.0*
