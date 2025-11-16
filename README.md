@@ -210,6 +210,7 @@ Before you begin, ensure you have the following installed:
 - **Node.js 18+** ([Download](https://nodejs.org/))
 - **Docker & Docker Compose** ([Download](https://www.docker.com/))
 - **Git** ([Download](https://git-scm.com/))
+- **MiKTeX**([Download](https://miktex.org/download/))(it should be updated)
 
 ### API Keys & Accounts
 
@@ -731,33 +732,9 @@ SENDER_PASSWORD=<app-password>  # Not your regular password!
 
 ---
 
-## 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Update documentation
-6. Submit a pull request
 
-### Contribution Guidelines
-
-- Follow existing code style
-- Write clear commit messages
-- Add comments for complex logic
-- Update README if adding features
-- Test your changes thoroughly
-- Don't commit sensitive data
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## 🙏 Acknowledgments
 
@@ -767,33 +744,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **React Team** - Frontend library
 - **Open Source Community** - Various libraries and tools
 
----
 
-## 📞 Contact
-
-- **Developer**: Anas
-- **Email**: contact@utopiahire.com
-- **Security**: security@utopiahire.com
-- **GitHub**: [anas-dev0/cs-challange](https://github.com/anas-dev0/cs-challange)
-
----
-
-## 🔄 Version History
-
-- **v1.0.0** (2024-11-15)
-  - Initial release
-  - Enterprise security implementation
-  - Full authentication system
-  - LiveKit interview integration
-  - CV analysis features
-  - Multi-language support
-
----
 
 <div align="center">
 
 **Built with ❤️ for better interview preparation**
-
-[🐛 Report Bug](https://github.com/anas-dev0/cs-challange/issues) • [✨ Request Feature](https://github.com/anas-dev0/cs-challange/issues) • [📖 Documentation](https://github.com/anas-dev0/cs-challange/wiki)
 
 </div>
