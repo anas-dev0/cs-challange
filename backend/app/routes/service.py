@@ -5,12 +5,12 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from livekit import api
-from .config import settings
-from .db import get_db
-from .models import User, Interview
-from .schemas import StartSessionRequest, SaveInterviewRequest
-from .security import get_current_user
-from .security_middleware import (
+from ..config.settings import settings
+from ..database.connection import get_db
+from ..models.user import User, Interview
+from ..schemas.auth_schemas import StartSessionRequest, SaveInterviewRequest
+from ..utils.security_utils import get_current_user
+from ..middleware.security import (
     limiter,
     validate_file_upload,
     get_safe_filename,

@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from .db import get_db
-from .models import User
-from .schemas import RegisterRequest, LoginRequest, TokenResponse, UserOut, MeResponse, Message, RefreshRequest, VerifyEmailRequest
-from .security import is_strong_password, hash_password, verify_password, create_access_token, create_refresh_token, get_current_user
-from .security_middleware import (
+from ..database.connection import get_db
+from ..models.user import User
+from ..schemas.auth_schemas import RegisterRequest, LoginRequest, TokenResponse, UserOut, MeResponse, Message, RefreshRequest, VerifyEmailRequest
+from ..utils.security_utils import is_strong_password, hash_password, verify_password, create_access_token, create_refresh_token, get_current_user
+from ..middleware.security import (
     limiter,
     sanitize_html,
     sanitize_sql_input,
