@@ -48,7 +48,7 @@ async def register(request: Request, payload: RegisterRequest, db: AsyncSession 
             
             # Send verification email
             from agent.mailer import send_verification_email
-            from .config import settings
+            from ..config.settings import settings
             
             try:
                 await send_verification_email(
@@ -82,7 +82,7 @@ async def register(request: Request, payload: RegisterRequest, db: AsyncSession 
     
     # Send verification email
     from agent.mailer import send_verification_email
-    from .config import settings
+    from ..config.settings import settings
     
     try:
         await send_verification_email(
@@ -152,7 +152,7 @@ async def resend_verification(request: Request, payload: LoginRequest, db: Async
     
     # Send verification email
     from agent.mailer import send_verification_email
-    from .config import settings
+    from ..config.settings import settings
     
     try:
         await send_verification_email(
@@ -202,7 +202,7 @@ async def login(request: Request, payload: LoginRequest, db: AsyncSession = Depe
         
         # Send verification email
         from agent.mailer import send_verification_email
-        from .config import settings
+        from ..config.settings import settings
         
         try:
             await send_verification_email(
@@ -230,7 +230,7 @@ async def me(user: User = Depends(get_current_user)):
 @router.post("/refresh", response_model=TokenResponse, responses={401: {"model": Message}})
 async def refresh(payload: RefreshRequest, db: AsyncSession = Depends(get_db)):
     from jose import jwt, JWTError
-    from .config import settings
+    from ..config.settings import settings
     try:
         data = jwt.decode(payload.refreshToken, settings.refresh_secret, algorithms=["HS256"])
     except JWTError:

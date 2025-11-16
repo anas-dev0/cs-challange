@@ -51,7 +51,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data: https:; "
-            "connect-src 'self' http://localhost:* https: wss:; "
+            "connect-src 'self' http://localhost:* http://127.0.0.1:* https: wss:; "
             "frame-ancestors 'none';"
         )
         response.headers["Content-Security-Policy"] = csp

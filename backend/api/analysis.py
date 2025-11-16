@@ -136,16 +136,29 @@ def _sanitize_for_ai(text: str) -> str:
     if not text:
         return text
     original_len = len(text)
+    # Remove emails more aggressively
     text = re.sub(r'[A-Za-z0-9_.+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+', '[EMAIL_REDACTED]', text)
+    # Remove phone numbers
     text = re.sub(r'(?:\+?\d[\s.-]?){7,15}', '[PHONE_REDACTED]', text)
+    # Remove URLs
+    text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '[URL_REDACTED]', text)
+    # Remove addresses
     cleaned_lines = []
     for line in text.splitlines():
         lower = line.lower()
-        if any(tok in lower for tok in ["street", "st.", "avenue", "ave", "road", "rd.", "boulevard", "blvd"]):
+        # Skip lines with address indicators
+        if any(tok in lower for tok in ["street", "st.", "avenue", "ave", "road", "rd.", "boulevard", "blvd", "apt", "suite", "unit"]):
+            continue
+        # Skip lines with zip codes
+        if re.search(r'\b\d{5}(?:-\d{4})?\b', line):
             continue
         cleaned_lines.append(line)
     text = "\n".join(cleaned_lines)
+    # Remove excessive newlines
     text = re.sub(r'\n{3,}', '\n\n', text)
+    # Remove long number sequences
+    text = re.sub(r'\b\d{9,}\b', '[NUMBER_REDACTED]', text)
+    # Limit length
     if len(text) > 8000:
         text = text[:8000]
     return text
@@ -169,11 +182,12 @@ async def full_ai_analysis(
         await cv_file.close()
 
     sanitized_attempted = False
+    max_attempts = 3
     try:
         quant_report = await get_quantitative_analysis(cv_text, job_description)
         
         attempt = 1
-        while True:
+        while attempt <= max_attempts:
             try:
                 ai_analyzer_response = await call_gemini_analyzer(
                     cv_text=cv_text,
@@ -185,11 +199,18 @@ async def full_ai_analysis(
             except HTTPException as he:
                 if he.status_code != 400 or 'safety' not in he.detail.lower():
                     raise he
-                if sanitized_attempted:
-                    raise he
+                if attempt >= max_attempts:
+                    # If all attempts failed, return a more helpful error
+                    raise HTTPException(
+                        status_code=400,
+                        detail="The AI safety filter has blocked this content. Please ensure your CV and job description don't contain sensitive personal information (addresses, phone numbers, etc.) or potentially harmful content. Try uploading a sanitized version of your CV."
+                    )
+                # Try sanitizing more aggressively
                 cv_text = _sanitize_for_ai(cv_text)
+                job_description = _sanitize_for_ai(job_description)
                 sanitized_attempted = True
                 attempt += 1
+                print(f"⚠️ Safety filter triggered, retrying with sanitization (attempt {attempt}/{max_attempts})")
                 continue
 
         cv_profile_map = {p['skill'].lower(): p for p in ai_analyzer_response['cv_profile']}

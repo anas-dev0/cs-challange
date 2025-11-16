@@ -7,8 +7,7 @@ from .security_utils import (
     verify_password,
     create_access_token,
     create_refresh_token,
-    get_current_user,
-    decode_token
+    get_current_user
 )
 
 __all__ = [
@@ -17,6 +16,5 @@ __all__ = [
     "verify_password",
     "create_access_token",
     "create_refresh_token",
-    "get_current_user",
-    "decode_token"
+    "get_current_user"
 ]
