@@ -487,8 +487,8 @@ async def send_verification_email(
                                     
                                     <!-- Verification Button -->
                                     <div style="text-align: center; margin: 30px 0;">
-                                        <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                                            Verify Email Address
+                                        <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;">
+                                            <span style="color: #ffffff;">Verify Email Address</span>
                                         </a>
                                     </div>
                                     
