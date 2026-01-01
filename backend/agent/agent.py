@@ -86,35 +86,35 @@ async def entrypoint(ctx: agents.JobContext):
 
         # Generate personalized prompts
         print("🤖 Generating prompts...")
-        # if language.lower() == "english":
-        #     agent_instruction, session_instruction = create_initial_prompts_en(
-        #         cv_text=cv_text,
-        #         job_title=job_title,
-        #         job_description_text=job_description,
-        #     )
-        # else:
-        #     agent_instruction, session_instruction = create_initial_prompts_fr(
-        #         cv_text=cv_text,
-        #         job_title=job_title,
-        #         job_description_text=job_description,
-        #     )
-        
-        # ===== TEST MODE =====
-        # Uncomment the lines below to enable fast test mode (2 questions only)
-        # Comment out the production prompts above when testing
-        # 
         if language.lower() == "english":
-            agent_instruction, session_instruction = create_test_prompts(
+            agent_instruction, session_instruction = create_initial_prompts_en(
                 cv_text=cv_text,
                 job_title=job_title,
                 job_description_text=job_description,
             )
         else:
-            agent_instruction, session_instruction = create_test_prompts_fr(
+            agent_instruction, session_instruction = create_initial_prompts_fr(
                 cv_text=cv_text,
                 job_title=job_title,
                 job_description_text=job_description,
             )
+        
+        # ===== TEST MODE =====
+        # Uncomment the lines below to enable fast test mode (2 questions only)
+        # Comment out the production prompts above when testing
+        # 
+        # if language.lower() == "english":
+        #     agent_instruction, session_instruction = create_test_prompts(
+        #         cv_text=cv_text,
+        #         job_title=job_title,
+        #         job_description_text=job_description,
+        #     )
+        # else:
+        #     agent_instruction, session_instruction = create_test_prompts_fr(
+        #         cv_text=cv_text,
+        #         job_title=job_title,
+        #         job_description_text=job_description,
+        #     )
         # =====================
         
         # Initialize session
