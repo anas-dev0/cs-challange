@@ -24,7 +24,7 @@ def analyze_structured_cv_with_gemini(structured_cv: dict, job_description: str,
         dict: Analysis with field-targeted suggestions
     """
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash-lite")
     
     # Convert structured CV to readable format for AI
     cv_json = json.dumps(structured_cv, indent=2)

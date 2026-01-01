@@ -26,7 +26,7 @@ def parse_and_analyze_cv(cv_input, job_description: str, api_key: str, links: li
         dict: Combined result with structured_data and analysis
     """
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash-lite")
     
     # Determine if input is a file path or text
     is_file = False

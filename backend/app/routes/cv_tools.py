@@ -30,7 +30,7 @@ os.makedirs(CV_DATA_DIR, exist_ok=True)
 os.makedirs(ANALYSIS_DIR, exist_ok=True)
 
 # ⚠️ IMPORTANT: Set your Gemini API key here or use environment variable
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyADSqukXGi3gtDTfLB-sUMmxnI-bdY4Oa0")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 """
 Removed legacy /analyze endpoint. Use POST /analyze-structured instead.

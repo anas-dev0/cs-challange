@@ -125,7 +125,7 @@ async def entrypoint(ctx: agents.JobContext):
         print("🎤 Initializing voice session...")
         session = AgentSession(
             vad=silero.VAD.load(min_silence_duration=2.5, min_speech_duration=0.5),
-            llm=google.beta.realtime.RealtimeModel(voice="charon", language=interview_language)
+            llm=google.realtime.RealtimeModel(model="gemini-2.5-flash-native-audio-preview-12-2025",voice="charon", language=interview_language)
         )
         assistant = Assistant(agent_instruction)
         

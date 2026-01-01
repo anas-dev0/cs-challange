@@ -32,7 +32,7 @@ try:
     ]
     
     model = genai.GenerativeModel(
-        model_name="models/gemini-2.5-flash",
+        model_name="models/gemini-2.5-flash-lite",
         generation_config=generation_config,
         safety_settings=safety_settings
     )
