@@ -34,6 +34,156 @@ A well-structured backend application following industry best practices with **m
 - **Comprehensive API**: RESTful design with OpenAPI documentation
 - **Reliable**: Graceful error handling and recovery
 
+## ⚙️ How the Backend Works & Query Handling
+
+> **Note:** This project uses **FastAPI** (Python), not Spring Boot (Java). FastAPI is a modern, async-first Python web framework that shares similar concepts (routing, dependency injection, middleware) with Spring Boot but runs on Python's `asyncio` event loop.
+
+### FastAPI Request Lifecycle
+
+Every HTTP request flows through the following pipeline before reaching a route handler:
+
+```
+HTTP Request
+    │
+    ▼
+┌────────────────────────────┐
+│  CORS Middleware           │  ← Validates Origin header
+└──────────┬─────────────────┘
+           │
+           ▼
+┌────────────────────────────┐
+│  Security Middleware       │  ← Rate limiting, security headers,
+│  (middleware/security.py)  │    input sanitization, size limits
+└──────────┬─────────────────┘
+           │
+           ▼
+┌────────────────────────────┐
+│  Logging Middleware        │  ← Logs method, path, status, duration
+│  (middleware/logging.py)   │
+└──────────┬─────────────────┘
+           │
+           ▼
+┌────────────────────────────┐
+│  Pydantic Schema           │  ← Validates & coerces request body
+│  (schemas/)                │    against declared types
+└──────────┬─────────────────┘
+           │
+           ▼
+┌────────────────────────────┐
+│  Route Handler             │  ← Business logic (routes/)
+│  (routes/*.py)             │
+└──────────┬─────────────────┘
+           │
+           ▼
+        Response
+```
+
+### Routing
+
+Routes are defined as Python functions decorated with HTTP-method decorators and grouped into `APIRouter` objects. Each router is then mounted on the main `app` in `main.py`:
+
+```python
+# app/routes/auth.py
+router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+@router.post("/login", response_model=TokenResponse)
+async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
+    ...
+```
+
+```python
+# app/main.py
+app.include_router(auth_router, tags=["Authentication"])
+```
+
+### Dependency Injection
+
+FastAPI uses `Depends()` to inject shared resources into route handlers. The two most commonly used dependencies in this project are:
+
+| Dependency | Source | What it provides |
+|---|---|---|
+| `db: AsyncSession = Depends(get_db)` | `database/connection.py` | An async SQLAlchemy database session scoped to the request |
+| `user: User = Depends(get_current_user)` | `utils/security_utils.py` | The authenticated `User` ORM object, decoded from the JWT Bearer token |
+
+`get_db` is a generator function that yields a session and automatically closes it when the request finishes:
+
+```python
+# app/database/connection.py
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session          # session is open during the request
+                               # automatically closed when generator exits
+```
+
+---
+
+### How Database Queries Are Handled
+
+This project uses **SQLAlchemy 2.0 (async mode)** with an **asyncpg** driver for PostgreSQL.
+
+#### ORM Models
+
+Tables are defined as Python classes that extend `Base` (SQLAlchemy `DeclarativeBase`). Column types and relationships are declared with Python type hints via `Mapped`:
+
+```python
+# app/models/user.py
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    interviews: Mapped[List["Interview"]] = relationship(
+        "Interview", back_populates="user", cascade="all, delete-orphan"
+    )
+```
+
+#### Async Query Pattern
+
+All database operations are non-blocking. The standard pattern used throughout the routes is:
+
+```python
+# SELECT – find a single row
+result = await db.execute(select(User).where(User.email == email))
+user = result.scalar_one_or_none()   # None if not found, raises MultipleResultsFound if >1 row
+
+# INSERT – create a new record
+new_user = User(name=payload.name, email=payload.email, password_hash=hash_password(payload.password))
+db.add(new_user)
+await db.commit()
+await db.refresh(new_user)   # reload the auto-generated fields (e.g. id, created_at)
+
+# UPDATE – modify an existing record
+user.email_verified = True
+await db.commit()
+
+# DELETE – remove a record (cascade handled by ORM relationship)
+await db.delete(user)
+await db.commit()
+```
+
+#### SQL Injection Prevention
+
+SQLAlchemy never interpolates values directly into SQL strings. The `select(User).where(User.email == email)` expression compiles to a **parameterized query** (`SELECT … WHERE email = $1`), so user-supplied values are always treated as data, not SQL.
+
+Raw SQL is only used for schema migrations at startup (inside `lifespan` in `main.py`) and always with DDL-safe statements (`ALTER TABLE … ADD COLUMN IF NOT EXISTS`).
+
+#### Connection Pooling & Session Lifecycle
+
+The async engine is created once at startup and reused for the entire application lifetime:
+
+```python
+# app/database/connection.py
+engine = create_async_engine(settings.database_url, echo=False, future=True)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+```
+
+- **One session per request** – `get_db` opens a fresh `AsyncSession` for every incoming request via the `async with AsyncSessionLocal()` context manager.
+- **`expire_on_commit=False`** – ORM objects remain usable after `commit()` without an extra round-trip to the database (important in async code to avoid lazy-load issues).
+- **Connection pool** – asyncpg maintains a pool of reusable TCP connections to PostgreSQL under the hood, managed automatically by SQLAlchemy.
+
+---
+
 ## 📁 Project Structure
 
 ```
